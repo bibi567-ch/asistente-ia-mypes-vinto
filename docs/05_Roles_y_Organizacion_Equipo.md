@@ -1,54 +1,28 @@
-# 5. Organización del Equipo y Roles
+# 5. Organización del Equipo y Roles (Equipo de 5 Integrantes)
 
-Para garantizar que el proyecto se entregue con éxito el **20 de Septiembre** y cumpla con las expectativas de ambas materias, es fundamental dividir el trabajo de manera estratégica.
+Para garantizar el éxito del desarrollo del "Asistente Conversacional Offline para MYPES", el trabajo se ha dividido estratégicamente en 5 roles, permitiendo desarrollo en paralelo y especialización.
 
-A continuación, se propone una estructura de roles que puedes asignar a los miembros de tu equipo.
+## 5.1 Asignación de Roles
 
----
+### 1. Project Manager & QA Lead (Líder y Calidad)
+* **Misión:** Gestionar la metodología ágil, mantener el Backlog, asegurar la trazabilidad arquitectónica (C1/C2) y realizar las pruebas de usabilidad (Métricas SUS).
+* **Herramientas:** Trello, GitHub, Documentación SAD.
 
-## 5.1 Roles y Responsabilidades
+### 2. UX/UI Designer & Frontend (Especialista en Diseño)
+* **Misión:** Diseñar la interfaz móvil orientada a VUI (Voice-User Interface). Aplicar el sistema de diseño (tokens, paleta primaria #2E7D32) centrado en usuarios de baja alfabetización digital (User Personas: María y Carlos).
+* **Herramientas:** Figma.
 
-### 1. Scrum Master / Project Manager (Líder del Equipo)
-*   **Responsabilidades:**
-    *   Supervisar que todos cumplan con sus entregas antes del 20 de septiembre.
-    *   Mantener actualizado el Product Backlog y organizar las reuniones diarias de estado (Daily Standups).
-    *   Asegurar que la documentación en GitHub (los archivos `.md`) esté perfecta.
-    *   Preparar la presentación principal (diapositivas) utilizando la información del archivo `01_Introduccion_y_Contexto.md`.
+### 3. AI & Edge Developer (Desarrollador de IA Móvil)
+* **Misión:** Construir el pipeline de Procesamiento de Lenguaje Natural (PLN) directamente en el dispositivo (Edge Computing). Transcribir voz a texto y extraer intenciones (Venta, Compra, Consulta).
+* **Herramientas:** Kotlin, Vosk, TensorFlow Lite / Gemma 3n.
 
-### 2. Analista / Arquitecto de Software
-*   **Responsabilidades:**
-    *   Dominar el documento `04_Arquitectura_SAD_y_UX.md`.
-    *   Explicar al tribunal por qué se eligió el modelo C4 y cómo funciona la arquitectura Offline-First.
-    *   Defender los Requisitos Funcionales, No Funcionales, y los ADRs (Decisiones Arquitectónicas).
-    *   Asegurar la trazabilidad (Que lo que está en Figma y el código concuerde con los diagramas C1 y C2).
+### 4. Offline-First Engineer (Ingeniero de Datos Móvil)
+* **Misión:** Implementar la persistencia local en el teléfono móvil. Garantizar que la app opere 100% offline y gestionar la cola de transacciones pendientes (Outbox pattern local) para sincronización.
+* **Herramientas:** Kotlin, SQLite / Room, Android WorkManager.
 
-### 3. Diseñador UX/UI (Especialista en Figma)
-*   **Responsabilidades:**
-    *   Construir el prototipo interactivo en Figma basándose en el enfoque *Voice-User Interface (VUI)*.
-    *   Crear el Sistema de Diseño: paletas de color de alto contraste, tipografías grandes y componentes básicos (Auto Layout).
-    *   Armar el mapa de sitio y los "User Personas" (ej: Comerciante mayor, celular básico).
-    *   Asegurar que el enlace al prototipo navegable sea público y funcione para la presentación.
-
-### 4. Desarrollador Especialista en IA y Móvil (Tech Lead)
-*   **Responsabilidades:**
-    *   Investigar y preparar la viabilidad técnica de integrar Vosk (Speech-to-text) en Android.
-    *   Entender y defender la elección de "Gemma 3n" para la extracción de intenciones de lenguaje natural de manera offline.
-    *   Hablar sobre las restricciones de hardware (teléfonos de menos de 2GB de RAM) y cómo la aplicación las supera.
+### 5. Cloud & Backend Architect (Arquitecto de Servidores)
+* **Misión:** Diseñar la API REST en la nube, gestionar la base de datos maestra y resolver conflictos de datos (Políticas LWW) cuando los dispositivos móviles envían sincronizaciones en diferido.
+* **Herramientas:** Java Spring Boot, Axon Framework (CQRS/Event Sourcing), PostgreSQL, Railway.
 
 ---
-
-## 5.2 Plan de Acción para la Presentación (20 de Septiembre)
-
-### Antes de la presentación:
-1.  **Importar a GitHub:** Suban todos estos archivos Markdown (`.md`) al repositorio `bibi567-ch/asistente-ia-mypes-vinto`.
-2.  **Validar Figma:** El responsable de UX debe tener el enlace listo, con el flujo principal simulando una "venta por voz" operando sin errores.
-3.  **Ensayo:** Cada miembro debe repasar su parte basándose en los documentos generados. No intenten aprender todo, ¡confíen en la división de roles!
-
-### Día de la Presentación:
-*   **Minuto 1-2:** El *Líder* expone el problema en Vinto (La brecha digital y la falta de internet).
-*   **Minuto 3-5:** El *Arquitecto* muestra el diagrama de Contenedores (C2) y explica que el sistema funciona 100% offline.
-*   **Minuto 6-8:** El *Tech Lead* menciona la innovación de usar Inteligencia Artificial local (Vosk/Gemma).
-*   **Minuto 9-12:** El *Diseñador UX* muestra la pantalla de Figma, demostrando que con "un solo botón" el comerciante puede hacer todo, justificando la inclusión digital.
-
----
-💡 **Consejo:** Si tu equipo tiene menos de 4 personas, pueden fusionar roles. Por ejemplo, el Líder puede ser también el Arquitecto, y el Diseñador UX puede apoyar al Desarrollador.
+*Este documento ha sido estructurado para la presentación de avance y distribución de carga técnica equitativa.*
