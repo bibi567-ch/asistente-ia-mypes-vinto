@@ -1,25 +1,24 @@
-# 🤖 Asistente IA Offline para MYPES - Vinto
+🛒 Asistente Conversacional IA Offline para MYPES - Vinto
+Kotlin Native Vosk AI Spring Boot SQLite
 
-**TÍTULO DEL PROYECTO:**  
-«Diseño de un asistente conversacional offline con procesamiento de lenguaje natural en el dispositivo para la gestión automatizada de ventas e inventario en MYPES del centro de Vinto, Cochabamba, 2026»
+Este repositorio contiene la especificación arquitectónica, diseño UX/UI y requisitos para un Asistente Conversacional Offline (Edge AI) orientado a comerciantes de Vinto, Cochabamba. El sistema permite gestionar ventas, stock y finanzas mediante comandos de voz naturales, procesando la Inteligencia Artificial al 100% en el dispositivo (sin necesidad de Internet) para superar la brecha tecnológica y de hardware de la región.
 
----
+📑 Documentación del Proyecto (Entregables)
+La documentación del sistema ha sido estructurada rigurosamente para cumplir los requerimientos de calidad de las asignaturas Arquitectura de Software y Tecnologías en Internet:
 
-## 📌 Visión General del Proyecto
-Este proyecto busca revolucionar la gestión comercial de las micro y pequeñas empresas (MYPES) en Vinto, Cochabamba. Ante la baja alfabetización digital, equipos móviles obsoletos y conectividad intermitente, proponemos un **asistente conversacional offline** impulsado por IA (Gemma 3n y Vosk). Permite a los comerciantes registrar ventas y consultar inventarios utilizando **lenguaje natural**, eliminando la barrera de las interfaces gráficas complejas.
+📄 Documento SAD (Software Architecture Document) Contiene: Análisis del problema, Stakeholders, Drivers Arquitectónicos, Escenarios de Calidad, Tácticas (Offline-first), ADRs y Modelo C4.
 
-## 🗂️ Estructura del Repositorio
-Para mantener el profesionalismo y cumplir con las rúbricas universitarias (Arquitectura de Software y Tecnologías en Internet), la documentación del proyecto se ha dividido estratégicamente:
+📄 Especificación de Requisitos y UX/UI Contiene: Matriz extendida de Requisitos (24 RF, 7 RNF), Narrativa de Casos de Uso Críticos, Arquitectura de la Información, Personas, Sistema de Diseño (Figma) y Métricas de Negocio (Eficiencia/Eficacia).
 
-- 📄 [**01. Introducción y Contexto**](./docs/01_Introduccion_y_Contexto.md): Antecedentes, justificación, problema y stakeholders.
-- ⚙️ [**02. Requisitos del Sistema**](./docs/02_Requisitos_del_Sistema.md): Requisitos funcionales (RF), no funcionales (RNF) y drivers arquitectónicos.
-- 📋 [**03. Backlog e Historias de Usuario**](./docs/03_Historias_Usuario_y_Backlog.md): Gestión ágil del proyecto, épicas y product backlog.
-- 🏗️ [**04. Arquitectura de Software (SAD) y UX**](./docs/04_Arquitectura_SAD_y_UX.md): Modelo C4 (Contexto y Contenedores), atributos de calidad, ADRs y directrices UX/UI.
-- 👥 [**05. Organización del Equipo y Roles**](./docs/05_Roles_y_Organizacion_Equipo.md): Estructura del equipo de trabajo y asignación de responsabilidades.
+🎨 Prototipo Interactivo (Figma)
+El diseño respeta los estándares de Material Design 3, WCAG 2.1 Nivel AA para accesibilidad (adultos mayores) y tácticas de confirmación visual para mitigar falsos positivos por ruido ambiental.
 
-## 🚀 Tecnologías Principales (Propuestas)
-*   **Inteligencia Artificial:** Gemma 3n (On-device LLM), Vosk (Offline Speech-to-Text).
-*   **Desarrollo Móvil/Web:** Aplicación optimizada para Android 8.0+ (Progressive Web App o App Nativa Ligera).
-*   **Base de Datos:** SQLite / Room (Offline-first) con sincronización en segundo plano.
-*   **Diseño UX/UI:** Figma (Sistemas de diseño orientados a interfaces de voz - VUI).
+👉 [Pegar aquí el Enlace Público a Figma]
 
+👥 Equipo de Desarrollo e Investigación
+Universidad Adventista de Bolivia - Ingeniería en Sistemas
+
+[Nombre del Estudiante 1] - Project Manager & Lead Backend
+[Nombre del Estudiante 2] - Arquitecto Mobile & AI Edge
+[Nombre del Estudiante 3] - Diseñador UX/UI & QA
+Proyecto Integrador Semestral - Gestión 2026
