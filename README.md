@@ -23,10 +23,3 @@ Para mantener el profesionalismo y cumplir con las rúbricas universitarias (Arq
 *   **Base de Datos:** SQLite / Room (Offline-first) con sincronización en segundo plano.
 *   **Diseño UX/UI:** Figma (Sistemas de diseño orientados a interfaces de voz - VUI).
 
-## 📅 Próximos Pasos (Presentación 20 de Septiembre)
-1. **Revisar la documentación:** Lean juntos los archivos en la carpeta `docs/`.
-2. **Asignar Roles:** Utilicen el archivo `docs/05_Roles_y_Organizacion_Equipo.md` para dividir el trabajo equitativamente.
-3. **Diseño en Figma:** Comenzar con los flujos de usuario y diseño de interfaz basándose en los requisitos estipulados.
-
----
-*Desarrollado para la materia de Arquitectura de Software / Proyecto de Grado - Ingeniería en Sistemas.*
