@@ -1,102 +1,87 @@
-# 4. Arquitectura de Software y Diseño UX/UI
+# Arquitectura de Software y Diseño UX/UI
 
-Este documento consolida el SAD (Software Architecture Document) en su etapa inicial, abordando decisiones arquitectónicas y lineamientos de interacción de usuario (Figma).
+**Versión:** 1.1  
+**Estado:** Propuesta arquitectónica y diseño UX/UI; no implica implementación.
 
-## 4.1 Atributos de Calidad Priorizados
+## 1. Propósito
 
-| Atributo | Prioridad | Justificación |
-| :--- | :--- | :--- |
-| **Disponibilidad** | Alta | El sistema debe funcionar en un contexto sin conexión a internet constante (Offline-first). |
-| **Rendimiento** | Alta | Los dispositivos objetivo tienen memoria RAM muy limitada (< 2GB) y procesadores antiguos. |
-| **Usabilidad** | Alta | Los usuarios tienen muy baja alfabetización digital; requieren interacción por voz intuitiva. |
-| **Seguridad** | Media | Se requiere proteger la información financiera y de inventario a nivel local. |
+Este documento resume los elementos arquitectónicos y de experiencia de usuario que complementan el SAD principal. Los nombres tecnológicos son decisiones propuestas sujetas a validación mediante prototipo, pruebas y restricciones reales de hardware.
 
-## 4.2 Escenarios de Calidad
+## 2. Atributos de calidad priorizados
 
-| ID | Atributo | Fuente | Estímulo | Entorno | Respuesta | Medida |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **QS-01** | Rendimiento | Usuario | Dicta un comando de voz | Operación normal | Transcribe y procesa el texto | ≤ 2 segundos |
-| **QS-02** | Disponibilidad | Sistema operativo | Se pierde la conexión Wi-Fi/Datos | Operación normal | El sistema cambia a modo 100% local | Sin interrupción visible |
-| **QS-03** | Usabilidad | Usuario (1ra vez) | Abre la app para registrar venta | Operación normal | Encuentra la acción de dictar voz | Máximo 2 clics |
-| **QS-04** | Seguridad | Tercero | Intenta leer la BD del celular (robo) | Dispositivo perdido | La BD local impide lectura directa | Cifrado AES-256 activo |
-| **QS-05** | Disponibilidad | Sistema Operativo | Retorna conexión a internet | Operación normal | Sincroniza datos en segundo plano | 100% registros subidos |
+| Atributo | Prioridad | Razón | Requisitos relacionados |
+|---|---|---|---|
+| Disponibilidad | Alta | Las operaciones principales deben continuar sin conexión. | RNF-003, RF-018 |
+| Rendimiento | Alta | La interacción debe ser adecuada para dispositivos de recursos limitados. | RNF-001, RNF-002 |
+| Usabilidad | Alta | El usuario debe completar tareas con poca carga cognitiva. | RNF-005, RF-007 |
+| Seguridad | Alta | Los datos comerciales locales requieren protección. | RNF-004 |
 
-## 4.3 Tácticas Arquitectónicas
+## 3. Escenarios de calidad
 
-| Atributo | Problema | Táctica | Justificación |
-| :--- | :--- | :--- | :--- |
-| Disponibilidad | Fallo/Ausencia de red | **Local Data / Offline-First** | Permite operar el core del negocio localmente usando SQLite/Room. |
-| Rendimiento | Modelos IA muy pesados | **Model Quantization** | Uso de Gemma 3n y Vosk cuantizados para caber en memoria RAM reducida. |
-| Usabilidad | Dificultad para navegar GUI | **Voice-User Interface (VUI)** | Reemplaza clics y tipeo por procesamiento de lenguaje natural. |
-| Seguridad | Datos expuestos en el equipo | **Data Encryption en Reposo** | Uso de SQLCipher para proteger la base de datos local. |
+| ID | Atributo | Estímulo | Entorno | Respuesta esperada | Medida / verificación |
+|---|---|---|---|---|---|
+| QS-01 | Rendimiento | El usuario dicta una operación válida. | Dispositivo Android objetivo. | El sistema transcribe y prepara la confirmación. | Objetivo ≤ 2 s; prueba instrumentada pendiente. |
+| QS-02 | Disponibilidad | Se pierde la conexión. | Operación normal. | El usuario puede registrar y consultar datos locales. | Prueba offline; pendiente. |
+| QS-03 | Usabilidad | Usuario nuevo intenta registrar una venta. | Prototipo móvil. | Encuentra la acción principal y completa el flujo. | Prueba con usuarios; pendiente. |
+| QS-04 | Seguridad | Se intenta acceder al almacenamiento local fuera de la app. | Dispositivo protegido y no protegido. | Los datos no quedan legibles directamente. | Verificación de cifrado; pendiente. |
+| QS-05 | Sincronización | Regresa la conectividad con operaciones pendientes. | Cola local disponible. | Se envían operaciones sin duplicarlas y se registra el resultado. | Prueba de idempotencia y reintentos; pendiente. |
 
-## 4.4 Decisiones Arquitectónicas (ADRs)
+## 4. Tácticas propuestas
 
-### ADR-001: Arquitectura Offline-First
-*   **Contexto:** Los usuarios en Vinto sufren de conectividad intermitente y no pueden depender de APIs cloud para registrar ventas diarias.
-*   **Decisión:** Adoptar un enfoque *Offline-First* donde la base de datos maestra operativa es la local (SQLite/Room), utilizando sincronización asíncrona hacia la nube.
-*   **Justificación:** Garantiza la operatividad ininterrumpida.
-*   **Consecuencias:** Añade complejidad técnica para la resolución de conflictos al sincronizar datos hacia el servidor central.
+| Problema | Táctica | Justificación | Estado |
+|---|---|---|---|
+| Ausencia de red | Offline-first y persistencia local | Permite mantener el flujo comercial básico. | Propuesta |
+| Recursos limitados | Procesamiento local liviano, modularidad y medición de memoria | Reduce dependencia de servicios externos y permite optimizar. | Propuesta |
+| Errores de interpretación | Confirmación explícita antes de operaciones sensibles | Evita guardar automáticamente una interpretación incorrecta. | Propuesta |
+| Duplicación durante sincronización | Identificador único, estados de cola e idempotencia | Permite reintentos controlados. | Propuesta |
+| Exposición de información | Cifrado en reposo y transporte seguro | Protege datos locales y comunicaciones. | Propuesta |
 
-### ADR-002: Procesamiento NLP en el Dispositivo (On-Device)
-*   **Contexto:** Mandar audios a la nube para Speech-to-Text consume datos y requiere internet.
-*   **Decisión:** Utilizar el modelo Vosk de 50MB para reconocimiento de voz en español y Gemma 3n (si es soportado, o reglas heurísticas como alternativa temporal) directamente en el celular.
-*   **Consecuencias:** Obliga a optimizar severamente el uso de la batería y la RAM.
+## 5. ADRs resumidos
 
----
+### ADR-001 — Enfoque offline-first
+- **Contexto:** conectividad intermitente.
+- **Decisión propuesta:** usar almacenamiento local como fuente operativa temporal y sincronización diferida.
+- **Alternativas:** dependencia cloud, aplicación exclusivamente web.
+- **Consecuencias:** mayor complejidad de sincronización y resolución de conflictos.
+- **Validación pendiente:** prueba de operaciones sin red y recuperación de conectividad.
 
-## 4.5 Representación C4
+### ADR-002 — Procesamiento de voz en el dispositivo
+- **Contexto:** privacidad, costos y ausencia de Internet.
+- **Decisión propuesta:** evaluar Vosk u otra alternativa local para ASR; el componente de intención se seleccionará después de comparar precisión, tamaño y consumo.
+- **Alternativas:** APIs cloud, entrada exclusivamente textual.
+- **Consecuencias:** mantenimiento de modelos, consumo de almacenamiento y necesidad de pruebas con ruido.
 
-### Diagrama C1 - Contexto del Sistema
+### ADR-003 — Sincronización con operaciones idempotentes
+- **Contexto:** una misma operación puede reenviarse por fallos de red.
+- **Decisión propuesta:** cola Outbox local, identificador único por operación, estados de envío y confirmación del servidor.
+- **Alternativas:** sincronización manual, base de datos sincronizada administrada.
+- **Consecuencias:** se debe definir política de conflictos y reconciliación antes de implementar.
 
-```mermaid
-C4Context
-title Diagrama de Contexto (C1) - Asistente IA para MYPES
+## 6. Coherencia de contenedores
 
-Person(comerciante, "Comerciante (MYPE)", "Dueño del negocio con baja alfabetización digital.")
-System(asistente, "Asistente Conversacional Offline", "Permite registrar ventas y consultar inventario mediante voz sin conexión.")
-System_Ext(cloud_backup, "Cloud Backup Server", "Servidor de respaldo y análisis centralizado.")
+Los diagramas C1 y C2 de `/diagrams` representan una propuesta documental. Los nombres conceptuales utilizados son:
 
-Rel(comerciante, asistente, "Registra ventas y consulta stock usando su voz.")
-Rel(asistente, cloud_backup, "Sincroniza datos cuando detecta conexión (HTTPS).")
-```
+- Interfaz Android.
+- Orquestador conversacional.
+- Motor de voz y clasificación local.
+- Persistencia local.
+- Cola Outbox y sincronización.
+- API de sincronización.
+- Base de datos del servidor.
 
-### Diagrama C2 - Contenedores
+La tecnología concreta —por ejemplo Kotlin, Jetpack Compose, Room, Vosk, TFLite, Spring Boot o PostgreSQL— debe considerarse propuesta hasta que exista una decisión técnica validada.
 
-```mermaid
-C4Container
-title Diagrama de Contenedores (C2) - Asistente IA para MYPES
+## 7. Lineamientos UX/UI
 
-Person(comerciante, "Comerciante (MYPE)", "Dueño del negocio")
+- Mobile-first con marcos de referencia de 375/390 px.
+- Considerar también una vista desktop de 1440 px si la rúbrica lo exige.
+- Acción principal visible: registrar o consultar mediante voz.
+- Alternativa siempre disponible mediante teclado.
+- Confirmación clara antes de guardar ventas o modificar inventario.
+- Estados mínimos: inicial, escucha, procesamiento, confirmación, éxito, error, vacío y sin conexión.
+- Contraste, tamaño de texto, foco visible y áreas táctiles deben revisarse contra WCAG 2.1 AA.
+- Personas y mapas de empatía deben identificarse como hipótesis de diseño si no existe investigación de campo documentada.
 
-System_Boundary(c1, "Asistente Conversacional Offline (Dispositivo Móvil)") {
-    Container(mobile_app, "Aplicación Android", "Kotlin / Jetpack Compose", "Provee la interfaz gráfica (Dashboard) y el botón de voz.")
-    Container(nlp_engine, "Motor NLP (On-Device)", "Vosk + Gemma 3n / Reglas", "Transcribe audio a texto y extrae la intención y parámetros de la compra.")
-    ContainerDb(local_db, "Base de Datos Local", "SQLite / Room + SQLCipher", "Almacena productos, ventas y métricas cifradas.")
-    Container(sync_manager, "Manejador de Sincronización", "WorkManager", "Detecta red y envía cargas útiles a la nube.")
-}
+## 8. Regla de evidencia
 
-System_Ext(cloud_backup, "Servidor de Respaldo", "API REST (Node.js / Python)")
-
-Rel(comerciante, mobile_app, "Dicta comandos de voz / visualiza dashboard")
-Rel(mobile_app, nlp_engine, "Envía buffer de audio")
-Rel(nlp_engine, mobile_app, "Retorna texto e intención estructurada (JSON)")
-Rel(mobile_app, local_db, "Lee/Escribe inventario y ventas")
-Rel(mobile_app, sync_manager, "Encola tareas de respaldo")
-Rel(sync_manager, cloud_backup, "Sincroniza datos vía API REST (JSON/HTTPS)")
-```
-
----
-
-## 4.6 Diseño UX/UI (Directrices para Figma)
-De acuerdo a los requisitos de la materia de **Tecnologías en Internet**:
-
-1.  **Arquitectura de la Información:**
-    *   **Usuarios:** Mapear el "Persona" de Don Juan (dueño de abarrotes, 55 años, usa celular solo para WhatsApp).
-    *   **Mapa de sitio:** Muy plano. Dashboard -> Pantalla de Escucha -> Catálogo.
-2.  **Sistema de Diseño:**
-    *   **Colores:** Alto contraste. Botón principal (Micrófono) en color primario llamativo (Ej. Verde esmeralda o Azul fuerte) con retroalimentación visual al hablar (ondas).
-    *   **Tipografía:** Tamaños grandes (H1 y Body grandes) para fácil legibilidad en pantallas de gama baja.
-3.  **Prototipado:**
-    *   Debe enfocarse en **Mobile First** (375px / 390px).
-    *   Interfaces no sobrecargadas: Priorizar el reconocimiento de voz sobre la navegación manual por categorías.
+Los diagramas, ADRs y lineamientos de este documento describen decisiones y propuestas. No prueban que exista una aplicación ejecutable, que se hayan realizado pruebas de rendimiento, que se haya validado accesibilidad o que la sincronización esté implementada.
