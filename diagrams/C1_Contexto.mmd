@@ -1,0 +1,9 @@
+flowchart TB
+    comerciante[Comerciante / propietario de MYPE]
+    asistente[Asistente Conversacional IA Offline]
+    backend[Sistema backend de sincronización]
+    admin[Administrador del sistema]
+    comerciante -->|Texto o voz| asistente
+    asistente -->|Consulta y sincronización cuando existe conexión| backend
+    admin -->|Supervisión y configuración| backend
+    backend -->|Datos sincronizados| asistente
