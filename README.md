@@ -2,7 +2,7 @@
 
 **Proyecto Integrador Semestral — Gestión 2026**  
 **Universidad Adventista de Bolivia**  
-**Facultad de Ciencias Exactas e Ingeniería — Ingeniería en Sistemas**  
+**Facultad de Ingeniería — Ingeniería en Sistemas**  
 **Asignaturas:** Arquitectura de Software · Tecnologías en Internet
 
 ## Descripción
@@ -45,7 +45,6 @@ Validar, antes del desarrollo técnico:
 
 [Archivo del sistema de diseño en Figma](https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Dise%C3%B1o-MYPES-Vinto?p=f&fullscreen=1)
 
-> Antes de entregar, verificar que los enlaces sean accesibles para el docente en una ventana privada y que el prototipo incluya los flujos, estados y tamaños solicitados.
 
 ## Alcance de la primera entrega
 
