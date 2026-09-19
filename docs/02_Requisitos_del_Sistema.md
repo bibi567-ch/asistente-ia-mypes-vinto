@@ -1,40 +1,76 @@
 # 2. Requisitos del Sistema
 
-En esta sección se definen los Requisitos Funcionales (RF), Requisitos No Funcionales (RNF) y los Requisitos Arquitectónicamente Significativos que guiaron las decisiones de diseño del sistema, de acuerdo a los estándares de la materia.
+**Estado documental:** requisitos propuestos para validación académica. No representan funcionalidades implementadas hasta contar con evidencia de desarrollo y pruebas.
 
-## 2.1 Matriz de Requisitos Funcionales (RF)
-Se utiliza la sintaxis formal: *«El sistema debe [acción] + [entidad/objeto] + [condición/contexto]»*.
+## 2.1 Convención de redacción
 
-| Código | Módulo | Descripción del Requisito | Prioridad |
-| :--- | :--- | :--- | :--- |
-| **RF-001** | Procesamiento de Voz | El sistema debe transcribir comandos de voz a texto utilizando el modelo NLP offline. | Alta |
-| **RF-002** | Gestión de Ventas | El sistema debe registrar una venta en la base de datos local al confirmar el comando de voz del usuario. | Alta |
-| **RF-003** | Gestión de Inventario | El sistema debe descontar del inventario la cantidad de productos vendidos de manera automática. | Alta |
-| **RF-004** | Consulta de Stock | El sistema debe permitir consultar la cantidad de un producto específico mediante lenguaje natural. | Alta |
-| **RF-005** | Notificaciones | El sistema debe alertar visual y auditivamente al usuario cuando un producto alcance el stock mínimo. | Media |
-| **RF-006** | Panel Principal | El sistema debe desplegar un dashboard con el resumen de métricas clave (ventas del día) al iniciar. | Alta |
-| **RF-007** | Gestión de Productos | El sistema debe permitir el registro manual o por voz de nuevos productos al catálogo local. | Alta |
-| **RF-008** | Sincronización | El sistema debe sincronizar los registros locales con la base de datos en la nube cuando detecte conexión a internet. | Media |
-| **RF-009** | Autenticación | El sistema debe autenticar al usuario localmente mediante un PIN simple de 4 dígitos. | Alta |
-| **RF-010** | Reportes | El sistema debe generar un reporte resumen de las ventas diarias en formato PDF local. | Baja |
+Se utiliza la estructura formal:
 
-## 2.2 Requisitos No Funcionales (RNF)
+> **El sistema debe + acción + entidad/objeto + condición o contexto.**
 
-| Código | Categoría | Descripción del Requisito | Prioridad |
-| :--- | :--- | :--- | :--- |
-| **RNF-001** | Rendimiento | El sistema debe procesar el comando de voz y emitir una respuesta en un tiempo no mayor a 2 segundos en un dispositivo con 2GB de RAM. | Alta |
-| **RNF-002** | Confiabilidad / Offline | El sistema debe garantizar un 100% de operatividad para el registro de ventas sin requerir conexión a internet. | Alta |
-| **RNF-003** | Seguridad | El sistema debe cifrar los datos del inventario y ventas locales utilizando el algoritmo AES-256 (Datos en reposo). | Alta |
-| **RNF-004** | Usabilidad / Accesibilidad | El sistema debe cumplir con pautas WCAG 2.1 AA y requerir un máximo de un toque para activar la escucha activa, reduciendo la carga cognitiva. | Alta |
-| **RNF-005** | Compatibilidad | El sistema debe ser totalmente compatible y fluido en dispositivos móviles con sistema operativo Android 8.0 o superior. | Alta |
+Las prioridades se interpretan así:
 
-## 2.3 Requisitos Arquitectónicamente Significativos (Drivers Arquitectónicos)
-Estos requisitos condicionan fuertemente las decisiones de la arquitectura.
+- **Alta:** necesaria para el MVP o para demostrar el flujo principal.
+- **Media:** importante, pero puede implementarse después del flujo principal.
+- **Baja:** complementaria y susceptible de posponerse.
 
-| ID | Requisito | Impacto arquitectónico | Prioridad |
-| :--- | :--- | :--- | :--- |
-| **RA-01** | Operar 100% offline (RNF-002) | Obliga a usar bases de datos locales (SQLite/Room) y modelos NLP on-device (Gemma/Vosk). | Alta |
-| **RA-02** | Recursos de hardware limitados (<2GB RAM) | Limita el tamaño de los modelos y requiere optimización extrema de la memoria (Grouped-query attention). | Alta |
-| **RA-03** | Sincronización diferida (RF-008) | Requiere un manejador de trabajos en segundo plano (WorkManager) y manejo de conflictos de datos. | Media |
-| **RA-04** | Cifrado de datos en reposo (RNF-003) | Afecta el rendimiento de lectura/escritura en la base de datos local (requiere SQLCipher). | Media |
-| **RA-05** | Interfaz basada en voz (VUI) | Cambia el paradigma visual clásico, requiriendo un orquestador de intenciones a nivel cliente. | Alta |
+## 2.2 Requisitos Funcionales
+
+| Código | Módulo | Requisito | Prioridad |
+|---|---|---|---|
+| RF-001 | Autenticación | El sistema debe autenticar al comerciante mediante un mecanismo local de acceso antes de mostrar información privada. | Alta |
+| RF-002 | Productos | El sistema debe registrar productos con nombre, precio, stock y stock mínimo en el catálogo local. | Alta |
+| RF-003 | Productos | El sistema debe permitir actualizar los datos de un producto registrado desde la interfaz de gestión. | Alta |
+| RF-004 | Ventas | El sistema debe registrar una venta manual con uno o varios productos y sus cantidades. | Alta |
+| RF-005 | Ventas | El sistema debe calcular el total de una venta considerando los precios y cantidades confirmados por el usuario. | Alta |
+| RF-006 | Inventario | El sistema debe descontar del inventario las cantidades correspondientes a una venta confirmada. | Alta |
+| RF-007 | Inventario | El sistema debe permitir consultar el stock disponible de un producto mediante búsqueda textual. | Alta |
+| RF-008 | Alertas | El sistema debe mostrar una alerta cuando el stock de un producto sea igual o inferior al stock mínimo configurado. | Media |
+| RF-009 | Voz | El sistema debe convertir un comando de voz compatible en texto utilizando procesamiento local cuando el modelo esté disponible en el dispositivo. | Alta |
+| RF-010 | Voz | El sistema debe identificar la intención y las entidades principales de un comando compatible antes de proponer una operación. | Alta |
+| RF-011 | Confirmación | El sistema debe mostrar un resumen de la operación interpretada y solicitar confirmación antes de guardar cambios críticos. | Alta |
+| RF-012 | Sincronización | El sistema debe enviar operaciones locales pendientes al servidor cuando exista conectividad y se cumplan las condiciones de sincronización. | Media |
+| RF-013 | Pendientes | El sistema debe mostrar las operaciones pendientes de sincronización y su estado actual. | Media |
+| RF-014 | Reportes | El sistema debe mostrar un resumen de ventas del día a partir de los registros disponibles localmente. | Media |
+| RF-015 | Historial | El sistema debe permitir consultar el historial de ventas registradas por el comerciante. | Media |
+
+## 2.3 Requisitos No Funcionales
+
+| Código | Categoría | Requisito verificable | Prioridad |
+|---|---|---|---|
+| RNF-001 | Rendimiento | El sistema debe mostrar la pantalla principal en un tiempo objetivo menor o igual a 2 segundos en un dispositivo Android de referencia definido por el equipo. | Alta |
+| RNF-002 | Rendimiento | El sistema debe procesar un comando de voz compatible dentro de un objetivo inicial de 2 segundos, sujeto a medición con un conjunto de pruebas definido. | Alta |
+| RNF-003 | Disponibilidad | El sistema debe permitir registrar ventas manuales sin conexión a Internet durante el funcionamiento normal de la aplicación. | Alta |
+| RNF-004 | Seguridad | El sistema debe proteger los datos locales sensibles mediante cifrado en reposo y controlar el acceso a la información del comerciante. | Alta |
+| RNF-005 | Seguridad | El sistema debe transmitir información al backend mediante HTTPS cuando exista sincronización remota. | Alta |
+| RNF-006 | Compatibilidad | El sistema debe funcionar en la versión mínima de Android definida en la matriz de compatibilidad del proyecto. | Alta |
+| RNF-007 | Usabilidad | El sistema debe presentar mensajes de confirmación, error y estado de sincronización comprensibles para usuarios con experiencia tecnológica limitada. | Alta |
+| RNF-008 | Accesibilidad | El sistema debe mantener contraste, tamaños táctiles, jerarquía visual y navegación compatibles con los criterios aplicables de WCAG 2.1 AA. | Alta |
+| RNF-009 | Integridad | El sistema debe evitar el descuento duplicado de inventario cuando una operación se reintente durante la sincronización. | Alta |
+| RNF-010 | Mantenibilidad | El sistema debe separar presentación, dominio, persistencia y comunicación remota mediante responsabilidades claramente delimitadas. | Media |
+
+> **Nota:** los valores de rendimiento son objetivos de diseño hasta que se ejecuten pruebas instrumentadas. No deben presentarse como resultados comprobados en esta primera entrega.
+
+## 2.4 Requisitos Arquitectónicamente Significativos
+
+| ID | Requisito relacionado | Impacto arquitectónico | Prioridad |
+|---|---|---|---|
+| RA-01 | RNF-003 / RF-004 | Requiere persistencia local y un flujo offline-first para operaciones esenciales. | Alta |
+| RA-02 | RF-009 / RF-010 | Requiere una canalización conversacional local con reconocimiento, clasificación y extracción de entidades. | Alta |
+| RA-03 | RF-011 | Requiere una etapa explícita de confirmación antes de ejecutar operaciones críticas. | Alta |
+| RA-04 | RF-012 / RF-013 | Requiere cola de operaciones pendientes, reintentos, estados e idempotencia. | Media |
+| RA-05 | RNF-004 | Requiere una estrategia de protección de datos locales y control de acceso. | Alta |
+| RA-06 | RNF-009 | Requiere identificadores únicos de operación y reglas para evitar duplicaciones. | Alta |
+| RA-07 | RNF-010 | Requiere separación de responsabilidades y dependencias controladas entre capas. | Media |
+
+## 2.5 Criterios de validación pendientes
+
+Antes de considerar estos requisitos como aprobados, el equipo debe validar:
+
+- [ ] La versión mínima real de Android.
+- [ ] El dispositivo de referencia para pruebas.
+- [ ] El conjunto de comandos de voz admitidos por el MVP.
+- [ ] Las entidades mínimas reconocidas: producto, cantidad, precio, cliente y modalidad de pago.
+- [ ] La estrategia definitiva de autenticación local.
+- [ ] El mecanismo de resolución de conflictos de inventario.
+- [ ] Los umbrales de rendimiento mediante pruebas reproducibles.
