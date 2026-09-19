@@ -1,34 +1,48 @@
-# Matriz de trazabilidad
+# Matriz de Trazabilidad
 
-**Proyecto:** Asistente Conversacional IA Offline para MYPES de Vinto  
-**Versión:** 1.0  
-**Estado:** Preparación de primera entrega
+**Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto  
+**Versión:** 1.1  
+**Estado:** Revisión documental de primera entrega.
 
 ## 1. Propósito
 
-Esta matriz relaciona el problema identificado, los objetivos, los requisitos, los casos de uso, las decisiones arquitectónicas y las pantallas previstas en el prototipo UX/UI.
+Relacionar problema, objetivos, requisitos, historias de usuario, casos de uso, atributos de calidad, decisiones arquitectónicas y evidencias UX/UI.
 
-## 2. Matriz principal
+## 2. Trazabilidad principal
 
-| Elemento | Relación | Evidencia esperada | Estado |
-|---|---|---|---|
-| Problema: dificultad para registrar ventas y controlar stock | Objetivo general | Documento de contexto y justificación | Documentado |
-| OG-01: diseñar una solución offline-first para apoyar la gestión comercial | RF-001 a RF-015 | Documento de objetivos y requisitos | Documentado |
-| RF-001: transcribir comandos de voz | CU-01 Registrar venta por voz | Pantalla de captura y confirmación | Por validar en Figma |
-| RF-002: registrar una venta confirmada | CU-01 | Flujo de venta | Documentado |
-| RF-003: actualizar inventario | CU-02 Consultar inventario | Pantalla de inventario | Documentado |
-| RF-004: consultar stock mediante lenguaje natural | CU-02 | Flujo de consulta | Documentado |
-| RF-006: mostrar resumen de ventas | CU-03 Consultar resumen diario | Dashboard | Documentado |
-| RF-008: sincronizar cuando exista conexión | CU-04 Sincronizar operaciones pendientes | Estado de sincronización | Propuesto |
-| RNF-001: respuesta menor o igual a 2 segundos como objetivo de diseño | Atributo rendimiento | Prueba de rendimiento futura | No verificado |
-| RNF-002: operación local sin conexión | Driver offline-first | Diseño de persistencia local | Documentado |
-| RNF-003: cifrado de datos locales | Driver seguridad | Decisión de almacenamiento seguro | Propuesto |
-| RNF-004: accesibilidad WCAG 2.1 AA | Atributo usabilidad | Revisión de contraste, tamaños y navegación | Por validar |
-| RNF-005: compatibilidad Android | Restricción técnica | Matriz de dispositivos de prueba | No verificado |
+| Requisito | Historia | Caso / flujo relacionado | Arquitectura / UX | Evidencia actual | Estado |
+|---|---|---|---|---|---|
+| RF-004 Entrada por voz offline | US-01 | CU-01 Registrar venta | Motor de voz local; pantalla de escucha | Requisito y flujo documentados | Diseñado/documentado |
+| RF-005 Clasificación de intención | US-02 | CU-01 | Orquestador conversacional | Propuesta técnica | Propuesto |
+| RF-006 Extracción de entidades | US-02 | CU-01 | Motor PLN local | Propuesta técnica | Propuesto |
+| RF-007 Confirmación visual | US-03 | CU-01 | Pantalla de confirmación | Lineamiento UX | Diseñado/documentado |
+| RF-009 Registro de venta | US-04 | CU-01 | Persistencia local | Flujo documentado | Documentado |
+| RF-010 Registro manual alternativo | US-05 | CU-01 alternativo | Formulario de venta | Requisito documentado | Documentado |
+| RF-014 Registro de compras | US-07 | CU-02 Gestión de inventario | Módulo inventario | Requisito documentado | Documentado |
+| RF-017 Consulta de stock | US-06 | CU-02 | Consulta por voz/interfaz | Flujo previsto | Diseñado/documentado |
+| RF-018 Cola local offline | US-10 | CU-03 Persistencia | SQLite/Room y Outbox | Diagrama C2 propuesto | Propuesto |
+| RF-019 Sincronización | US-11 | CU-04 Sincronizar operaciones | Manejador de sincronización/API | Diagrama y ADR propuestos | Propuesto |
+| RF-022 Resumen diario | US-09 | CU-05 Consultar resumen | Dashboard | Requisito y UX documentados | Diseñado/documentado |
+| RNF-001 Consumo de memoria | — | QS-01 | Restricción de recursos | Objetivo sin prueba | No verificado |
+| RNF-002 Latencia | — | QS-01 | Procesamiento local | Objetivo sin prueba | No verificado |
+| RNF-003 Operación offline | US-01, US-10 | QS-02 | Offline-first | Decisión arquitectónica | Propuesto |
+| RNF-004 Seguridad de datos | — | QS-04 | Cifrado local y transporte seguro | Requisito/ADR | No verificado |
+| RNF-005 Accesibilidad | US-03, US-09 | QS-03 | Diseño UX/UI | Revisión pendiente | Por validar |
 
-## 3. Pendientes de trazabilidad
+## 3. Correspondencia de casos de uso
 
-- [POR COMPLETAR] Vincular cada requisito con una pantalla específica del archivo Figma.
-- [POR COMPLETAR] Incorporar identificadores definitivos de casos de uso.
-- [POR COMPLETAR] Adjuntar capturas de evidencia de navegación.
-- [POR COMPLETAR] Registrar resultados reales de pruebas de accesibilidad y rendimiento.
+- **CU-01:** Registrar venta mediante voz o teclado.
+- **CU-02:** Gestionar inventario y consultar stock.
+- **CU-03:** Guardar operaciones localmente.
+- **CU-04:** Sincronizar operaciones pendientes.
+- **CU-05:** Consultar resumen diario.
+
+Estos identificadores son documentales y deberán mantenerse iguales en el diagrama UML, las narrativas y el documento maestro.
+
+## 4. Pendientes verificables
+
+- Asociar cada requisito a una pantalla o frame exacto de Figma.
+- Incorporar capturas fechadas del prototipo.
+- Verificar que existan versiones desktop y mobile.
+- Ejecutar pruebas de accesibilidad, rendimiento, persistencia y sincronización.
+- Reemplazar estados “propuesto” o “no verificado” únicamente cuando exista evidencia.
