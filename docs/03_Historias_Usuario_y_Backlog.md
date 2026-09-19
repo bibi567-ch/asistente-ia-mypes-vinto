@@ -1,37 +1,69 @@
-# 3. Product Backlog e Historias de Usuario
+# Historias de Usuario y Product Backlog
 
-Esta sección estructura el trabajo en formato ágil para guiar el desarrollo durante el semestre.
+**Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto  
+**Versión:** 1.1  
+**Estado:** Documentación de primera entrega; no implica implementación.
 
-## 3.1 Épicas del Proyecto
-*   **Épica 1 (E1):** Implementación del Asistente Conversacional Offline.
-*   **Épica 2 (E2):** Gestión del Inventario y Ventas en el Dispositivo.
-*   **Épica 3 (E3):** Experiencia de Usuario (Dashboard y UX).
-*   **Épica 4 (E4):** Sincronización y Respaldo en la Nube.
+## 1. Épicas
 
-## 3.2 Product Backlog (Historias de Usuario)
+- **E1 — Interacción conversacional:** entrada por voz, interpretación y confirmación.
+- **E2 — Ventas e inventario:** operaciones comerciales locales.
+- **E3 — Experiencia de usuario:** dashboard, accesibilidad y navegación.
+- **E4 — Persistencia y sincronización:** almacenamiento local y respaldo diferido.
+- **E5 — Seguridad y configuración:** protección de datos y perfil de negocio.
 
-| ID | Épica | Historia de Usuario | Criterios de Aceptación | Estimación (Puntos) |
-| :--- | :--- | :--- | :--- | :--- |
-| **US-01** | E1 | **Como** dueño de MYPE, **quiero** dictar las ventas por voz **para** no tener que escribir en una pantalla pequeña. | 1. El botón de micrófono es el elemento principal.<br>2. Transcribe comandos como "Vendí 2 cocacolas".<br>3. Funciona sin internet (Vosk). | 8 |
-| **US-02** | E1 | **Como** dueño de MYPE, **quiero** que el sistema entienda qué producto vendí **para** descontarlo automáticamente. | 1. El modelo NLP extrae cantidad e ítem.<br>2. Confirma la acción por voz y texto.<br>3. Tiempo de respuesta < 2s. | 13 |
-| **US-03** | E2 | **Como** dueño de MYPE, **quiero** consultar mi stock preguntando con mi voz **para** saber qué me falta comprar. | 1. Reconoce la intención de "consulta".<br>2. El sistema responde con audio (TTS) el stock actual. | 8 |
-| **US-04** | E2 | **Como** dueño de MYPE, **quiero** que los datos de mis ventas se guarden en mi celular **para** no perderlos si se corta la luz o el internet. | 1. Base de datos SQLite configurada.<br>2. Datos cifrados (AES-256). | 5 |
-| **US-05** | E3 | **Como** dueño de MYPE, **quiero** ver un resumen fácil de entender al abrir la app **para** saber cuánto gané en el día. | 1. Pantalla principal con ganancias del día.<br>2. Diseño en Figma aprobado y validado. | 5 |
-| **US-06** | E4 | **Como** dueño de MYPE, **quiero** que mis datos se guarden en internet cuando tenga megas **para** tener un respaldo si pierdo el celular. | 1. Detecta conexión a Wi-Fi/Datos.<br>2. Sincronización silenciosa en background.<br>3. Sin conflictos de concurrencia. | 8 |
+## 2. Backlog trazable
 
-## 3.3 Casos de Uso Clave (Narrativa)
+| ID | Épica | Historia de usuario | Requisitos relacionados | Prioridad | Puntos |
+|---|---|---|---|---|---:|
+| US-01 | E1 | Como comerciante, quiero ingresar comandos por voz sin conexión para registrar operaciones sin depender de Internet. | RF-004, RNF-003 | Alta | 8 |
+| US-02 | E1 | Como comerciante, quiero que el sistema identifique intención, producto y cantidad para reducir el registro manual. | RF-005, RF-006 | Alta | 13 |
+| US-03 | E1 | Como comerciante, quiero confirmar visualmente una operación interpretada antes de guardarla para evitar errores. | RF-007, RF-008 | Alta | 5 |
+| US-04 | E2 | Como comerciante, quiero registrar ventas confirmadas para mantener actualizado mi control diario. | RF-009, RF-012 | Alta | 8 |
+| US-05 | E2 | Como comerciante, quiero registrar ventas mediante teclado cuando exista ruido o dificultad de reconocimiento. | RF-010 | Alta | 5 |
+| US-06 | E2 | Como comerciante, quiero consultar el stock mediante voz o interfaz para conocer qué productos necesito reponer. | RF-017 | Alta | 5 |
+| US-07 | E2 | Como comerciante, quiero registrar compras y entradas de mercadería para actualizar existencias. | RF-014 | Alta | 8 |
+| US-08 | E2 | Como comerciante, quiero recibir alertas cuando un producto llegue a cero para identificar faltantes. | RF-015 | Media | 3 |
+| US-09 | E3 | Como comerciante, quiero visualizar un resumen diario de ventas para comprender el movimiento de mi negocio. | RF-022 | Alta | 5 |
+| US-10 | E4 | Como comerciante, quiero que las operaciones se guarden localmente cuando no haya Internet para no perder información. | RF-018, RNF-003 | Alta | 8 |
+| US-11 | E4 | Como comerciante, quiero que las operaciones pendientes se sincronicen cuando exista conexión para disponer de respaldo. | RF-019 | Alta | 13 |
+| US-12 | E5 | Como propietario, quiero configurar el nombre y rubro de mi tienda para personalizar el sistema. | RF-003 | Media | 3 |
 
-### Caso de Uso 1: Registrar Venta por Voz (US-01, US-02)
-*   **Actores:** Comerciante (Usuario Final).
-*   **Precondiciones:** La app está abierta. Hay productos registrados en la BD local.
-*   **Flujo Principal:**
-    1. El usuario presiona el botón central del micrófono.
-    2. El usuario dice: "Registra la venta de 3 kilos de azúcar".
-    3. Vosk transcribe el audio a texto offline.
-    4. El motor NLP identifica la intención (Venta), la cantidad (3) y el producto (azúcar).
-    5. El sistema busca "azúcar" en la base local, deduce 3 unidades.
-    6. El sistema emite un sonido de éxito y actualiza el dashboard.
-*   **Flujos Alternativos:**
-    *   *4a.* El NLP no entiende el producto. El sistema pregunta: "¿Puedes repetir el producto?".
-    *   *5a.* No hay stock suficiente. El sistema advierte: "Solo tienes 1 kilo de azúcar en stock".
-*   **Postcondiciones:** El inventario se actualiza en la BD local y la transacción queda guardada con su timestamp.
+## 3. Criterios de aceptación representativos
+
+### US-01 — Entrada por voz offline
+- El sistema permite iniciar la captura desde la pantalla principal.
+- La captura no requiere conexión a Internet.
+- Si no se obtiene una transcripción confiable, se informa al usuario y se ofrece repetir o usar teclado.
+
+### US-03 — Confirmación de operación
+- La intención, producto, cantidad y monto identificado se muestran antes de guardar.
+- El usuario puede confirmar o cancelar.
+- Una operación cancelada no modifica ventas ni inventario.
+
+### US-04 — Registro de venta
+- Solo una operación confirmada se registra.
+- Se almacenan fecha, hora, productos, cantidades, total y modalidad de pago.
+- El inventario local se actualiza de manera consistente con la venta.
+
+### US-10 — Persistencia local
+- Una operación creada sin conexión queda en estado pendiente de sincronización.
+- La operación permanece disponible después de cerrar y abrir la aplicación.
+- El sistema informa si el almacenamiento local no está disponible.
+
+### US-11 — Sincronización
+- Las operaciones pendientes se envían únicamente cuando existe conectividad.
+- Cada operación posee un identificador único para evitar duplicados.
+- Los errores de sincronización quedan registrados y pueden reintentarse.
+
+## 4. Caso de uso principal: Registrar venta
+
+**Actor principal:** Comerciante.  
+**Precondiciones:** catálogo disponible y sesión local válida.  
+**Flujo principal:** iniciar captura → ingresar comando → interpretar → mostrar resumen → confirmar → guardar localmente → actualizar inventario → informar resultado.  
+**Alternativas:** audio no comprendido, producto inexistente, stock insuficiente, cancelación del usuario o almacenamiento no disponible.  
+**Postcondición:** venta confirmada almacenada localmente o flujo cancelado sin cambios.
+
+## 5. Regla de gestión
+
+Las historias describen comportamiento esperado. No constituyen evidencia de implementación ni de validación. Los puntos son estimaciones preliminares del equipo y deberán revisarse durante la planificación.
