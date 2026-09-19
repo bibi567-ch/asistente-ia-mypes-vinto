@@ -1,31 +1,76 @@
-# 🛒 Asistente Conversacional IA Offline para MYPES - Vinto
+# Asistente Conversacional IA Offline para MYPES de Vinto
 
-![Kotlin Native](https://img.shields.io/badge/Kotlin-Native-purple)
-![Vosk AI](https://img.shields.io/badge/Vosk-Offline_NLP-blue)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-Backend-green)
-![SQLite](https://img.shields.io/badge/SQLite-Edge_DB-lightblue)
+**Proyecto Integrador Semestral — Gestión 2026**  
+**Universidad Adventista de Bolivia**  
+**Facultad de Ciencias Exactas e Ingeniería — Ingeniería en Sistemas**  
+**Asignaturas:** Arquitectura de Software · Tecnologías en Internet
 
-Este repositorio contiene la especificación arquitectónica, diseño UX/UI y requisitos para un **Asistente Conversacional Offline (Edge AI)** orientado a comerciantes de Vinto, Cochabamba. El sistema permite gestionar ventas, stock y finanzas mediante **comandos de voz naturales**, procesando la Inteligencia Artificial al 100% en el dispositivo (sin necesidad de Internet) para superar la brecha tecnológica y de hardware de la región.
+## Descripción
+
+Este repositorio contiene la documentación académica, la especificación de requisitos, el diseño UX/UI y la propuesta arquitectónica de un asistente conversacional **offline-first** orientado a micro y pequeñas empresas del centro de Vinto, Cochabamba.
+
+La solución propuesta permitirá registrar ventas, consultar inventario y gestionar operaciones comerciales mediante texto y, en una fase controlada, comandos de voz procesados localmente en el dispositivo.
+
+> **Estado actual:** documentación, análisis, requisitos, arquitectura y prototipo UX/UI. La implementación móvil, el backend y los modelos de IA se consideran trabajo posterior y no deben interpretarse como funcionalidades ya implementadas.
+
+## Objetivo de la primera entrega
+
+Validar, antes del desarrollo técnico:
+
+- La definición y delimitación del problema.
+- Los requisitos funcionales y no funcionales.
+- Los casos de uso prioritarios.
+- La arquitectura propuesta y sus decisiones principales.
+- La organización de la información y los flujos de usuario.
+- El prototipo navegable de alta fidelidad en Figma.
+
+## Documentación
+
+| Documento | Propósito |
+|---|---|
+| [Introducción y contexto](docs/01_Introduccion_y_Contexto.md) | Contexto, problema y justificación |
+| [Requisitos del sistema](docs/02_Requisitos_del_Sistema.md) | Requisitos funcionales y no funcionales |
+| [Historias de usuario y backlog](docs/03_Historias_Usuario_y_Backlog.md) | Priorización y planificación funcional |
+| [SAD — Arquitectura de Software](docs/SAD_Arquitectura_Software.md) | Drivers, atributos de calidad, tácticas, ADRs y C4 |
+| [Arquitectura SAD y UX](docs/04_Arquitectura_SAD_y_UX.md) | Relación entre arquitectura, experiencia y flujos |
+| [Tecnologías en Internet — UX y requisitos](docs/Tecnologias_Internet_UX_Requisitos.md) | Requisitos, casos de uso, personas, UX/UI y prototipo |
+| [Matriz de trazabilidad](docs/05_Matriz_Trazabilidad.md) | Relación entre problema, objetivos, requisitos, casos de uso y pantallas |
+| [Auditoría de rúbricas](docs/06_Auditoria_Rubricas.md) | Verificación de criterios y pendientes de evidencia |
+| [Guía de entrega](docs/07_Guia_Entrega.md) | Checklist de presentación y control final |
+| [Evidencias](docs/08_Evidencias.md) | Registro de evidencias verificables |
+
+## Prototipo Figma
+
+[Prototipo navegable de alta fidelidad](https://snake-dijon-92194767.figma.site/)
+
+[Archivo del sistema de diseño en Figma](https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Dise%C3%B1o-MYPES-Vinto?p=f&fullscreen=1)
+
+> Antes de entregar, verificar que los enlaces sean accesibles para el docente en una ventana privada y que el prototipo incluya los flujos, estados y tamaños solicitados.
+
+## Alcance de la primera entrega
+
+Esta entrega prioriza el análisis, la especificación, la arquitectura y el diseño UX/UI. No se afirma que exista todavía una aplicación móvil compilable, un backend desplegado, modelos de IA entrenados ni resultados de pruebas de rendimiento.
+
+## Equipo
+
+- Eva Chino Quispe — coordinación, requisitos y aseguramiento de calidad.
+- Christian Gonzales — procesamiento de lenguaje natural e IA.
+- Marializ Mamani — backend, seguridad y persistencia.
+- Kevin Rocha — UX/UI, Figma y sistema de diseño.
+- Luis Lazo — arquitectura C4, pruebas y trazabilidad.
+
+## Control de calidad antes de presentar
+
+- [ ] Los documentos tienen portada, versión, fecha y responsables.
+- [ ] Existen al menos 10 requisitos funcionales y 5 no funcionales con redacción formal.
+- [ ] Los requisitos están vinculados con casos de uso y pantallas.
+- [ ] Los diagramas UML y C4 están incluidos y son legibles.
+- [ ] El prototipo Figma es público, navegable y no contiene enlaces rotos.
+- [ ] Se verificaron las vistas desktop y mobile.
+- [ ] Se identificaron claramente los elementos propuestos, diseñados y no implementados.
+- [ ] No se presentan métricas como resultados comprobados si todavía no fueron medidas.
 
 ---
 
-## 📑 Documentación del Proyecto (Entregables)
-La documentación del sistema ha sido estructurada rigurosamente para cumplir los requerimientos de calidad de las asignaturas *Arquitectura de Software* y *Tecnologías en Internet*:
-
-* 📄 **[Documento SAD (Software Architecture Document)](docs/SAD_Arquitectura_Software.md)**
-  *Contiene: Análisis del problema, Stakeholders, Drivers Arquitectónicos, Escenarios de Calidad, Tácticas (Offline-first), ADRs y Modelo C4.*
-
-* 📄 **[Especificación de Requisitos y UX/UI](docs/Tecnologias_Internet_UX_Requisitos.md)**
-  *Contiene: Matriz extendida de Requisitos (24 RF, 7 RNF), Narrativa de Casos de Uso Críticos, Arquitectura de la Información, Personas, Sistema de Diseño (Figma) y Métricas de Negocio (Eficiencia/Eficacia).*
-
----
-
-## 🎨 Prototipo Interactivo (Figma)
-El diseño respeta los estándares de Material Design 3, WCAG 2.1 Nivel AA para accesibilidad (adultos mayores) y tácticas de confirmación visual para mitigar falsos positivos por ruido ambiental.
-
-👉 **[Pegar aquí el Enlace Público a Figma]**
-
----
-
----
-*Proyecto Integrador Semestral - Gestión 2026*
+*Proyecto Integrador Semestral — Gestión 2026*  
+*Versión documental: 1.0 — Preparación para primera entrega*
