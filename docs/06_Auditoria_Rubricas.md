@@ -1,50 +1,56 @@
-# Auditoría de rúbricas — Primera entrega
+# Auditoría de Rúbricas — Primera Entrega
 
-**Proyecto:** Asistente Conversacional IA Offline para MYPES de Vinto  
-**Versión:** 1.0  
-**Estado:** Revisión documental
+**Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto  
+**Versión:** 1.1  
+**Estado:** Auditoría documental; no equivale a aprobación docente.
 
-## 1. Arquitectura de Software
+## 1. Criterios de Arquitectura de Software
 
-| Criterio | Evidencia disponible | Estado | Acción requerida |
+| Criterio | Evidencia disponible | Estado | Pendiente / acción |
 |---|---|---|---|
-| Problema y contexto | Documento de introducción y contexto | Parcial | Incorporar evidencia de campo o declarar limitación |
-| Stakeholders y alcance | SAD y requisitos | Documentado | Revisar consistencia terminológica |
-| Requisitos arquitectónicamente significativos | Matriz de requisitos | Documentado | Priorizar los cinco principales |
-| Atributos de calidad | SAD | Parcial | Relacionar cada atributo con escenarios medibles |
-| Escenarios de calidad | SAD | Parcial | Completar estímulo, entorno, respuesta y medida |
-| Tácticas arquitectónicas | SAD | Documentado | Justificar cada táctica frente a un escenario |
-| ADR | SAD | Parcial | Verificar que existan tres ADR completos |
-| C4 nivel contexto | Diagrama pendiente de consolidación | Por completar | Crear y revisar con stakeholders y límites |
-| C4 nivel contenedores | Diagrama pendiente de consolidación | Por completar | Mantener coherencia con el stack propuesto |
-| Trazabilidad | Matriz de trazabilidad | Documentado | Vincular requisitos, casos de uso y pantallas |
-| Retos arquitectónicos | SAD | Parcial | Explicitar sincronización, voz offline y recursos limitados |
+| Portada y control de versiones | Documentos Markdown | Parcial | Completar datos institucionales y docente en Word/PDF. |
+| Introducción y contexto | `01_Introduccion_y_Contexto.md` | Documentado | Agregar fuentes o declarar que el contexto es una hipótesis de diseño. |
+| Problema, causas y efectos | SAD y contexto | Parcial | Presentar causas y efectos en esquema explícito. |
+| Stakeholders | SAD | Documentado | Validar roles con el equipo. |
+| Alcance y exclusiones | SAD | Documentado | Mantener el mismo alcance en todos los documentos. |
+| Requisitos arquitectónicamente significativos | Requisitos y SAD | Documentado | Confirmar los cinco drivers definitivos. |
+| Atributos de calidad | SAD y arquitectura complementaria | Documentado | Mantener cuatro atributos consistentes. |
+| Escenarios medibles | SAD | Parcial | Ejecutar pruebas y registrar resultados; actualmente son objetivos. |
+| Tácticas arquitectónicas | SAD | Documentado | Relacionar cada táctica con un problema y escenario. |
+| ADRs | SAD | Documentado | Revisar y aprobar decisiones tecnológicas definitivas. |
+| C4 contexto | `diagrams/C1_Contexto.mmd` | Diseñado | Renderizar y revisar legibilidad. |
+| C4 contenedores | `diagrams/C2_Contenedores.mmd` | Diseñado | Mantener nombres coherentes con SAD y ADRs. |
+| Trazabilidad | `05_Matriz_Trazabilidad.md` | Documentado | Vincular frames concretos de Figma. |
+| Retos arquitectónicos | SAD | Documentado | Añadir estrategia de validación por reto. |
 
-## 2. Tecnologías en Internet
+## 2. Criterios de Tecnologías en Internet
 
-| Criterio | Evidencia disponible | Estado | Acción requerida |
+| Criterio | Evidencia disponible | Estado | Pendiente / acción |
 |---|---|---|---|
-| Mínimo 10 RF | Documento de requisitos | Documentado | Revisar redacción formal |
-| Mínimo 5 RNF | Documento de requisitos | Documentado | Asociar métricas y métodos de verificación |
-| Casos de uso UML | Documento y diagrama pendiente | Parcial | Incorporar diagrama legible |
-| Tres narrativas de casos de uso | Documentación existente | Parcial | Uniformar precondiciones, flujo y excepciones |
-| Dos personas | Documento UX/UI | Por validar | Revisar claridad y relación con el problema |
-| Mapas de empatía | Documento UX/UI | Por validar | Completar evidencia o marcar pendiente |
-| Mapa del sitio | Documento UX/UI | Parcial | Alinear con navegación de Figma |
-| Flujos de usuario | Documento UX/UI | Parcial | Añadir flujo principal y alternos |
-| Sistema de diseño | Enlace Figma | Por verificar | Revisar tokens, variantes, propiedades y Auto Layout |
-| Desktop y mobile | Prototipo Figma | Por verificar | Confirmar marcos 1440 px y 375/390 px |
-| Estados de interfaz | Prototipo Figma | Por verificar | Incluir carga, vacío, error y éxito |
-| Accesibilidad | Declaración documental | No verificado | Realizar revisión WCAG 2.1 AA |
+| Mínimo 10 requisitos funcionales | `02_Requisitos_del_Sistema.md` | Documentado | Revisar redacción formal final. |
+| Mínimo 5 requisitos no funcionales | `02_Requisitos_del_Sistema.md` | Documentado | Asociar método de verificación. |
+| Diagrama UML de casos de uso | `diagrams/Casos_Uso.puml` | Diseñado | Renderizar e insertar en documento final. |
+| Tres narrativas completas | Documento de Tecnologías | Parcial | Uniformar IDs CU-01 a CU-05 y completar excepciones. |
+| Dos personas | Documento UX/UI | Propuesto | Confirmar si existe investigación real; de lo contrario, etiquetar como hipótesis. |
+| Mapas de empatía | Documento UX/UI | Pendiente | Incorporar dos mapas completos o declarar pendiente. |
+| Mapa del sitio | Documento UX/UI | Diseñado | Comparar con navegación real del prototipo. |
+| Flujos de usuario | `diagrams/Flujos_Usuario.md` | Diseñado | Insertar en Word/PDF. |
+| Sistema de diseño | Enlace Figma | Por verificar | Revisar colores, tipografía, componentes, variantes, Auto Layout y variables. |
+| Desktop 1440 px | Enlace Figma | Por verificar | Confirmar frame y capturar evidencia. |
+| Mobile 375/390 px | Enlace Figma | Por verificar | Confirmar frame y capturar evidencia. |
+| Estados de interfaz | Prototipo Figma | Por verificar | Confirmar carga, vacío, error, éxito y sin conexión. |
+| Accesibilidad WCAG 2.1 AA | Declaración documental | No verificado | Ejecutar revisión de contraste, foco, tamaño y navegación. |
 
-## 3. Regla de presentación
+## 3. Estados oficiales de evidencia
 
-No se debe presentar como implementado, probado o validado ningún elemento que únicamente esté descrito en documentos o diseñado en Figma. Los estados recomendados son:
+- **Implementado:** existe código ejecutable y evidencia de funcionamiento.
+- **Diseñado:** existe prototipo, diagrama o diseño revisable.
+- **Documentado:** existe especificación escrita.
+- **Propuesto:** decisión pendiente de validación técnica.
+- **En validación:** existe actividad de prueba en curso.
+- **No verificado:** se definió un objetivo, pero no hay resultado comprobable.
+- **Pendiente:** falta producir el entregable o evidencia.
 
-- Implementado.
-- Diseñado.
-- Documentado.
-- Propuesto.
-- En validación.
-- No verificado.
-- Pendiente.
+## 4. Conclusión de auditoría
+
+La entrega puede presentarse como un paquete de **análisis, requisitos, arquitectura propuesta y diseño UX/UI**. No debe presentarse como sistema implementado ni como solución validada en campo mientras no existan código ejecutable, pruebas reproducibles, capturas del prototipo y resultados documentados.
