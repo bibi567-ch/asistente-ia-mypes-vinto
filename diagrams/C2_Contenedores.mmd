@@ -1,0 +1,24 @@
+flowchart TB
+    usuario[Comerciante]
+    subgraph app[Aplicación móvil Android]
+      ui[Interfaz Jetpack Compose]
+      conversation[Orquestador conversacional]
+      local[Persistencia local Room / SQLite]
+      sync[Cola Outbox y sincronización]
+      voice[Reconocimiento de voz Vosk]
+      intent[Clasificación de intención TFLite]
+    end
+    subgraph server[Backend]
+      api[API REST Spring Boot]
+      security[Seguridad JWT]
+      db[(PostgreSQL)]
+    end
+    usuario --> ui
+    ui --> conversation
+    conversation --> voice
+    conversation --> intent
+    conversation --> local
+    local --> sync
+    sync --> api
+    api --> security
+    api --> db
