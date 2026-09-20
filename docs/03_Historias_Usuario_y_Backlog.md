@@ -22,11 +22,11 @@
 | US-04 | E2 | Como comerciante, quiero registrar ventas confirmadas para mantener actualizado mi control diario. | RF-009, RF-012 | Alta | 8 |
 | US-05 | E2 | Como comerciante, quiero registrar ventas mediante teclado cuando exista ruido o dificultad de reconocimiento. | RF-011 | Alta | 5 |
 | US-06 | E2 | Como comerciante, quiero consultar el stock mediante voz o interfaz para conocer qué productos necesito reponer. | RF-013 | Alta | 5 |
-| US-07 | E2 | Como comerciante, quiero registrar compras y entradas de mercadería para actualizar existencias. | RF-013 | Alta | 8 |
+| US-07 | E2 | Como comerciante, quiero registrar entradas de mercadería para actualizar existencias. | RF-013 | Alta | 8 |
 | US-08 | E2 | Como comerciante, quiero recibir alertas cuando un producto llegue a cero para identificar faltantes. | RF-018 | Media | 3 |
 | US-09 | E3 | Como comerciante, quiero visualizar un resumen diario de ventas para comprender el movimiento de mi negocio. | RF-016 | Alta | 5 |
 | US-10 | E4 | Como comerciante, quiero que las operaciones se guarden localmente cuando no haya Internet para no perder información. | RF-015, RNF-001 | Alta | 8 |
-| US-11 | E4 | Como comerciante, quiero que las operaciones pendientes se sincronicen cuando exista conexión para disponer de respaldo. | RF-016 | Alta | 13 |
+| US-11 | E4 | Como comerciante, quiero que las operaciones pendientes se sincronicen cuando exista conexión para disponer de respaldo. | RF-016, RF-017 | Alta | 13 |
 | US-12 | E5 | Como propietario, quiero configurar el nombre y rubro de mi tienda para personalizar el sistema. | RF-003 | Media | 3 |
 
 ## 3. Criterios de aceptación representativos
