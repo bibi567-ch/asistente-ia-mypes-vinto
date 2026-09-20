@@ -7,7 +7,7 @@
 
 ## 1. Material que debe entregarse
 
-- [ ] Documento técnico en PDF o Word.
+- [ ] Documento técnico final en Word y PDF.
 - [ ] Enlace público al prototipo navegable de Figma.
 - [ ] Enlace al repositorio GitHub.
 - [ ] Diagramas UML y C4 legibles.
@@ -29,7 +29,7 @@
 - [ ] Diagrama de casos de uso.
 - [ ] Tres narrativas de casos de uso prioritarios.
 - [ ] Diagrama C4 de contexto.
-- [ ] Personas y mapas de empatía.
+- [ ] Dos personas y mapas de empatía: los mapas deben incorporarse o marcarse explícitamente como pendientes según la evidencia disponible.
 - [ ] Mapa del sitio.
 - [ ] Flujos principales de usuario.
 - [ ] Sistema de diseño.
