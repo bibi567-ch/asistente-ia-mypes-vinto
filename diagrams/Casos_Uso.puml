@@ -1,22 +1,12 @@
 @startuml
 left to right direction
 actor Comerciante
-actor Administrador
 rectangle "Asistente IA MYPES Vinto" {
-  usecase "Iniciar sesión" as UC1
-  usecase "Gestionar productos" as UC2
-  usecase "Registrar venta" as UC3
-  usecase "Consultar inventario" as UC4
-  usecase "Consultar ventas" as UC5
-  usecase "Sincronizar operaciones" as UC6
-  usecase "Administrar usuarios" as UC7
+  usecase "Registrar venta" as UC01
+  usecase "Consultar inventario" as UC02
+  usecase "Sincronizar operaciones pendientes" as UC03
 }
-Comerciante --> UC1
-Comerciante --> UC2
-Comerciante --> UC3
-Comerciante --> UC4
-Comerciante --> UC5
-Comerciante --> UC6
-Administrador --> UC7
-Administrador --> UC6
+Comerciante --> UC01
+Comerciante --> UC02
+Comerciante --> UC03
 @enduml
