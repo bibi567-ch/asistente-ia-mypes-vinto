@@ -73,3 +73,12 @@ Esta entrega prioriza el análisis, la especificación, la arquitectura y el dis
 
 *Proyecto Integrador Semestral — Gestión 2026*  
 *Versión documental: 1.0 — Preparación para primera entrega*
+
+## Prototipos y Diseño (Figma)
+- Prototipo navegable: https://snake-dijon-92194767.figma.site/
+- Sistema de diseño: https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Diseño-MYPES-Vinto
+
+## Documentación oficial
+- [SAD — Arquitectura de Software](docs/SAD_Arquitectura_Software.md)
+- [Requisitos y UX/UI — Tecnologías en Internet](docs/Requisitos_UX_TecnologiasInternet.md)
+- [Blueprint del Stack Tecnológico](docs/Blueprint_Arquitectonico_Stack_Vinto.md)
