@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mypes-vinto-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mypes_vinto_dev
+      POSTGRES_USER: mypes_local
+      POSTGRES_PASSWORD: local_dev_only
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mypes_local -d mypes_vinto_dev"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

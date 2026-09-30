@@ -6,7 +6,7 @@
 **INTEGRANTES:** Eva Chino Quispe, Christian Gonzales, Marializ Mamani, Kevin Rocha, Luis Lazo
 **DOCENTE:** _(completar)_ — **FECHA:** _(completar)_ — **VERSIÓN:** 1.1
 
-> Este documento reemplaza y consolida `02_Requisitos_del_Sistema.md` y la primera versión de `Tecnologias_Internet_UX_Requisitos.md`, eliminando la duplicidad de matrices de requisitos (10 vs. 24 RF) y de personas UX (María/Carlos vs. Don Juan). Es el documento **único y oficial** para esta asignatura.
+> Este es el documento activo de requisitos y UX del repositorio; conserva el contenido de la versión consolidada anterior. No sustituye una rúbrica, consigna o aprobación docente. Las copias anteriores se guardan en `docs/archive/referencias_historicas/` para consulta.
 
 ---
 
@@ -42,7 +42,7 @@ Sintaxis formal obligatoria: *«El sistema debe [acción] + [entidad/objeto] + [
 | RF-017 | Inventario | El sistema debe responder consultas verbales de stock disponible por producto. | Alta |
 | RF-018 | Sincronización | El sistema debe encolar (Outbox) todas las transacciones locales cuando no haya conexión a Internet. | Alta |
 | RF-019 | Sincronización | El sistema debe detectar la red disponible y enviar las transacciones encoladas automáticamente en formato JSON. | Alta |
-| RF-020 | Sincronización | El sistema debe resolver los conflictos de stock en la nube mediante la política LWW (Last Write Wins). | Media |
+| RF-020 | Sincronización | El sistema debe identificar operaciones concurrentes sobre existencias y conservar el historial de ventas, evitando descartar transacciones mediante sobrescritura automática. | Alta |
 | RF-021 | Panel principal | El sistema debe desplegar un dashboard con el resumen de ventas del día al iniciar sesión. | Alta |
 | RF-022 | Reportes | El sistema debe generar un reporte visual de los productos más vendidos del mes. | Baja |
 
@@ -77,15 +77,15 @@ Sintaxis formal obligatoria: *«El sistema debe [acción] + [entidad/objeto] + [
 - **Postcondición:** inventario actualizado localmente; transacción con timestamp guardada en la cola Outbox.
 
 ### Caso de Uso 2 — Sincronizar Transacciones Offline con el Servidor Cloud
-- **Actores:** Sistema Android / Backend Spring Boot.
+- **Actores:** Sistema Android / API Node.js + TypeScript + Express (línea base objetivo, pendiente de actualizar en SAD v2.0).
 - **Precondición:** existen transacciones pendientes en la cola Outbox local.
 - **Flujo principal:**
   1. El sistema operativo detecta la activación de datos móviles o Wi-Fi.
   2. La app envía un `POST` REST con el JSON de las operaciones pendientes, autenticado vía JWT.
-  3. El backend Spring Boot recibe las transacciones y aplica la política LWW para resolver posibles conflictos de stock.
+  3. La API Node.js recibe eventos idempotentes y preserva las ventas; los conflictos de inventario se marcan para reconciliación según la política que defina el SAD v2.0.
   4. El backend responde `HTTP 200 OK` con el resultado de la consolidación.
   5. La app limpia su cola Outbox local de los ítems confirmados.
-- **Flujo alternativo:** si el backend detecta un conflicto irresoluble automáticamente (RF-021), marca la transacción para reconciliación manual y notifica al usuario en el dashboard.
+- **Flujo alternativo:** si el backend detecta un conflicto irresoluble automáticamente (RF-020), marca la operación de inventario para reconciliación manual y notifica al usuario en el dashboard; conserva intactos los eventos de venta.
 - **Postcondición:** los datos del comerciante quedan respaldados en PostgreSQL.
 
 ### Caso de Uso 3 — Consultar Inventario y Ventas del Día
@@ -174,3 +174,8 @@ Estructura plana, máximo 2 niveles de profundidad:
 
 ---
 *Tecnologías en Internet — Proyecto Integrador — Documento consolidado v1.1*
+
+
+## Nota de coherencia de stack — 30/09/2026
+
+La especificación original menciona backend Spring Boot y PostgreSQL. La línea base solicitada para la siguiente versión unifica Node.js/TypeScript/Express con PostgreSQL y conserva la base local SQLite. Por tanto, referencias a Spring en esta versión son antecedentes y deben actualizarse junto con SAD y API. El requisito MongoDB del sílabo TI se mantiene pendiente de aclaración; no se declara cubierto por PostgreSQL.

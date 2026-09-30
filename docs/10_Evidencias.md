@@ -7,13 +7,13 @@
 | EV-001 | Enlace al repositorio | GitHub | Disponible |
 | EV-002 | Prototipo navegable | Figma | Por verificar |
 | EV-003 | Sistema de diseño | Figma | Por verificar |
-| EV-004 | Requisitos funcionales y no funcionales | `docs/02_Requisitos_del_Sistema.md` | Disponible |
-| EV-005 | Matriz de trazabilidad | `docs/05_Matriz_Trazabilidad.md` | Disponible |
-| EV-006 | Auditoría de rúbricas | `docs/06_Auditoria_Rubricas.md` | Disponible |
-| EV-007 | Diagrama C1 | `diagrams/C1_Contexto.mmd` | Por completar |
-| EV-008 | Diagrama C2 | `diagrams/C2_Contenedores.mmd` | Por completar |
+| EV-004 | Requisitos funcionales y no funcionales | `docs/02_Requisitos_y_UX.md` | Disponible |
+| EV-005 | Matriz de trazabilidad | `docs/06_Matriz_Trazabilidad.md` | Disponible |
+| EV-006 | Auditoría de rúbricas | `docs/07_Auditoria_Rubricas.md` | Disponible |
+| EV-007 | Diagrama C1 | `diagrams/C1_Contexto.mmd` | Fuente Mermaid creada; render y revisión pendientes |
+| EV-008 | Diagrama C2 | `diagrams/C2_Contenedores.mmd` | Fuente Mermaid creada; render y revisión pendientes |
 | EV-009 | Diagrama de casos de uso | `diagrams/Casos_Uso.puml` | Por completar |
-| EV-010 | Capturas de pantallas | `evidence/screenshots/` | Por completar |
+| EV-010 | Capturas y registros anonimizados | `evidence/` | Carpeta preparada; evidencias por agregar |
 
 ## Reglas
 

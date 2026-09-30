@@ -1,0 +1,47 @@
+name: Backend
+
+on:
+  push:
+    branches: [main, doc-mypes-vinto]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: mypes_vinto_test
+          POSTGRES_USER: mypes_test
+          POSTGRES_PASSWORD: test_only_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mypes_test -d mypes_vinto_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: postgres://mypes_test:test_only_password@127.0.0.1:5432/mypes_vinto_test
+      JWT_SECRET: integration-test-secret-that-is-at-least-32-bytes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run db:migrate
+      - run: npm run build
+      - run: npm run typecheck:test
+      - run: npm test
+      - run: npm run test:integration

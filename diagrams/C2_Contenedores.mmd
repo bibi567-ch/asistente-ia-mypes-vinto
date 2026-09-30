@@ -1,24 +1,33 @@
-flowchart TB
-    usuario[Comerciante]
-    subgraph app[Aplicación móvil Android]
-      ui[Interfaz Jetpack Compose]
-      conversation[Orquestador conversacional]
-      local[Persistencia local Room / SQLite]
-      sync[Cola Outbox y sincronización]
-      voice[Reconocimiento de voz Vosk]
-      intent[Clasificación de intención TFLite]
+flowchart LR
+    merchant[Comerciante]
+    subgraph android[Dispositivo Android · objetivo]
+      ui[Presentación<br/>Kotlin + Compose]
+      domain[Casos de uso y reglas de dominio]
+      local[(Room / SQLite<br/>catálogo y ventas locales)]
+      outbox[Outbox<br/>UUID y estados]
+      worker[WorkManager<br/>sync diferida]
+      asr[Vosk / NLU acotado<br/>propuesta, no implementado]
     end
-    subgraph server[Backend]
-      api[API REST Spring Boot]
-      security[Seguridad JWT]
+    subgraph server[Servicio remoto · API y catálogo inicial]
+      api[API Node.js + TypeScript + Express]
+      auth[Login · token corto<br/>propietario administrado]
+      products[Catálogo<br/>scope por negocio]
+      pool[Adaptador PostgreSQL · pg]
       db[(PostgreSQL)]
     end
-    usuario --> ui
-    ui --> conversation
-    conversation --> voice
-    conversation --> intent
-    conversation --> local
-    local --> sync
-    sync --> api
-    api --> security
-    api --> db
+    merchant --> ui
+    ui --> domain
+    domain --> local
+    ui -. comandos de voz .-> asr
+    local --> outbox
+    outbox --> worker
+    worker -. HTTPS pendiente antes de red .-> api
+    api --> pool
+    api --> auth
+    api --> products
+    auth --> pool
+    products --> pool
+    pool --> db
+
+    %% Login y operaciones GET/POST de catálogo están implementados; falta verificación de integración local.
+    %% Ventas, sync y Android aún no están implementados.

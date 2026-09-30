@@ -1,84 +1,129 @@
-# Asistente Conversacional IA Offline para MYPES de Vinto
+# Asistente conversacional offline para MYPES de Vinto
 
-**Proyecto Integrador Semestral — Gestión 2026**  
-**Universidad Adventista de Bolivia**  
-**Facultad de Ingeniería — Ingeniería en Sistemas**  
-**Asignaturas:** Arquitectura de Software · Tecnologías en Internet
+Proyecto integrador de Ingeniería en Sistemas — Universidad Adventista de Bolivia — Gestión 2026-2.
 
-## Descripción
+## Estado del repositorio
 
-Este repositorio contiene la documentación académica, la especificación de requisitos, el diseño UX/UI y la propuesta arquitectónica de un asistente conversacional **offline-first** orientado a micro y pequeñas empresas del centro de Vinto, Cochabamba.
+El backend inicial usa Node.js, TypeScript, Express y PostgreSQL. Incluye migraciones versionadas, creación controlada de propietarios, inicio de sesión con contraseña hasheada y token de acceso, y consulta/alta de productos aisladas por negocio. **Ventas, sincronización offline y una app Android funcional siguen pendientes.** Es una base de desarrollo local; no debe exponerse a Internet ni usarse con datos reales hasta completar controles y revisión de seguridad.
 
-La solución propuesta permitirá registrar ventas, consultar inventario y gestionar operaciones comerciales mediante texto y, en una fase controlada, comandos de voz procesados localmente en el dispositivo.
+## Arquitectura acordada por el equipo
 
-> **Estado actual:** documentación, análisis, requisitos, arquitectura y prototipo UX/UI. La implementación móvil, el backend y los modelos de IA se consideran trabajo posterior y no deben interpretarse como funcionalidades ya implementadas.
+```mermaid
+flowchart LR
+  U[Comerciante] --> A[Android · Kotlin / Compose]
+  A --> L[Room / SQLite local]
+  L --> O[Outbox · UUID idempotente]
+  O -->|con conectividad| API[Node.js · TypeScript · Express]
+  API --> PG[(PostgreSQL)]
+  A -. Voz offline, fase posterior .-> V[Vosk + NLU acotado]
+```
 
-## Objetivo de la primera entrega
+**Línea base unificada solicitada:** Kotlin + Jetpack Compose; Room/SQLite local; API Node.js + TypeScript + Express; PostgreSQL remoto como fuente autoritativa comercial; Outbox + WorkManager + UUID para sincronización idempotente. El Perfil/SAD entregado anteriormente menciona Spring Boot/PostgreSQL; la transición a Node requiere ADR sucesora y actualización del SAD/diagramas. El sílabo de Tecnologías en Internet incluye MongoDB/Mongoose y producto web full-stack: la líder debe confirmar con el docente si MongoDB debe aparecer en el producto o puede demostrarse en una práctica acotada y si se exige cliente web además de Android. PostgreSQL no se presenta como NoSQL.
 
-Validar, antes del desarrollo técnico:
+## Empezar localmente
 
-- La definición y delimitación del problema.
-- Los requisitos funcionales y no funcionales.
-- Los casos de uso prioritarios.
-- La arquitectura propuesta y sus decisiones principales.
-- La organización de la información y los flujos de usuario.
-- El prototipo navegable de alta fidelidad en Figma.
+Requisitos: Node.js 24.x, npm y Docker Desktop.
 
-## Documentación
+1. Desde la raíz del repositorio, iniciar la base de desarrollo:
 
-| Documento | Propósito |
+   ```powershell
+   docker compose up -d postgres
+   ```
+
+   Espera hasta que `docker compose ps` muestre PostgreSQL como `healthy`.
+
+2. Copiar configuración de ejemplo, crear una clave JWT local y aplicar las migraciones:
+
+   ```powershell
+   Copy-Item backend/.env.example backend/.env
+   $secret = node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))"
+   Add-Content backend/.env "JWT_SECRET=$secret"
+   Set-Location backend
+   npm ci
+   npm run db:migrate
+   ```
+
+3. Crear el primer propietario con un negocio de prueba. El comando genera una contraseña temporal y la muestra una sola vez:
+
+   ```powershell
+   npm run admin:create-owner -- "MYPE de prueba" "propietario@example.test"
+   ```
+
+4. Ejecutar la API:
+
+   ```powershell
+   npm run dev
+   ```
+
+5. Abrir `http://127.0.0.1:3000/api/v1/health`. La respuesta debe indicar que PostgreSQL está conectado. `npm run build` y `npm test` verifican el backend sin necesitar una base de datos.
+
+No publiques el archivo `backend/.env` ni compartas la contraseña temporal generada. Las migraciones se aplican sin borrar volúmenes ni datos.
+
+## Documentos activos
+
+Los documentos vigentes se numeran desde 01 y se navegan desde [`00_Indice.md`](00_Indice.md). `docs/archive/` contiene copias históricas o duplicadas y no es fuente activa.
+
+| N.º | Documento | Para qué sirve |
+|---|---|---|
+| 01 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Problema, MVP, límites y fuentes |
+| 02 | [Requisitos y UX](docs/02_Requisitos_y_UX.md) | Requisitos, casos de uso y experiencia |
+| 03 | [SAD de Arquitectura](docs/03_SAD_Arquitectura.md) | SAD v1.1 entregado y nota de cambio objetivo |
+| 04 | [Decisión de stack](docs/04_Decisiones_Stack.md) | Línea Node/PostgreSQL y consultas docentes |
+| 05 | [Product Backlog y equipo](docs/05_Product_Backlog_y_Equipo.md) | Épicas, responsables y aceptación de tareas |
+| 06 | [Matriz de trazabilidad](docs/06_Matriz_Trazabilidad.md) | Relación requisitos, casos y evidencia |
+| 07 | [Auditoría de rúbricas](docs/07_Auditoria_Rubricas.md) | Brechas y verificación académica |
+| 08 | [Cronograma y riesgos](docs/08_Cronograma_y_Riesgos.md) | Hitos, fechas, R3 y R6 |
+| 09 | [Guía de entrega](docs/09_Guia_Entrega.md) | Revisión previa a presentar |
+| 10 | [Registro de evidencias](docs/10_Evidencias.md) | Estado y ubicación de artefactos |
+| 11 | [Plan de implementación y API](docs/11_Plan_Implementacion_y_API.md) | Orden de desarrollo y contrato inicial |
+| 12 | [Matriz de tres materias](docs/12_Matriz_Rubricas_Tres_Materias.md) | Criterios, estados y evidencias |
+
+## Próximo incremento del equipo
+
+1. Eva consulta y archiva las respuestas docentes sobre Node/PostgreSQL, Mongo/Mongoose, frontend web y fecha exacta de defensa.
+2. Marializ completa pruebas con PostgreSQL, edición del catálogo y revisión de autorización; Luis revisa aislamiento entre negocios.
+3. Kevin define el flujo móvil de catálogo/venta, modo avión y confirmación; construir frontend web solo si TI confirma que lo exige.
+4. Christian prepara casos de intención en texto; integrar Vosk después de probar venta manual offline.
+5. Luis actualiza ADR/C4, vincula requisitos a pruebas y coordina revisión del recorrido vertical.
+6. Eva mantiene tablero, cronograma y checklist de rúbricas; no marca completado sin evidencia.
+
+El recorrido prioritario es **catálogo protegido → venta local → modo avión → persistencia tras reinicio → API → PostgreSQL → reintento con el mismo UUID sin duplicado**. No se empieza por Gemma, microservicios o funciones fiscales.
+
+## Fechas principales reportadas
+
+Fechas de los documentos compartidos; confirmar en aula virtual antes de entregar:
+
+| Fecha | Hito reportado |
 |---|---|
-| [Introducción y contexto](docs/01_Introduccion_y_Contexto.md) | Contexto, problema y justificación |
-| [Requisitos del sistema](docs/02_Requisitos_del_Sistema.md) | Requisitos funcionales y no funcionales |
-| [Historias de usuario y backlog](docs/03_Historias_Usuario_y_Backlog.md) | Priorización y planificación funcional |
-| [SAD — Arquitectura de Software](docs/SAD_Arquitectura_Software.md) | Drivers, atributos de calidad, tácticas, ADRs y C4 |
-| [Arquitectura SAD y UX](docs/04_Arquitectura_SAD_y_UX.md) | Relación entre arquitectura, experiencia y flujos |
-| [Tecnologías en Internet — UX y requisitos](docs/Tecnologias_Internet_UX_Requisitos.md) | Requisitos, casos de uso, personas, UX/UI y prototipo |
-| [Matriz de trazabilidad](docs/05_Matriz_Trazabilidad.md) | Relación entre problema, objetivos, requisitos, casos de uso y pantallas |
-| [Auditoría de rúbricas](docs/06_Auditoria_Rubricas.md) | Verificación de criterios y pendientes de evidencia |
-| [Guía de entrega](docs/07_Guia_Entrega.md) | Checklist de presentación y control final |
-| [Evidencias](docs/08_Evidencias.md) | Registro de evidencias verificables |
+| 14/10/2026 | Examen práctico REST y NoSQL — Tecnologías en Internet |
+| 19/10/2026 | Examen integrador — Arquitectura |
+| 22/10/2026 | Evaluación del Perfil — Investigación I |
+| 11/11/2026 | Backend/integración — Tecnologías en Internet |
+| 16/11/2026 | SAD/solución arquitectónica — Arquitectura |
+| 23/11/2026 | Defensa final — Arquitectura |
+| 25/11/2026 | Plataforma full-stack — Tecnologías en Internet |
+| 24–26/11 y 01–03/12 | Defensa del Perfil reportada; falta confirmar fecha exacta |
 
-## Prototipo Figma
-
-[Prototipo navegable de alta fidelidad](https://snake-dijon-92194767.figma.site/)
-
-[Archivo del sistema de diseño en Figma](https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Dise%C3%B1o-MYPES-Vinto?p=f&fullscreen=1)
-
-
-## Alcance de la primera entrega
-
-Esta entrega prioriza el análisis, la especificación, la arquitectura y el diseño UX/UI. No se afirma que exista todavía una aplicación móvil compilable, un backend desplegado, modelos de IA entrenados ni resultados de pruebas de rendimiento.
+El Gantt etiqueta por error el corte 29/09 como lunes. **29/09/2026 es martes; W11 va de 28/09 a 04/10.** Ver [cronograma](docs/08_Cronograma_y_Riesgos.md). El Perfil usa cinco fases; SAD/Gantt seis; el documento de cronograma explica la equivalencia sin cambiar en silencio los originales.
 
 ## Equipo
 
-- Eva Chino Quispe — coordinación, requisitos y aseguramiento de calidad.
-- Christian Gonzales — procesamiento de lenguaje natural e IA.
-- Marializ Mamani — backend, seguridad y persistencia.
-- Kevin Rocha — UX/UI, Figma y sistema de diseño.
-- Luis Lazo — arquitectura C4, pruebas y trazabilidad.
+- **Eva Lizeth Chino Quispe:** líder, requisitos, coordinación y QA documental.
+- **Christian Gonzales Mamani:** IA y pipeline conversacional.
+- **Marializ Mamani Quispe:** backend, seguridad y persistencia.
+- **Kevin Jhonathan Rocha Rojas:** UX/UI y prototipado.
+- **Luis Gerardo Lazo Bustamante:** arquitectura C4, trazabilidad y QA técnico.
 
-## Control de calidad antes de presentar
+## Diseño
 
-- [ ] Los documentos tienen portada, versión, fecha y responsables.
-- [ ] Existen al menos 10 requisitos funcionales y 5 no funcionales con redacción formal.
-- [ ] Los requisitos están vinculados con casos de uso y pantallas.
-- [ ] Los diagramas UML y C4 están incluidos y son legibles.
-- [ ] El prototipo Figma es público, navegable y no contiene enlaces rotos.
-- [ ] Se verificaron las vistas desktop y mobile.
-- [ ] Se identificaron claramente los elementos propuestos, diseñados y no implementados.
-- [ ] No se presentan métricas como resultados comprobados si todavía no fueron medidas.
+- [Prototipo navegable en Figma](https://snake-dijon-92194767.figma.site/)
+- [Sistema de diseño](https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Dise%C3%B1o-MYPES-Vinto?p=f&fullscreen=1)
 
----
+## Reglas para colaborar
 
-*Proyecto Integrador Semestral — Gestión 2026*  
-*Versión documental: 1.0 — Preparación para primera entrega*
-
-## Prototipos y Diseño (Figma)
-- Prototipo navegable: https://snake-dijon-92194767.figma.site/
-- Sistema de diseño: https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Diseño-MYPES-Vinto
-
-## Documentación oficial
-- [SAD — Arquitectura de Software](docs/SAD_Arquitectura_Software.md)
-- [Requisitos y UX/UI — Tecnologías en Internet](docs/Requisitos_UX_TecnologiasInternet.md)
-- [Blueprint del Stack Tecnológico](docs/Blueprint_Arquitectonico_Stack_Vinto.md)
+- No subir `.env`, tokens, contraseñas, datos reales ni audio identificable.
+- Crear ramas pequeñas y pedir revisión antes de integrar cambios a `main`.
+- Registrar decisiones que afecten stack, datos, sincronización o alcance mediante ADR.
+- Mantener README, código, SAD y diagramas coherentes con la versión realmente construida.
+- Separar **propuesto**, **diseñado**, **implementado**, **probado** y **evaluado**.
+- El índice de lectura está en `00_Indice.md`; las tareas ejecutables están centralizadas en `docs/05_Product_Backlog_y_Equipo.md`.
