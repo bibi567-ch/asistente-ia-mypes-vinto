@@ -1,9 +1,12 @@
-flowchart TB
-    comerciante[Comerciante / propietario de MYPE]
-    asistente[Asistente Conversacional IA Offline]
-    backend[Sistema backend de sincronización]
-    admin[Administrador del sistema]
-    comerciante -->|Texto o voz| asistente
-    asistente -->|Consulta y sincronización cuando existe conexión| backend
-    admin -->|Supervisión y configuración| backend
-    backend -->|Datos sincronizados| asistente
+flowchart LR
+    merchant[Comerciante de MYPE]
+    app[App Android offline-first<br/>Kotlin + Jetpack Compose]
+    api[API objetivo<br/>Node.js + TypeScript + Express]
+    pg[(PostgreSQL remoto<br/>fuente comercial autoritativa)]
+    edge[Vosk + NLU local<br/>propuesta por validar]
+    merchant -->|texto, toque o voz| app
+    app -. procesamiento offline .-> edge
+    app -->|sincroniza cuando vuelve la red| api
+    api --> pg
+
+    %% Propuesta de arquitectura del equipo, pendiente de aprobación docente.

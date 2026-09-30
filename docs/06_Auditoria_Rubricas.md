@@ -9,7 +9,7 @@
 | Criterio | Evidencia disponible | Estado | Pendiente / acción |
 |---|---|---|---|
 | Portada y control de versiones | Documentos Markdown + documento maestro | Documentado | Consolidar datos institucionales y versión en la entrega final. |
-| Introducción y contexto | `01_Introduccion_y_Contexto.md` | Documentado | Agregar fuentes o declarar que el contexto es una hipótesis de diseño. |
+| Introducción y contexto | `01_Proyecto_y_Alcance.md` | Documentado | Agregar fuentes o declarar que el contexto es una hipótesis de diseño. |
 | Problema, causas y efectos | SAD y contexto | Parcial | Presentar causas y efectos en esquema explícito. |
 | Stakeholders | SAD | Documentado | Validar roles con el equipo. |
 | Alcance y exclusiones | SAD | Documentado | Mantener el mismo alcance en todos los documentos. |
@@ -27,14 +27,14 @@
 
 | Criterio | Evidencia disponible | Estado | Pendiente / acción |
 |---|---|---|---|
-| Mínimo 10 requisitos funcionales | `02_Requisitos_del_Sistema.md` | Documentado | Revisar redacción formal final. |
-| Mínimo 5 requisitos no funcionales | `02_Requisitos_del_Sistema.md` | Documentado | Asociar método de verificación. |
+| Mínimo 10 requisitos funcionales | `02_Requisitos_y_UX.md` | Documentado | Revisar redacción formal final. |
+| Mínimo 5 requisitos no funcionales | `02_Requisitos_y_UX.md` | Documentado | Asociar método de verificación. |
 | Diagrama UML de casos de uso | `diagrams/Casos_Uso.puml` | Diseñado | Renderizar e insertar en documento final. |
-| Tres narrativas completas | `docs/Tecnologias_Internet_UX_Requisitos.md` | Documentado | CU-01 Registrar venta, CU-02 Consultar inventario y CU-03 Sincronizar operaciones están narrados; no se presentan como implementados. |
+| Tres narrativas completas | `docs/02_Requisitos_y_UX.md` | Documentado | CU-01 Registrar venta, CU-02 Consultar inventario y CU-03 Sincronizar operaciones están narrados; no se presentan como implementados. |
 | Dos personas | Documento UX/UI | Propuesto | Confirmar si existe investigación real; de lo contrario, etiquetar como hipótesis. |
 | Mapas de empatía | Documento UX/UI | Pendiente | Incorporar dos mapas completos o declarar pendiente. |
 | Mapa del sitio | Documento UX/UI | Diseñado | Comparar con navegación real del prototipo. |
-| Flujos de usuario | `diagrams/Flujos_Usuario.md` | Diseñado | Insertar en Word/PDF. |
+| Flujos de usuario | `diagrams/Flujos_Usuario.md` | Diseñado | Incorporar al formato que solicite cada docente y verificar la legibilidad. |
 | Sistema de diseño | Enlace Figma | Por verificar | Revisar colores, tipografía, componentes, variantes, Auto Layout y variables. |
 | Desktop 1440 px | Enlace Figma | Por verificar | Confirmar frame y capturar evidencia. |
 | Mobile 375/390 px | Enlace Figma | Por verificar | Confirmar frame y capturar evidencia. |

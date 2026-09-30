@@ -1,48 +1,57 @@
-# Matriz de Trazabilidad
+# Matriz de trazabilidad
 
 **Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto  
-**Versión:** 1.1  
-**Estado:** Revisión documental de primera entrega.
+**Versión:** 1.2 — 30/09/2026
+**Estado:** trazabilidad documental; no implica que las funciones estén implementadas.
 
-## 1. Propósito
+## Propósito y lectura de estados
 
-Relacionar problema, objetivos, requisitos, historias de usuario, casos de uso, atributos de calidad, decisiones arquitectónicas y evidencias UX/UI.
+Esta matriz conecta requisitos priorizados con flujos, decisiones y evidencia localizable. Los estados se limitan a **documentado**, **propuesto**, **en desarrollo** y **verificado**. Solo se utilizará “verificado” cuando exista evidencia reproducible, fechada y revisable. Los diagramas representan una arquitectura objetivo; tampoco demuestran implementación.
 
-## 2. Trazabilidad principal
+## Trazabilidad funcional
 
-| Requisito | Historia | Caso / flujo relacionado | Arquitectura / UX | Evidencia actual | Estado |
-|---|---|---|---|---|---|
-| RF-005 Entrada por voz offline | US-01 | CU-01 Registrar venta | Motor de voz local; pantalla de escucha | Requisito y flujo documentados | Diseñado/documentado |
-| RF-006 Clasificación de intención | US-02 | CU-01 | Orquestador conversacional | Propuesta técnica | Propuesto |
-| RF-007 Extracción de entidades | US-02 | CU-01 | Motor PLN local | Propuesta técnica | Propuesto |
-| RF-008 Confirmación visual | US-03 | CU-01 | Pantalla de confirmación | Lineamiento UX | Diseñado/documentado |
-| RF-009 Registro de venta | US-04 | CU-01 | Persistencia local | Flujo documentado | Documentado |
-| RF-010 Registro manual alternativo | US-05 | CU-01 alternativo | Formulario de venta | Requisito documentado | Documentado |
-| RF-013 Registro de entradas de inventario | US-07 | CU-02 Gestión de inventario | Módulo inventario | Requisito documentado | Documentado |
-| RF-014 Consulta de stock | US-06 | CU-02 | Consulta por voz/interfaz | Flujo previsto | Diseñado/documentado |
-| RF-015 Cola local offline | US-10 | CU-03 Persistencia | SQLite/Room y Outbox | Diagrama C2 propuesto | Propuesto |
-| RF-016 Sincronización | US-11 | CU-04 Sincronizar operaciones | Manejador de sincronización/API | Diagrama y ADR propuestos | Propuesto |
-| RF-019 Resumen diario | US-09 | CU-05 Consultar resumen | Dashboard | Requisito y UX documentados | Diseñado/documentado |
-| RNF-003 Recursos | — | QS-01 | Restricción de recursos | Objetivo sin prueba | No verificado |
-| RNF-002 Latencia | — | QS-01 | Procesamiento local | Objetivo sin prueba | No verificado |
-| RNF-003 Operación offline | US-01, US-10 | QS-02 | Offline-first | Decisión arquitectónica | Propuesto |
-| RNF-004 Seguridad de datos | — | QS-04 | Cifrado local y transporte seguro | Requisito/ADR | No verificado |
-| RNF-007 Accesibilidad | US-03, US-09 | QS-03 | Diseño UX/UI | Revisión pendiente | Por validar |
+| Requisito | Flujo / historia | Componente objetivo | Evidencia en el repositorio | Estado |
+|---|---|---|---|---|
+| RF-004 reconocimiento de voz sin red | US-01 captura de voz | Android + Vosk local | `docs/02_Requisitos_y_UX.md`; `docs/03_SAD_Arquitectura.md` | Propuesto |
+| RF-005 clasificación de intención | US-01 | Clasificador conversacional local | `docs/02_Requisitos_y_UX.md`; `docs/12_Plan_Implementacion_y_API.md` | Propuesto |
+| RF-006 extracción de entidades | US-01 | Parser/NLU local | `docs/02_Requisitos_y_UX.md` | Propuesto |
+| RF-007 confirmación antes de venta | US-02 registrar venta | Aplicación Android | `docs/02_Requisitos_y_UX.md` | Documentado |
+| RF-009 guardar venta | US-02 | SQLite local y PostgreSQL remoto tras sincronizar | `docs/02_Requisitos_y_UX.md`; `backend/db/migrations/001_initial.sql` | Diseño documentado; código inicial |
+| RF-013 actualizar inventario | US-03 compra/venta | Servicio de dominio + persistencia | `docs/02_Requisitos_y_UX.md`; `docs/12_Plan_Implementacion_y_API.md` | Propuesto |
+| RF-017 consulta de stock | US-04 consulta | Aplicación local | `docs/02_Requisitos_y_UX.md` | Propuesto |
+| RF-018 guardar operaciones sin conexión | US-05 Outbox | SQLite/Room | `docs/02_Requisitos_y_UX.md`; `docs/03_SAD_Arquitectura.md` | Propuesto |
+| RF-019 sincronizar al recuperar conexión | US-05 | Android + API Node.js | `docs/02_Requisitos_y_UX.md`; `docs/12_Plan_Implementacion_y_API.md` | Propuesto |
+| RF-020 preservar ventas concurrentes | US-05 conciliación | Idempotencia API + conciliación de stock | `docs/02_Requisitos_y_UX.md`; ADR en `docs/04_Decisiones_Stack.md` | Decisión propuesta |
+| RF-021 resumen diario | US-06 dashboard | Cliente local/API | `docs/02_Requisitos_y_UX.md` | Propuesto |
 
-## 3. Correspondencia de casos de uso
+## Trazabilidad de calidad
 
-- **CU-01:** Registrar venta mediante voz o teclado.
-- **CU-02:** Consultar inventario.
-- **CU-03:** Sincronizar operaciones pendientes.
-- 
-- 
+| Requisito | Escenario / medición | Decisión relacionada | Evidencia esperada | Estado |
+|---|---|---|---|---|
+| RNF-001 uso de memoria | Medir RAM en Android de referencia; objetivo <500 MB sujeto a protocolo | Kotlin nativo y presupuesto de recursos | Registro de dispositivo, versión y medición | No verificado |
+| RNF-002 latencia | Medir captura a respuesta local; objetivo ≤2 s sujeto a protocolo | Inferencia local y consultas locales | Dataset/prueba y percentiles | No verificado |
+| RNF-003 operación offline | Ejecutar flujos del MVP sin red y verificar persistencia | SQLite local + Outbox | Video/logs de prueba sin datos reales | No verificado |
+| RNF-004 seguridad | Revisar cifrado local, TLS, secretos y controles de API | Seguridad por capas | Configuración y reporte de revisión | No verificado |
+| RNF-005 accesibilidad | Contraste, tamaño táctil, texto y navegación | Diseño UX accesible | Capturas y checklist | Por validar |
+| RNF-006 compatibilidad | Ejecutar en los Android acordados | Cliente nativo | Matriz dispositivo/versión | No verificado |
+| RNF-007 usabilidad | SUS con participantes y protocolo aprobado; objetivo ≥70 | Diseño centrado en comerciante | Instrumento y resultados anonimizados | No verificado |
 
-Estos identificadores son documentales y deberán mantenerse iguales en el diagrama UML, las narrativas y el documento maestro.
+## Evidencias de arquitectura e integración
 
-## 4. Pendientes verificables
+| Elemento | Ubicación | Qué demuestra actualmente |
+|---|---|---|
+| C1 contexto | `diagrams/C1_Contexto.mmd` | Contexto propuesto; revisar/renderizar antes de presentar |
+| C2 contenedores | `diagrams/C2_Contenedores.mmd` | Contenedores objetivo y estado no implementado indicado en etiquetas |
+| API y plan de construcción | `docs/12_Plan_Implementacion_y_API.md` | Contrato/orden de trabajo propuesto |
+| Esquema PostgreSQL inicial | `backend/db/migrations/001_initial.sql` | DDL inicial, aún requiere revisión y aplicación local |
+| Health check | `backend/src/routes/health.routes.ts` | Endpoint de estado del servicio/BD en el scaffold |
+| Matriz académica | `docs/13_Matriz_Rubricas_Tres_Materias.md` | Relación documental con las tres materias; confirmaciones docentes pendientes |
 
-- Asociar cada requisito a una pantalla o frame exacto de Figma.
-- Incorporar capturas fechadas del prototipo.
-- Verificar que existan versiones desktop y mobile.
-- Ejecutar pruebas de accesibilidad, rendimiento, persistencia y sincronización.
-- Reemplazar estados “propuesto” o “no verificado” únicamente cuando exista evidencia.
+## Pendientes para completar la trazabilidad
+
+1. Asignar cada RF a un issue de GitHub y una prueba de aceptación.
+2. Asociar requisitos UX con frames concretos de Figma y registrar acceso verificado.
+3. Añadir casos de uso UML versionados y comprobar consistencia de IDs.
+4. Para cada prueba, registrar fecha, commit, versión, dispositivo/entorno y resultado.
+5. Cambiar un estado a “verificado” solo cuando una tercera persona pueda repetir la comprobación.
+6. Confirmar con el docente si TI exige MongoDB/Mongoose además de la línea base unificada Node.js/PostgreSQL y si requiere frontend web.

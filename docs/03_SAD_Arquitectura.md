@@ -1,4 +1,6 @@
-# DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v1.1)
+# DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v1.1 ENTREGADO)
+
+> **Estado:** se conserva aquí la versión 1.1 presentada, con una propuesta de migración añadida. La arquitectura entregada describe Spring Boot/PostgreSQL. La línea base objetivo solicitada por el equipo es Node.js/TypeScript/Express/PostgreSQL; debe emitirse un SAD v2.0 coherente y obtener aprobación docente. Este archivo no es la entrega v2.0 aprobada.
 
 **UNIVERSIDAD ADVENTISTA DE BOLIVIA**
 **FACULTAD DE CIENCIAS EXACTAS E INGENIERÍA — CARRERA DE INGENIERÍA EN SISTEMAS**
@@ -26,6 +28,7 @@
 | :--- | :--- | :--- | :--- |
 | 1.0 | _(fecha)_ | Equipo de Proyecto | Versión inicial del SAD. |
 | 1.1 | _(fecha)_ | Equipo de Proyecto | Consolidación de las dos versiones previas del SAD en un único documento oficial. Se agrega columna "Artefacto" a los escenarios de calidad (estándar SEI/ATAM), se amplía a 5 tácticas arquitectónicas, se completa la matriz de trazabilidad (RA-01 a RA-05) y se resuelve la inconsistencia tecnológica entre ADR-002 (Vosk+TFLite vs. Gemma 3n) y ADR-003 (Spring Boot vs. Node.js), fijando como stack oficial: **Kotlin Nativo + Vosk/TFLite (edge) + SQLite/Room+SQLCipher + Spring Boot/PostgreSQL**. |
+| 2.0 propuesta | 30/09/2026 | Equipo | Solicitud de unificar backend Node.js/TypeScript/Express y conservar PostgreSQL. Pendiente aprobación docente y revisión integral de diagramas, secuencias, seguridad y API. |
 
 ---
 
@@ -33,7 +36,7 @@
 
 El presente documento describe la arquitectura del **Asistente Conversacional Offline** para la gestión de ventas e inventario en las MYPES del centro de Vinto, Cochabamba. El sistema está diseñado en tecnologías nativas (Kotlin) para operar en dispositivos Android de gama baja, garantizando un consumo menor a 500 MB de RAM y operación 100% offline, con sincronización diferida hacia un backend en la nube cuando exista conectividad.
 
-Esta versión (1.1) es el documento **único y oficial** del SAD; reemplaza y consolida las versiones parciales anteriores del repositorio (`01_Introduccion_y_Contexto.md`, `02_Requisitos_del_Sistema.md`, `04_Arquitectura_SAD_y_UX.md` y la primera versión de `SAD_Arquitectura_Software.md`), que deben archivarse o eliminarse para evitar contradicciones frente al jurado evaluador.
+La versión 1.1 es la entrega histórica. Las menciones a Spring Boot describen esa línea base. La versión objetivo Node.js/PostgreSQL aún requiere revisión completa y aprobación; no se deben presentar las figuras antiguas como diagramas v2.0.
 
 ## 2. ANÁLISIS DEL PROBLEMA
 
@@ -261,3 +264,12 @@ Rel(api, pg, "Persiste vía JPA / Hibernate")
 
 ---
 *Arquitectura de Software — Proyecto Integrador — Documento consolidado v1.1*
+
+
+## Addendum de revisión de stack 2.0 — 30/09/2026
+
+El SAD entregado en versión 1.1 seleccionó Java/Spring Boot y PostgreSQL. Por instrucción de la líder del equipo, la línea base de trabajo pasa a Node.js/TypeScript/Express con PostgreSQL: se sustituye el framework servidor y se conserva el motor remoto relacional. Esta nota no representa aprobación del docente ni cambio retroactivo de la entrega 1.1. Eva solicitará aprobación de Arquitectura y actualizará ADR, vistas, especificación, seguridad y cronograma antes de presentar una revisión oficial. El sílabo de TI exige evidencia de MongoDB/Mongoose en su unidad; PostgreSQL no satisface por sí solo ese criterio y la docente debe indicar si la práctica puede ser separada.
+
+Hasta que se publique el SAD revisado, las menciones a Spring Boot en el cuerpo y diagramas describen la versión entregada y están desactualizadas como arquitectura objetivo. La próxima edición deberá actualizar los escenarios de sincronización para preservar ventas concurrentes, evitando aplicar Last Write Wins a hechos comerciales.
+
+**Regla para la propuesta de revisión:** la línea base objetivo es API Node.js/TypeScript/Express + PostgreSQL, pendiente de aprobación docente. SQLite local conserva operaciones offline y Outbox; cada evento utiliza un UUID idempotente. Las ventas y sus líneas se conservan como hechos; no se permite resolver conflictos sobrescribiendo una venta con otra mediante LWW. Las discrepancias de stock deben quedar visibles para conciliación explícita. C1/C2 muestran la propuesta y no deben citarse como evidencia de código implementado. La cobertura de MongoDB/Mongoose y la necesidad de frontend web siguen pendientes de confirmación por Tecnologías en Internet.

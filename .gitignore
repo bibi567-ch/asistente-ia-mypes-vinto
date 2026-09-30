@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+node_modules/
+backend/dist/
+backend/coverage/
+mobile/.gradle/
+mobile/**/build/
+.idea/
+*.iml
+*.log
+*.dump
+/Manual_Ejecucion_Proyecto_MYPES_Vinto_2026*.docx
+/Documento_Maestro_Inicio_Proyecto_MYPES_Vinto_2026_Final*.docx
