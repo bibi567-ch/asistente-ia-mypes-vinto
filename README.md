@@ -55,14 +55,14 @@ Los documentos vigentes se numeran desde 01 y se navegan desde [`00_Indice.md`](
 | 02 | [Requisitos y UX](docs/02_Requisitos_y_UX.md) | Requisitos, casos de uso y experiencia |
 | 03 | [SAD de Arquitectura](docs/03_SAD_Arquitectura.md) | SAD v1.1 entregado y nota de cambio objetivo |
 | 04 | [Decisión de stack](docs/04_Decisiones_Stack.md) | Línea Node/PostgreSQL y consultas docentes |
-| 05 | [Matriz de trazabilidad](docs/05_Matriz_Trazabilidad.md) | Relación requisitos, casos y evidencia |
-| 06 | [Auditoría de rúbricas](docs/06_Auditoria_Rubricas.md) | Brechas y verificación académica |
-| 07 | [Cronograma y riesgos](docs/07_Cronograma_y_Riesgos.md) | Hitos, fechas, R3 y R6 |
-| 08 | [Guía de entrega](docs/08_Guia_Entrega.md) | Revisión previa a presentar |
-| 09 | [Registro de evidencias](docs/09_Evidencias.md) | Estado y ubicación de artefactos |
-| 10 | [Plan de implementación y API](docs/10_Plan_Implementacion_y_API.md) | Orden de desarrollo y contrato inicial |
-| 11 | [Matriz de tres materias](docs/11_Matriz_Rubricas_Tres_Materias.md) | Criterios, estados y evidencias |
-| — | [Product Backlog y equipo](docs/Backlog_y_Equipo.md) | Épicas, responsables y aceptación de tareas |
+| 05 | [Product Backlog y equipo](docs/05_Product_Backlog_y_Equipo.md) | Épicas, responsables y aceptación de tareas |
+| 06 | [Matriz de trazabilidad](docs/06_Matriz_Trazabilidad.md) | Relación requisitos, casos y evidencia |
+| 07 | [Auditoría de rúbricas](docs/07_Auditoria_Rubricas.md) | Brechas y verificación académica |
+| 08 | [Cronograma y riesgos](docs/08_Cronograma_y_Riesgos.md) | Hitos, fechas, R3 y R6 |
+| 09 | [Guía de entrega](docs/09_Guia_Entrega.md) | Revisión previa a presentar |
+| 10 | [Registro de evidencias](docs/10_Evidencias.md) | Estado y ubicación de artefactos |
+| 11 | [Plan de implementación y API](docs/11_Plan_Implementacion_y_API.md) | Orden de desarrollo y contrato inicial |
+| 12 | [Matriz de tres materias](docs/12_Matriz_Rubricas_Tres_Materias.md) | Criterios, estados y evidencias |
 
 ## Próximo incremento del equipo
 
@@ -90,7 +90,7 @@ Fechas de los documentos compartidos; confirmar en aula virtual antes de entrega
 | 25/11/2026 | Plataforma full-stack — Tecnologías en Internet |
 | 24–26/11 y 01–03/12 | Defensa del Perfil reportada; falta confirmar fecha exacta |
 
-El Gantt etiqueta por error el corte 29/09 como lunes. **29/09/2026 es martes; W11 va de 28/09 a 04/10.** Ver [cronograma](docs/07_Cronograma_y_Riesgos.md). El Perfil usa cinco fases; SAD/Gantt seis; el documento de cronograma explica la equivalencia sin cambiar en silencio los originales.
+El Gantt etiqueta por error el corte 29/09 como lunes. **29/09/2026 es martes; W11 va de 28/09 a 04/10.** Ver [cronograma](docs/08_Cronograma_y_Riesgos.md). El Perfil usa cinco fases; SAD/Gantt seis; el documento de cronograma explica la equivalencia sin cambiar en silencio los originales.
 
 ## Equipo
 
@@ -112,4 +112,4 @@ El Gantt etiqueta por error el corte 29/09 como lunes. **29/09/2026 es martes; W
 - Registrar decisiones que afecten stack, datos, sincronización o alcance mediante ADR.
 - Mantener README, código, SAD y diagramas coherentes con la versión realmente construida.
 - Separar **propuesto**, **diseñado**, **implementado**, **probado** y **evaluado**.
-- El índice de lectura está en `00_Indice.md`; las tareas ejecutables están centralizadas en `docs/Backlog_y_Equipo.md`.
+- El índice de lectura está en `00_Indice.md`; las tareas ejecutables están centralizadas en `docs/05_Product_Backlog_y_Equipo.md`.

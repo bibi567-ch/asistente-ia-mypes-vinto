@@ -1,7 +1,7 @@
 # Product backlog y responsabilidades del equipo
 
 **Corte:** 30/09/2026  
-**Prioridad:** primero un recorrido pequeño que funcione y pueda revisarse. Las prioridades son de coordinación; el equipo debe refinarlas en Issues/Projects de GitHub y confirmar fechas contra [`07_Cronograma_y_Riesgos.md`](07_Cronograma_y_Riesgos.md).
+**Prioridad:** primero un recorrido pequeño que funcione y pueda revisarse. Las prioridades son de coordinación; el equipo debe refinarlas en Issues/Projects de GitHub y confirmar fechas contra [`08_Cronograma_y_Riesgos.md`](08_Cronograma_y_Riesgos.md).
 
 Este backlog toma la organización del repositorio SMIA como referencia: épicas, historias, criterios de aceptación y relación con requisitos. No copia sus historias, su dominio municipal ni sus estimaciones de puntos. No se asignan story points hasta que el equipo acuerde una escala y capacidad real.
 

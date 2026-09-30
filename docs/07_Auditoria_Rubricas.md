@@ -20,7 +20,7 @@
 | ADRs | SAD | Documentado | Revisar y aprobar decisiones tecnológicas definitivas. |
 | C4 contexto | `diagrams/C1_Contexto.mmd` | Diseñado | Renderizar y revisar legibilidad. |
 | C4 contenedores | `diagrams/C2_Contenedores.mmd` | Diseñado | Mantener nombres coherentes con SAD y ADRs. |
-| Trazabilidad | `05_Matriz_Trazabilidad.md` | Documentado | Vincular frames concretos de Figma. |
+| Trazabilidad | `06_Matriz_Trazabilidad.md` | Documentado | Vincular frames concretos de Figma. |
 | Retos arquitectónicos | SAD | Documentado | Añadir estrategia de validación por reto. |
 
 ## 2. Criterios de Tecnologías en Internet

@@ -142,6 +142,6 @@ La existencia de un enlace de prototipo no demuestra por sí sola que todos los 
 
 ## 8. Trazabilidad y estado de validación
 
-Los requisitos se relacionan con la arquitectura en `docs/05_Matriz_Trazabilidad.md`. Los criterios de la rúbrica y las evidencias pendientes se controlan en `docs/06_Auditoria_Rubricas.md` y `docs/08_Evidencias.md`.
+Los requisitos se relacionan con la arquitectura en `docs/06_Matriz_Trazabilidad.md`. Los criterios de la rúbrica y las evidencias pendientes se controlan en `docs/07_Auditoria_Rubricas.md` y `docs/10_Evidencias.md`.
 
 **Regla de consistencia:** ningún requisito, tecnología, métrica o funcionalidad debe presentarse como implementado, probado o validado si no existe evidencia correspondiente.
