@@ -13,14 +13,14 @@ Esta matriz conecta requisitos priorizados con flujos, decisiones y evidencia lo
 | Requisito | Flujo / historia | Componente objetivo | Evidencia en el repositorio | Estado |
 |---|---|---|---|---|
 | RF-004 reconocimiento de voz sin red | US-01 captura de voz | Android + Vosk local | `docs/02_Requisitos_y_UX.md`; `docs/03_SAD_Arquitectura.md` | Propuesto |
-| RF-005 clasificación de intención | US-01 | Clasificador conversacional local | `docs/02_Requisitos_y_UX.md`; `docs/12_Plan_Implementacion_y_API.md` | Propuesto |
+| RF-005 clasificación de intención | US-01 | Clasificador conversacional local | `docs/02_Requisitos_y_UX.md`; `docs/10_Plan_Implementacion_y_API.md` | Propuesto |
 | RF-006 extracción de entidades | US-01 | Parser/NLU local | `docs/02_Requisitos_y_UX.md` | Propuesto |
 | RF-007 confirmación antes de venta | US-02 registrar venta | Aplicación Android | `docs/02_Requisitos_y_UX.md` | Documentado |
 | RF-009 guardar venta | US-02 | SQLite local y PostgreSQL remoto tras sincronizar | `docs/02_Requisitos_y_UX.md`; `backend/db/migrations/001_initial.sql` | Diseño documentado; código inicial |
-| RF-013 actualizar inventario | US-03 compra/venta | Servicio de dominio + persistencia | `docs/02_Requisitos_y_UX.md`; `docs/12_Plan_Implementacion_y_API.md` | Propuesto |
+| RF-013 actualizar inventario | US-03 compra/venta | Servicio de dominio + persistencia | `docs/02_Requisitos_y_UX.md`; `docs/10_Plan_Implementacion_y_API.md` | Propuesto |
 | RF-017 consulta de stock | US-04 consulta | Aplicación local | `docs/02_Requisitos_y_UX.md` | Propuesto |
 | RF-018 guardar operaciones sin conexión | US-05 Outbox | SQLite/Room | `docs/02_Requisitos_y_UX.md`; `docs/03_SAD_Arquitectura.md` | Propuesto |
-| RF-019 sincronizar al recuperar conexión | US-05 | Android + API Node.js | `docs/02_Requisitos_y_UX.md`; `docs/12_Plan_Implementacion_y_API.md` | Propuesto |
+| RF-019 sincronizar al recuperar conexión | US-05 | Android + API Node.js | `docs/02_Requisitos_y_UX.md`; `docs/10_Plan_Implementacion_y_API.md` | Propuesto |
 | RF-020 preservar ventas concurrentes | US-05 conciliación | Idempotencia API + conciliación de stock | `docs/02_Requisitos_y_UX.md`; ADR en `docs/04_Decisiones_Stack.md` | Decisión propuesta |
 | RF-021 resumen diario | US-06 dashboard | Cliente local/API | `docs/02_Requisitos_y_UX.md` | Propuesto |
 
@@ -42,10 +42,10 @@ Esta matriz conecta requisitos priorizados con flujos, decisiones y evidencia lo
 |---|---|---|
 | C1 contexto | `diagrams/C1_Contexto.mmd` | Contexto propuesto; revisar/renderizar antes de presentar |
 | C2 contenedores | `diagrams/C2_Contenedores.mmd` | Contenedores objetivo y estado no implementado indicado en etiquetas |
-| API y plan de construcción | `docs/12_Plan_Implementacion_y_API.md` | Contrato/orden de trabajo propuesto |
+| API y plan de construcción | `docs/10_Plan_Implementacion_y_API.md` | Contrato/orden de trabajo propuesto |
 | Esquema PostgreSQL inicial | `backend/db/migrations/001_initial.sql` | DDL inicial, aún requiere revisión y aplicación local |
 | Health check | `backend/src/routes/health.routes.ts` | Endpoint de estado del servicio/BD en el scaffold |
-| Matriz académica | `docs/13_Matriz_Rubricas_Tres_Materias.md` | Relación documental con las tres materias; confirmaciones docentes pendientes |
+| Matriz académica | `docs/11_Matriz_Rubricas_Tres_Materias.md` | Relación documental con las tres materias; confirmaciones docentes pendientes |
 
 ## Pendientes para completar la trazabilidad
 

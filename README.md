@@ -47,7 +47,7 @@ La migración inicial se monta para la inicialización de un volumen vacío; Doc
 
 ## Documentos activos
 
-Los documentos vigentes se numeran desde 01. `docs/archive/` contiene copias históricas o duplicadas y no es fuente activa.
+Los documentos vigentes se numeran desde 01 y se navegan desde [`00_Indice.md`](00_Indice.md). `docs/archive/` contiene copias históricas o duplicadas y no es fuente activa.
 
 | N.º | Documento | Para qué sirve |
 |---|---|---|
@@ -60,11 +60,9 @@ Los documentos vigentes se numeran desde 01. `docs/archive/` contiene copias his
 | 07 | [Cronograma y riesgos](docs/07_Cronograma_y_Riesgos.md) | Hitos, fechas, R3 y R6 |
 | 08 | [Guía de entrega](docs/08_Guia_Entrega.md) | Revisión previa a presentar |
 | 09 | [Registro de evidencias](docs/09_Evidencias.md) | Estado y ubicación de artefactos |
-| 10 | [Plan del segundo parcial](docs/10_Plan_Segundo_Parcial.md) | Preparación por materia |
-| 11 | [Liderazgo y trabajo de equipo](docs/11_Guia_Liderazgo_y_Trabajo.md) | Roles y acuerdos |
-| 12 | [Implementación y API](docs/12_Plan_Implementacion_y_API.md) | Orden de desarrollo y contrato inicial |
-| 13 | [Matriz de tres materias](docs/13_Matriz_Rubricas_Tres_Materias.md) | Criterios, estados y evidencias |
-| — | [Prompt para seguir actualizando el repo](PROMPT_PARA_ACTUALIZAR_GITHUB.md) | Instrucción reusable para agente de código |
+| 10 | [Plan de implementación y API](docs/10_Plan_Implementacion_y_API.md) | Orden de desarrollo y contrato inicial |
+| 11 | [Matriz de tres materias](docs/11_Matriz_Rubricas_Tres_Materias.md) | Criterios, estados y evidencias |
+| — | [Product Backlog y equipo](docs/Backlog_y_Equipo.md) | Épicas, responsables y aceptación de tareas |
 
 ## Próximo incremento del equipo
 
@@ -114,4 +112,4 @@ El Gantt etiqueta por error el corte 29/09 como lunes. **29/09/2026 es martes; W
 - Registrar decisiones que afecten stack, datos, sincronización o alcance mediante ADR.
 - Mantener README, código, SAD y diagramas coherentes con la versión realmente construida.
 - Separar **propuesto**, **diseñado**, **implementado**, **probado** y **evaluado**.
-- El prompt de continuación está en `PROMPT_PARA_ACTUALIZAR_GITHUB.md`.
+- El índice de lectura está en `00_Indice.md`; las tareas ejecutables están centralizadas en `docs/Backlog_y_Equipo.md`.

@@ -8,7 +8,7 @@ Esta guía prepara el repositorio para que el equipo trabaje y presente evidenci
 ## 1. Qué debe encontrar el equipo
 
 - `README.md`: resumen del proyecto, estado real, stack objetivo, inicio local y enlaces al material canónico.
-- `docs/01`–`docs/13`: alcance, requisitos, SAD, stack, trazabilidad, evaluación, calendario, liderazgo y plan de implementación.
+- `00_Indice.md` y `docs/01`–`docs/11`: alcance, requisitos, SAD, stack, backlog, trazabilidad, evaluación, calendario, evidencias y plan de implementación.
 - `backend/`: scaffold inicial de API Node.js/TypeScript y esquema PostgreSQL.
 - `mobile/`: instrucciones iniciales; aún no contiene una aplicación Android implementada.
 - `diagrams/`: fuentes Mermaid/PlantUML; los diagramas deben renderizarse para la presentación.
@@ -17,7 +17,7 @@ Esta guía prepara el repositorio para que el equipo trabaje y presente evidenci
 ## 2. Revisión antes de compartir
 
 - [ ] Leer primero `README.md` y `docs/07_Cronograma_y_Riesgos.md`.
-- [ ] Confirmar con el docente las observaciones de `docs/13_Matriz_Rubricas_Tres_Materias.md`, en especial MongoDB/Mongoose y frontend web para TI.
+- [ ] Confirmar con el docente las observaciones de `docs/11_Matriz_Rubricas_Tres_Materias.md`, en especial MongoDB/Mongoose y frontend web para TI.
 - [ ] No afirmar que el SAD v1.1 histórico ya fue sustituido/aprobado; revisar el addendum de arquitectura.
 - [ ] Distinguir componentes propuestos, scaffolds, implementaciones y pruebas verificadas.
 - [ ] Confirmar que el diagrama C1/C2 corresponde a Node.js + PostgreSQL y mostrar límites actuales.
@@ -31,7 +31,7 @@ Para cada resultado, guardar un registro en `evidence/` con ID, fecha, commit, e
 
 ## 4. Presentación por materia
 
-Preparar la evidencia académica que pida cada sílabo: perfil y defensa para Investigación I; SAD, decisiones y atributos de calidad para Arquitectura; y el producto web, backend, NoSQL, seguridad y despliegue que Tecnologías en Internet solicite. La arquitectura compartida ayuda a reutilizar trabajo, pero no garantiza que un entregable de una materia satisfaga automáticamente otra. Registrar aclaraciones y cambios en `docs/13_Matriz_Rubricas_Tres_Materias.md` y `docs/04_Decisiones_Stack.md`.
+Preparar la evidencia académica que pida cada sílabo: perfil y defensa para Investigación I; SAD, decisiones y atributos de calidad para Arquitectura; y el producto web, backend, NoSQL, seguridad y despliegue que Tecnologías en Internet solicite. La arquitectura compartida ayuda a reutilizar trabajo, pero no garantiza que un entregable de una materia satisfaga automáticamente otra. Registrar aclaraciones y cambios en `docs/11_Matriz_Rubricas_Tres_Materias.md` y `docs/04_Decisiones_Stack.md`.
 
 ## 5. Publicación en GitHub
 
