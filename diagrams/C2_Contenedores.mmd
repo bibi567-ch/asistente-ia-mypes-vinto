@@ -8,8 +8,10 @@ flowchart LR
       worker[WorkManager<br/>sync diferida]
       asr[Vosk / NLU acotado<br/>propuesta, no implementado]
     end
-    subgraph server[Servicio remoto · implementación inicial]
+    subgraph server[Servicio remoto · API y catálogo inicial]
       api[API Node.js + TypeScript + Express]
+      auth[Login · token corto<br/>propietario administrado]
+      products[Catálogo<br/>scope por negocio]
       pool[Adaptador PostgreSQL · pg]
       db[(PostgreSQL)]
     end
@@ -19,9 +21,13 @@ flowchart LR
     ui -. comandos de voz .-> asr
     local --> outbox
     outbox --> worker
-    worker -->|HTTPS, al añadir auth| api
+    worker -. HTTPS pendiente antes de red .-> api
     api --> pool
+    api --> auth
+    api --> products
+    auth --> pool
+    products --> pool
     pool --> db
 
-    %% La API existente solo tiene health check y conexión PostgreSQL.
-    %% Ventas, auth, sync y Android aún no están implementados.
+    %% Login y operaciones GET/POST de catálogo están implementados; falta verificación de integración local.
+    %% Ventas, sync y Android aún no están implementados.

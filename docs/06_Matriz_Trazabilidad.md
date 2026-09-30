@@ -1,7 +1,7 @@
 # Matriz de trazabilidad
 
 **Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto  
-**Versión:** 1.2 — 30/09/2026
+**Versión:** 1.3 — 30/09/2026
 **Estado:** trazabilidad documental; no implica que las funciones estén implementadas.
 
 ## Propósito y lectura de estados
@@ -42,9 +42,10 @@ Esta matriz conecta requisitos priorizados con flujos, decisiones y evidencia lo
 |---|---|---|
 | C1 contexto | `diagrams/C1_Contexto.mmd` | Contexto propuesto; revisar/renderizar antes de presentar |
 | C2 contenedores | `diagrams/C2_Contenedores.mmd` | Contenedores objetivo y estado no implementado indicado en etiquetas |
-| API y plan de construcción | `docs/11_Plan_Implementacion_y_API.md` | Contrato/orden de trabajo propuesto |
-| Esquema PostgreSQL inicial | `backend/db/migrations/001_initial.sql` | DDL inicial, aún requiere revisión y aplicación local |
-| Health check | `backend/src/routes/health.routes.ts` | Endpoint de estado del servicio/BD en el scaffold |
+| API y plan de construcción | `docs/11_Plan_Implementacion_y_API.md` | Contrato inicial y estado de implementación; pruebas integradas pendientes |
+| Esquema PostgreSQL inicial | `backend/db/migrations/001_initial.sql`, `backend/db/migrations/002_authentication.sql` | DDL versionado; ejecución local/CI mediante `npm run db:migrate` |
+| Health check | `backend/src/routes/health.routes.ts` | Endpoint de estado del servicio y disponibilidad de PostgreSQL |
+| Acceso y catálogo | `backend/src/routes/auth.routes.ts`, `backend/src/routes/products.routes.ts` | Login, cambio de contraseña y catálogo limitado por negocio; falta verificar integración local |
 | Matriz académica | `docs/12_Matriz_Rubricas_Tres_Materias.md` | Relación documental con las tres materias; confirmaciones docentes pendientes |
 
 ## Pendientes para completar la trazabilidad

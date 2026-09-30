@@ -16,7 +16,6 @@ services:
       retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/db/migrations/001_initial.sql:/docker-entrypoint-initdb.d/001_initial.sql:ro
 
 volumes:
   postgres_data:

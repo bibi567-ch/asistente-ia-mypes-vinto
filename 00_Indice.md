@@ -25,7 +25,7 @@ Este índice sigue como referencia de organización el [repositorio SMIA del equ
 
 ## Código y modelos
 
-- [`backend/`](backend/README.md): scaffold Node.js/TypeScript/Express con conexión PostgreSQL y health check.
+- [`backend/`](backend/README.md): API Node.js/TypeScript/Express con PostgreSQL, migraciones, acceso de propietario y catálogo inicial protegido.
 - [`mobile/`](mobile/README.md): guía de preparación; la aplicación Android todavía no está implementada.
 - [`diagrams/`](diagrams/README.md): fuentes C1/C2, casos de uso y flujos; revisar el render antes de presentar.
 - [`evidence/`](evidence/README.md): evidencias fechadas y anonimizadas.

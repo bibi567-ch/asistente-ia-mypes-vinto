@@ -4,7 +4,7 @@ Proyecto integrador de Ingeniería en Sistemas — Universidad Adventista de Bol
 
 ## Estado del repositorio
 
-El repositorio está preparado como base de trabajo académico y de implementación. El backend ahora usa Node.js/TypeScript/Express y PostgreSQL para el esqueleto inicial, la conexión a la base y `GET /api/v1/health`; incluye el esquema relacional inicial de negocios/productos/operaciones. **Aún no contiene autenticación, autorización, CRUD comercial, ventas, endpoint de sincronización ni app Android funcional verificada.** La configuración actual se limita a desarrollo local y no debe exponerse a Internet ni usarse con datos reales.
+El backend inicial usa Node.js, TypeScript, Express y PostgreSQL. Incluye migraciones versionadas, creación controlada de propietarios, inicio de sesión con contraseña hasheada y token de acceso, y consulta/alta de productos aisladas por negocio. **Ventas, sincronización offline y una app Android funcional siguen pendientes.** Es una base de desarrollo local; no debe exponerse a Internet ni usarse con datos reales hasta completar controles y revisión de seguridad.
 
 ## Arquitectura acordada por el equipo
 
@@ -32,18 +32,32 @@ Requisitos: Node.js 24.x, npm y Docker Desktop.
 
    Espera hasta que `docker compose ps` muestre PostgreSQL como `healthy`.
 
-2. Copiar configuración de ejemplo y ejecutar la API:
+2. Copiar configuración de ejemplo, crear una clave JWT local y aplicar las migraciones:
 
    ```powershell
    Copy-Item backend/.env.example backend/.env
+   $secret = node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))"
+   Add-Content backend/.env "JWT_SECRET=$secret"
    Set-Location backend
-   npm install
+   npm ci
+   npm run db:migrate
+   ```
+
+3. Crear el primer propietario con un negocio de prueba. El comando genera una contraseña temporal y la muestra una sola vez:
+
+   ```powershell
+   npm run admin:create-owner -- "MYPE de prueba" "propietario@example.test"
+   ```
+
+4. Ejecutar la API:
+
+   ```powershell
    npm run dev
    ```
 
-3. Abrir `http://127.0.0.1:3000/api/v1/health`. La respuesta debe indicar que PostgreSQL está conectado.
+5. Abrir `http://127.0.0.1:3000/api/v1/health`. La respuesta debe indicar que PostgreSQL está conectado. `npm run build` y `npm test` verifican el backend sin necesitar una base de datos.
 
-La migración inicial se monta para la inicialización de un volumen vacío; Docker no vuelve a ejecutar scripts de `docker-entrypoint-initdb.d` en una base ya creada. No elimines volúmenes con datos para “arreglar” una migración. Define y documenta una herramienta de migración antes de desarrollar el esquema compartido.
+No publiques el archivo `backend/.env` ni compartas la contraseña temporal generada. Las migraciones se aplican sin borrar volúmenes ni datos.
 
 ## Documentos activos
 
@@ -67,13 +81,13 @@ Los documentos vigentes se numeran desde 01 y se navegan desde [`00_Indice.md`](
 ## Próximo incremento del equipo
 
 1. Eva consulta y archiva las respuestas docentes sobre Node/PostgreSQL, Mongo/Mongoose, frontend web y fecha exacta de defensa.
-2. Marializ documenta herramienta de migraciones y completa catálogo con autorización por negocio antes de exponerlo.
+2. Marializ completa pruebas con PostgreSQL, edición del catálogo y revisión de autorización; Luis revisa aislamiento entre negocios.
 3. Kevin define el flujo móvil de catálogo/venta, modo avión y confirmación; construir frontend web solo si TI confirma que lo exige.
 4. Christian prepara casos de intención en texto; integrar Vosk después de probar venta manual offline.
 5. Luis actualiza ADR/C4, vincula requisitos a pruebas y coordina revisión del recorrido vertical.
 6. Eva mantiene tablero, cronograma y checklist de rúbricas; no marca completado sin evidencia.
 
-El recorrido prioritario es **producto → venta local → modo avión → persistencia tras reinicio → API → PostgreSQL → reintento con el mismo UUID sin duplicado**. No se empieza por Gemma, microservicios o funciones fiscales.
+El recorrido prioritario es **catálogo protegido → venta local → modo avión → persistencia tras reinicio → API → PostgreSQL → reintento con el mismo UUID sin duplicado**. No se empieza por Gemma, microservicios o funciones fiscales.
 
 ## Fechas principales reportadas
 
