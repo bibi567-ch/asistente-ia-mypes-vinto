@@ -31,6 +31,20 @@ test('product catalog rejects requests without an access token', async (context)
   assert.equal(body.error?.code, 'unauthorized');
 });
 
+test('product creation rejects requests without an access token', async (context) => {
+  const server = await startTestServer();
+  context.after(server.close);
+  const response = await fetch(`${server.baseUrl}/api/v1/products`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'Harina', unit: 'bolsa', salePrice: '12.50' })
+  });
+  const body = await response.json() as { error?: { code?: string } };
+
+  assert.equal(response.status, 401);
+  assert.equal(body.error?.code, 'unauthorized');
+});
+
 test('product catalog validates prices before accessing PostgreSQL', async (context) => {
   const server = await startTestServer();
   context.after(server.close);

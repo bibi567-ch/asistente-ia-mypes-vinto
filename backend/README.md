@@ -102,7 +102,7 @@ npm run db:migrate
 
 ## Próximos incrementos
 
-1. Completar pruebas de integración PostgreSQL, incluyendo aislamiento entre dos negocios.
+1. Ejecutar y revisar las pruebas de integración PostgreSQL existentes, incluyendo aislamiento entre dos negocios.
 2. Añadir actualización/borrado seguro de productos y paginación documentada.
 3. Añadir limitación de intentos y revocación de sesiones antes de permitir acceso desde una red.
 4. Añadir ventas, líneas y movimientos en transacción.

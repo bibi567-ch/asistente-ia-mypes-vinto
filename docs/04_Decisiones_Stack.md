@@ -1,13 +1,13 @@
 # Decisión de stack del proyecto unificado
 
-**Estado:** línea base solicitada por la líder; actualización documental pendiente de aprobación/propagación docente.
+**Estado:** Node.js y PostgreSQL confirmados como obligatorios por el docente; falta archivar la referencia de asignatura/docente y actualizar/aprobar la documentación académica.
 **Fecha:** 30/09/2026.
 
 ## Decisión
 
 El backend común del proyecto se implementa con **Node.js + TypeScript + Express y PostgreSQL**. La base PostgreSQL es remota y autoritativa para usuarios, catálogo, ventas, detalles, movimientos e idempotencia. Android usa Room/SQLite local para el funcionamiento offline. Node/Express y PostgreSQL son componentes complementarios: framework de servidor y motor de persistencia relacional.
 
-Esta selección responde a la instrucción de unificar el proyecto entre Investigación I, Arquitectura y Tecnologías en Internet, al tiempo que mantiene PostgreSQL del Perfil/SAD para transacciones relacionales. No es aún la decisión del docente de Arquitectura. El SAD v1.1 y el Perfil entregado dicen Spring Boot/PostgreSQL, así que se crea una ADR sucesora que sustituye Spring, conserva PostgreSQL y registra trade-offs. No editar la entrega evaluada como si hubiese nacido con Node.
+Esta selección responde a la instrucción de unificar el proyecto entre Investigación I, Arquitectura y Tecnologías en Internet, al tiempo que mantiene PostgreSQL del Perfil/SAD para transacciones relacionales. Aunque Node.js y PostgreSQL fueron confirmados como obligatorios, falta documentar qué docente/asignatura lo confirmó y obtener la aprobación específica de Arquitectura para reflejar la transición en la documentación evaluada. El SAD v1.1 y el Perfil entregado dicen Spring Boot/PostgreSQL, así que se crea una ADR sucesora que sustituye Spring, conserva PostgreSQL y registra trade-offs. No editar la entrega evaluada como si hubiese nacido con Node.
 
 ## Comparación
 
