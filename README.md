@@ -18,7 +18,7 @@ flowchart LR
   A -. Voz offline, fase posterior .-> V[Vosk + NLU acotado]
 ```
 
-**Línea base unificada solicitada:** Kotlin + Jetpack Compose; Room/SQLite local; API Node.js + TypeScript + Express; PostgreSQL remoto como fuente autoritativa comercial; Outbox + WorkManager + UUID para sincronización idempotente. El Perfil/SAD entregado anteriormente menciona Spring Boot/PostgreSQL; la transición a Node requiere ADR sucesora y actualización del SAD/diagramas. El sílabo de Tecnologías en Internet incluye MongoDB/Mongoose y producto web full-stack: la líder debe confirmar con el docente si MongoDB debe aparecer en el producto o puede demostrarse en una práctica acotada y si se exige cliente web además de Android. PostgreSQL no se presenta como NoSQL.
+**Línea base unificada solicitada:** Kotlin + Jetpack Compose; Room/SQLite local; API Node.js + TypeScript + Express; PostgreSQL remoto como fuente autoritativa comercial; Outbox + WorkManager + UUID para sincronización idempotente. El docente confirmó que Node.js y PostgreSQL son obligatorios; falta registrar la respuesta con asignatura/docente y fecha. El Perfil/SAD entregado anteriormente menciona Spring Boot/PostgreSQL; la transición a Node requiere ADR sucesora y actualización del SAD/diagramas. El sílabo de Tecnologías en Internet incluye MongoDB/Mongoose y producto web full-stack: la líder debe confirmar si MongoDB debe aparecer en el producto o puede demostrarse en una práctica acotada y si se exige cliente web además de Android. PostgreSQL no se presenta como NoSQL.
 
 ## Empezar localmente
 
@@ -80,7 +80,7 @@ Los documentos vigentes se numeran desde 01 y se navegan desde [`00_Indice.md`](
 
 ## Próximo incremento del equipo
 
-1. Eva consulta y archiva las respuestas docentes sobre Node/PostgreSQL, Mongo/Mongoose, frontend web y fecha exacta de defensa.
+1. Eva registra la confirmación docente de Node.js y PostgreSQL, consulta si Mongo/Mongoose y frontend web son obligatorios y confirma la fecha exacta de defensa.
 2. Marializ completa pruebas con PostgreSQL, edición del catálogo y revisión de autorización; Luis revisa aislamiento entre negocios.
 3. Kevin define el flujo móvil de catálogo/venta, modo avión y confirmación; construir frontend web solo si TI confirma que lo exige.
 4. Christian prepara casos de intención en texto; integrar Vosk después de probar venta manual offline.

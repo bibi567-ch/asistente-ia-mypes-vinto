@@ -22,11 +22,11 @@ Los responsables pueden colaborar; la asignación indica quién coordina y prese
 | ID | Épica / historia | Criterio de aceptación | Responsable | Dependencias | Estado |
 |---|---|---|---|---|---|
 | EP-01 / US-01 | Acordar alcance común del MVP | Lista priorizada: catálogo mínimo, venta manual, consulta local y sincronización posterior; exclusiones explícitas en `01_Proyecto_y_Alcance.md` | Eva + equipo | Ninguna | Documentado; revisar con docente |
-| EP-01 / US-02 | Resolver observaciones docentes | Registrar respuestas sobre Node/PostgreSQL, Mongo/Mongoose y frontend web en ADR/acta con fecha | Eva | Consultar sílabos | Pendiente |
+| EP-01 / US-02 | Resolver observaciones docentes | Archivar la confirmación recibida de que Node.js y PostgreSQL son obligatorios; registrar asignatura/docente y consultar Mongo/Mongoose, frontend web y fecha exacta de defensa | Eva | Consultar sílabos | En progreso |
 | EP-02 / US-03 | Preparar backend local | Otro miembro puede levantar Compose, aplicar migraciones y obtener health check conectado a PostgreSQL con instrucciones del README | Marializ; Eva revisa | Docker, `.env.example` | En verificación local |
 | EP-02 / US-04 | Acordar modelo relacional v1 | Esquema revisado con negocio, producto, venta, líneas y movimientos; constraints/índices explicados; sin duplicar persistencia remota | Marializ + Luis | EP-01 | Parcial: esquema solo inicial |
 | EP-03 / US-05 | Definir contrato de productos | Ejemplos JSON, validación, errores, paginación y requisito de autorización por negocio documentados antes de CRUD | Eva + Marializ | EP-04 | Contrato inicial documentado |
-| EP-03 / US-06 | Implementar acceso y catálogo protegido | Alta de propietario controlada; login con contraseña hasheada; GET/POST de productos usa negocio del token; prueba de acceso anónimo y cruce entre negocios | Marializ; Luis revisa | US-03, US-05 | En progreso: código y pruebas unitarias; falta integración PostgreSQL y cruce entre negocios |
+| EP-03 / US-06 | Implementar acceso y catálogo protegido | Alta de propietario controlada; login con contraseña hasheada; GET/POST de productos usa negocio del token; prueba de acceso anónimo y cruce entre negocios | Marializ; Luis revisa | US-03, US-05 | En progreso: pruebas de acceso anónimo y de integración PostgreSQL/cruce entre negocios escritas; falta ejecutarlas con PostgreSQL y revisar evidencia |
 | EP-04 / US-07 | Prototipar registrar venta manual | Figma permite completar venta, revisar detalle y confirmar; incluye error, vacío y precio/cantidad inválidos | Kevin | EP-01 | Por verificar |
 | EP-04 / US-08 | Registrar venta local | Venta confirmada queda guardada localmente tras reiniciar; modo avión no pierde operación; cálculo de total demostrable | Marializ + Kevin; Eva coordina | US-04, US-07 | Pendiente; móvil aún no creado |
 | EP-04 / US-09 | Sincronizar venta idempotentemente | Al repetir el mismo UUID, servidor no duplica la venta; preservar el evento y mostrar estado/conflicto de stock | Marializ + Luis | US-08, autenticación | Pendiente |
@@ -38,7 +38,7 @@ Los responsables pueden colaborar; la asignación indica quién coordina y prese
 
 1. **Preparar acceso local:** Marializ aplica migraciones y crea el propietario; Eva verifica instrucciones y health check.
 2. **Cerrar catálogo protegido:** Marializ termina pruebas de integración con PostgreSQL; Luis revisa token y aislamiento entre dos negocios.
-3. **Desbloquear decisiones académicas:** Eva registra respuestas docentes sobre Mongo/Mongoose, frontend web y transición de backend.
+3. **Desbloquear decisiones académicas:** Eva archiva la confirmación de Node.js/PostgreSQL y registra respuestas docentes pendientes sobre Mongo/Mongoose, frontend web, transición de backend y fecha de defensa.
 4. **Congelar el contrato del MVP:** Eva, Marializ y Luis acuerdan el contrato; Kevin ajusta prototipo a esos flujos.
 5. **Implementar el recorrido vertical:** catálogo autorizado → venta manual → almacenamiento local → Outbox → API → PostgreSQL.
 6. **Reintentar sin duplicar:** mismo UUID, resultados por evento y conciliación explícita; no usar LWW para reemplazar una venta.
