@@ -16,8 +16,7 @@
 - Kevin Rocha — Diseño UX/UI y Prototipado
 - Luis Lazo — Arquitectura C4 y QA Técnico
 
-**DOCENTE:** _(completar)_
-**FECHA DE ENTREGA:** _(completar)_
+
 **VERSIÓN:** 1.1
 
 ---
