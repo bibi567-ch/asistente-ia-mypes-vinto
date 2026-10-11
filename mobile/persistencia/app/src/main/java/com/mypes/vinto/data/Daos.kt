@@ -5,6 +5,7 @@ import androidx.room.*
 @Dao
 interface UsuarioDao {
     @Insert suspend fun insertar(u: Usuario)
+    @Update suspend fun actualizar(u: Usuario)
     @Query("SELECT * FROM usuarios LIMIT 1") suspend fun obtener(): Usuario?
 }
 
@@ -33,4 +34,10 @@ interface CajaDao {
 interface OutboxDao {
     @Insert suspend fun insertar(o: OutboxEntry)
     @Query("SELECT * FROM outbox WHERE estado = 'PENDIENTE' ORDER BY creadoEn") suspend fun pendientes(): List<OutboxEntry>
+}
+
+@Dao
+interface AuditoriaDao {
+    @Insert suspend fun insertar(a: AuditoriaAcceso)
+    @Query("SELECT * FROM auditoria_acceso ORDER BY creadoEn DESC") suspend fun todos(): List<AuditoriaAcceso>
 }

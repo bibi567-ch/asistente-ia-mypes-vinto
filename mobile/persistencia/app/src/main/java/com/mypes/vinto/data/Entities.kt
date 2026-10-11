@@ -10,6 +10,8 @@ data class Usuario(
     val pinHash: String,
     val salt: String,
     val iteraciones: Int,
+    val intentosFallidos: Int = 0,
+    val bloqueadoHasta: Long = 0,
     val creadoEn: Long = System.currentTimeMillis()
 )
 
@@ -61,8 +63,19 @@ data class MovimientoCaja(
 data class OutboxEntry(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val tipo: String,
+    val operationId: String = UUID.randomUUID().toString(),
+    val schemaVersion: Int = 1,
     val payloadJson: String,
     val estado: String = "PENDIENTE",
     val intentos: Int = 0,
+    val creadoEn: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "auditoria_acceso")
+data class AuditoriaAcceso(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val usuarioId: String?,
+    val evento: String,
+    val detalle: String = "",
     val creadoEn: Long = System.currentTimeMillis()
 )
