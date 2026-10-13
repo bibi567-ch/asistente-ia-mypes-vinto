@@ -10,7 +10,11 @@ Este índice sigue como referencia de organización el [repositorio SMIA del equ
 
 | Orden | Documento | Uso |
 |---:|---|---|
-| 01 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Problema, usuarios, MVP y límites |
+| — | [Perfil final](docs/perfil/Perfil_final.md) | Texto vigente para Investigación I |
+| — | [Cronograma final](docs/Cronograma_final.md) | Plazo de 26 semanas y fechas de este semestre |
+| — | [Nota de nombre](docs/Nota_de_nombre.md) | Nombre vigente del sistema |
+| — | [Guía de la próxima semana](docs/Guia_proxima_semana.md) | Qué presentar en cada materia |
+| 01 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Recorrido mínimo y límites |
 | 02 | [Requisitos y UX](docs/02_Requisitos_y_UX.md) | Requisitos, casos de uso y flujos UX |
 | 03 | [SAD de arquitectura](docs/03_SAD_Arquitectura.md) | Versión entregada, vistas y adenda de propuesta |
 | 04 | [Decisiones de stack](docs/04_Decisiones_Stack.md) | Node.js + PostgreSQL, trade-offs y consultas docentes |
