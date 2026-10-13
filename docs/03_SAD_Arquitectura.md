@@ -1,6 +1,6 @@
 # DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v1.1 ENTREGADO)
 
-> **Estado:** se conserva aquí la versión 1.1 presentada, con una propuesta de migración añadida. La arquitectura entregada describe Spring Boot/PostgreSQL. La línea base objetivo solicitada por el equipo es Node.js/TypeScript/Express/PostgreSQL; debe emitirse un SAD v2.0 coherente y obtener aprobación docente. Este archivo no es la entrega v2.0 aprobada.
+> **Estado:** se conserva aquí la versión 1.1 presentada, con una propuesta de migración añadida. Desde el 13/10/2026 el nombre vigente del sistema no es “gestión de ventas e inventario”; ver `docs/Nota_de_nombre.md`. Esta v1.1 no se reescribe. La arquitectura entregada describe Spring Boot/PostgreSQL. La línea base objetivo solicitada por el equipo es Node.js/TypeScript/Express/PostgreSQL; debe emitirse un SAD v2.0 coherente y obtener aprobación docente. Este archivo no es la entrega v2.0 aprobada.
 
 **UNIVERSIDAD ADVENTISTA DE BOLIVIA**
 **FACULTAD DE CIENCIAS EXACTAS E INGENIERÍA — CARRERA DE INGENIERÍA EN SISTEMAS**

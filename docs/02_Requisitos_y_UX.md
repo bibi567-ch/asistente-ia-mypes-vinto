@@ -8,6 +8,9 @@
 
 > Este es el documento activo de requisitos y UX del repositorio; conserva el contenido de la versión consolidada anterior. No sustituye una rúbrica, consigna o aprobación docente. Las copias anteriores se guardan en `docs/archive/referencias_historicas/` para consulta.
 
+> Desde el 13/10/2026 el nombre vigente no es “gestión de ventas e inventario”. Ver [Nota_de_nombre.md](Nota_de_nombre.md). RF-014 queda excluido: no hay compras a proveedores.
+
+
 ---
 
 ## 1. DATOS GENERALES DE LA ENTREGA
@@ -35,11 +38,11 @@ Sintaxis formal obligatoria: *«El sistema debe [acción] + [entidad/objeto] + [
 | RF-010 | Ventas | El sistema debe permitir registrar una venta manualmente (teclado) cuando el entorno sea muy ruidoso. | Media |
 | RF-011 | Ventas | El sistema debe permitir aplicar descuentos verbales sobre el monto dictado. | Media |
 | RF-012 | Ventas | El sistema debe clasificar cada transacción como "al contado" o "fiado". | Alta |
-| RF-013 | Inventario | El sistema debe descontar automáticamente el stock local tras cada venta confirmada. | Alta |
-| RF-014 | Inventario | El sistema debe incrementar automáticamente el stock al registrar una compra a proveedores. | Alta |
-| RF-015 | Inventario | El sistema debe generar una alerta visual cuando un producto llegue a 0 unidades. | Media |
-| RF-016 | Inventario | El sistema debe permitir agregar un nuevo producto al catálogo mediante comando de voz o formulario. | Alta |
-| RF-017 | Inventario | El sistema debe responder consultas verbales de stock disponible por producto. | Alta |
+| RF-013 | Saldo local | El sistema debe descontar automáticamente el stock local tras cada venta confirmada. | Alta |
+| RF-014 | Excluido | EXCLUIDO el 13/10/2026. No se registran compras a proveedores. Queda fuera del perfil y no se implementa. | — |
+| RF-015 | Saldo local | El sistema debe generar una alerta visual cuando un producto llegue a 0 unidades. | Media |
+| RF-016 | Saldo local | El sistema debe permitir agregar un nuevo producto al catálogo mediante comando de voz o formulario. | Alta |
+| RF-017 | Saldo local | El sistema debe responder consultas verbales de stock disponible por producto. | Alta |
 | RF-018 | Sincronización | El sistema debe encolar (Outbox) todas las transacciones locales cuando no haya conexión a Internet. | Alta |
 | RF-019 | Sincronización | El sistema debe detectar la red disponible y enviar las transacciones encoladas automáticamente en formato JSON. | Alta |
 | RF-020 | Sincronización | El sistema debe identificar operaciones concurrentes sobre existencias y conservar el historial de ventas, evitando descartar transacciones mediante sobrescritura automática. | Alta |
