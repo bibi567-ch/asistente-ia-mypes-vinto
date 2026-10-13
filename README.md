@@ -1,10 +1,16 @@
 # Asistente conversacional offline para MYPES de Vinto
 
-Proyecto integrador de Ingeniería en Sistemas — Universidad Adventista de Bolivia — Gestión 2026-2.
+Prototipo para registrar ventas y consultar el saldo local de existencias, sin conexión en el momento de la atención. Universidad Adventista de Bolivia, Ingeniería en Sistemas, gestión 2026-2.
+
+El trabajo no es un sistema de almacén: no lleva compras, proveedores, lotes, costos ni facturación. El perfil que se defiende está en [docs/perfil/Perfil_final.md](docs/perfil/Perfil_final.md). El calendario vigente está en [docs/Cronograma_final.md](docs/Cronograma_final.md).
 
 ## Estado del repositorio
 
-El backend inicial usa Node.js, TypeScript, Express y PostgreSQL. Incluye migraciones versionadas, creación controlada de propietarios, inicio de sesión con contraseña hasheada y token de acceso, y consulta/alta de productos aisladas por negocio. **Ventas, sincronización offline y una app Android funcional siguen pendientes.** Es una base de desarrollo local; no debe exponerse a Internet ni usarse con datos reales hasta completar controles y revisión de seguridad.
+Hay una API local en Node.js, TypeScript, Express y PostgreSQL. Tiene migraciones, alta de un propietario, inicio de sesión y alta y consulta de productos de un solo negocio.
+
+Todavía no hay aplicación Android. Tampoco está el registro de la venta, el descuento del saldo ni el envío de la cola local. No se presenta este repositorio como un prototipo usable por un comerciante.
+
+La voz queda para cuando el registro por pantalla se guarde sin red y siga ahí al reabrir la aplicación. No debe exponerse a Internet ni usarse con datos reales hasta completar controles y revisión de seguridad.
 
 ## Arquitectura acordada por el equipo
 
@@ -65,7 +71,11 @@ Los documentos vigentes se numeran desde 01 y se navegan desde [`00_Indice.md`](
 
 | N.º | Documento | Para qué sirve |
 |---|---|---|
-| 01 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Problema, MVP, límites y fuentes |
+| — | [Perfil final](docs/perfil/Perfil_final.md) | Texto que se presenta en Investigación I |
+| — | [Cronograma final](docs/Cronograma_final.md) | 26 semanas del Trabajo de Grado y las fechas de este semestre |
+| — | [Nota de nombre](docs/Nota_de_nombre.md) | El sistema no se llama gestión de ventas e inventario |
+| — | [Guía de la próxima semana](docs/Guia_proxima_semana.md) | Qué tocar en GitHub y qué llevar a cada materia |
+| 01 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Problema, recorrido mínimo y límites |
 | 02 | [Requisitos y UX](docs/02_Requisitos_y_UX.md) | Requisitos, casos de uso y experiencia |
 | 03 | [SAD de Arquitectura](docs/03_SAD_Arquitectura.md) | SAD v1.1 entregado y nota de cambio objetivo |
 | 04 | [Decisión de stack](docs/04_Decisiones_Stack.md) | Línea Node/PostgreSQL y consultas docentes |
@@ -104,7 +114,7 @@ Fechas de los documentos compartidos; confirmar en aula virtual antes de entrega
 | 25/11/2026 | Plataforma full-stack — Tecnologías en Internet |
 | 24–26/11 y 01–03/12 | Defensa del Perfil reportada; falta confirmar fecha exacta |
 
-El Gantt etiqueta por error el corte 29/09 como lunes. **29/09/2026 es martes; W11 va de 28/09 a 04/10.** Ver [cronograma](docs/08_Cronograma_y_Riesgos.md). El Perfil usa cinco fases; SAD/Gantt seis; el documento de cronograma explica la equivalencia sin cambiar en silencio los originales.
+El calendario que manda desde el 13/10/2026 es [docs/Cronograma_final.md](docs/Cronograma_final.md). El archivo [docs/08_Cronograma_y_Riesgos.md](docs/08_Cronograma_y_Riesgos.md) queda como antecedente del Gantt anterior, no como plazo vigente.
 
 ## Equipo
 
