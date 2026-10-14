@@ -1,5 +1,10 @@
-# Documentación histórica
+# Referencias históricas
 
-Los archivos de `referencias_historicas/` son duplicados/propuestas anteriores y no están vigentes. Se preservan para rastrear decisiones y diferencias con las versiones actuales. No presentarlos como especificación activa. Los documentos activos se enlazan desde `00_Indice.md` y el README de la raíz.
+Esta carpeta no es la versión vigente.
 
-La propuesta anterior de Spring Boot/PostgreSQL se conserva como antecedente; el equipo propone Node.js/Express/PostgreSQL. El SAD v1.1 también se conserva con su versión y una nota de migración. Las decisiones antiguas sobre MongoDB o sincronización no se consideran aprobadas para la arquitectura actual.
+`referencias_historicas/` guarda:
+
+- borradores de arquitectura y de requisitos anteriores al nombre actual;
+- los documentos 04 a 12 (stack, backlog, trazabilidad, auditoría, cronograma anterior, guía de entrega, evidencias, plan de API y matriz de rúbricas).
+
+La versión que se lee está en el [índice](../../00_Indice.md).
