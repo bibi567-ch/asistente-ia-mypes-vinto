@@ -1,34 +1,40 @@
-# 01 Proyecto y alcance
+# Proyecto y alcance
 
 ## Identificación
 
 **Título:** Prototipo de asistente conversacional offline con procesamiento de lenguaje natural en el dispositivo, configurable por tipo de negocio, para el registro de ventas y la consulta del saldo local de existencias en las MYPES del centro de Vinto, Cochabamba.
 
-**Equipo:** Eva Lizeth Chino Quispe (liderazgo, requisitos y QA documental); Christian Gonzales Mamani (IA y pipeline conversacional); Marializ Mamani Quispe (backend, seguridad y persistencia); Kevin Jhonathan Rocha Rojas (UX/UI); Luis Gerardo Lazo Bustamante (arquitectura C4 y QA técnico).
+**Equipo:** Eva Lizeth Chino Quispe, Christian Gonzales Mamani, Marializ Mamani Quispe, Kevin Jhonathan Rocha Rojas y Luis Gerardo Lazo Bustamante.
 
-El perfil completo está en [Perfil_final.md](perfil/Perfil_final.md). Si este resumen y el perfil se contradicen, manda el perfil.
+El texto completo del perfil está en [Perfil_final.md](perfil/Perfil_final.md). Si este resumen y el perfil no coinciden, manda el perfil.
 
-## Qué se construye
+## De qué se trata
 
-Un prototipo para anotar una venta y consultar cuánto queda, primero en el teléfono. La consolidación en la API ocurre después, cuando hay red, y no hace falta para atender.
+El prototipo anota una venta y muestra cuánto queda de cada producto, en el teléfono y sin internet. El comerciante elige una plantilla según el rubro (abarrotes, pensión, broastería o ferretería) y puede ajustarla.
 
-No es un sistema de almacén. No lleva compras, proveedores, lotes, costos ni facturación.
+La copia remota, en la API, llega cuando hay conexión. Atender no depende de esa copia.
 
-## Recorrido que tiene que funcionar antes que nada
+## Qué incluye
 
-1. Guardar y consultar productos en el teléfono.
-2. Anotar una venta de productos ya cargados y confirmar antes de guardar.
-3. Cerrar la aplicación, sin red, abrirla y encontrar la misma venta y el mismo saldo.
-4. Enviar esa operación a la API Node.js/Express y a PostgreSQL cuando vuelva la red.
-5. Reintentar con el mismo identificador y no duplicar la venta.
-6. Recién después, texto y voz.
+- Productos guardados en el teléfono.
+- Registro de una venta de productos ya cargados, con total y cambio, y confirmación antes de guardar.
+- Consulta del saldo local.
+- El mismo dato sigue ahí si se cierra la aplicación sin red.
+- Envío posterior a la API (Node.js, Express y PostgreSQL) sin duplicar la operación.
+- Texto y voz en castellano, y texto con vocabulario acotado en quechua, cuando el registro en pantalla ya funciona.
 
-Quedan fuera: compras a proveedores, lotes, costos, facturación, voz en quechua, aimara, lector de códigos, impresora y cobro por QR.
+## Qué no incluye
 
-## Decisión de stack
+Compras a proveedores, lotes, costos, facturación, reconocimiento de voz en quechua, aimara, lector de códigos, impresora y cobro por QR.
 
-La línea base es **Kotlin/Compose + Room/SQLite + Node.js/TypeScript/Express + PostgreSQL**. PostgreSQL es el almacén remoto. SQLite resuelve la persistencia en el teléfono. El SAD v1.1 habla de Spring Boot; esa versión se conserva como antecedente. La sustitución por Node se documenta en un ADR y no se hace pasar por si el SAD v1.1 siempre hubiera sido Node. Tecnologías en Internet incluye MongoDB/Mongoose. PostgreSQL no cubre ese punto. Si la docente lo exige, se entrega un ejercicio aparte, no una segunda base del asistente.
+Descontar lo vendido del saldo del teléfono forma parte de registrar la venta. No abre un módulo de almacén.
 
-## Fuentes
+## Cómo está construido
 
-El perfil, el SAD, la entrega de Tecnologías en Internet y los sílabos son fuentes distintas. Si difieren, se anota la diferencia y se consulta al docente. Desde el 13/10/2026 el nombre vigente del sistema es el del perfil, no “gestión de ventas e inventario”. Ver [Nota_de_nombre.md](Nota_de_nombre.md).
+La aplicación prevista es Kotlin y Jetpack Compose, con SQLite en el teléfono. La API de esta versión del repositorio es Node.js, TypeScript, Express y PostgreSQL.
+
+El documento de arquitectura v1.1 describe Spring Boot. Esa entrega se conserva. El código actual no usa Spring.
+
+## Nombre
+
+El sistema no se llama “gestión de ventas e inventario”. El nombre vigente es el del título de esta página. El detalle está en [Nota_de_nombre.md](Nota_de_nombre.md).

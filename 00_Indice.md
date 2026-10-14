@@ -1,30 +1,27 @@
-# Índice — Asistente MYPES Vinto
+# Índice
 
-Empieza por [docs/MAPA_PRESENTACION.md](docs/MAPA_PRESENTACION.md).
+El proyecto es un prototipo de asistente conversacional offline para anotar una venta y consultar el saldo local en MYPES del centro de Vinto. No es un sistema de almacén.
 
 **Equipo:** Eva Chino Quispe, Christian Gonzales, Marializ Mamani, Kevin Rocha y Luis Lazo.
 
-## Para defender
+## Versión vigente
 
-| Materia | Documento |
+| Documento | Contenido |
 |---|---|
-| Investigación I | [Perfil final](docs/perfil/Perfil_final.md) · [Cronograma](docs/Cronograma_final.md) |
-| Arquitectura | [SAD](docs/03_SAD_Arquitectura.md) · [Diagramas](diagrams/README.md) |
-| Tecnologías en Internet | [Stack](docs/04_Decisiones_Stack.md) · [API](docs/11_Plan_Implementacion_y_API.md) · `backend/` |
-
-## Resto de la carpeta docs
-
-| N.º | Archivo | Uso |
-|---:|---|---|
-| 01 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Recorrido mínimo y límites |
-| 02 | [Requisitos y UX](docs/02_Requisitos_y_UX.md) | Requisitos y casos |
-| 05 | [Backlog y equipo](docs/05_Product_Backlog_y_Equipo.md) | Tareas |
-| 06 | [Trazabilidad](docs/06_Matriz_Trazabilidad.md) | Requisitos y evidencia |
-| 12 | [Rúbricas de tres materias](docs/12_Matriz_Rubricas_Tres_Materias.md) | Cobertura académica |
-
-`docs/archive/` no se presenta. Es antecedente.
+| [Mapa](docs/MAPA_PRESENTACION.md) | Relación del trabajo con Investigación I, Arquitectura y Tecnologías en Internet |
+| [Perfil](docs/perfil/Perfil_final.md) | Perfil de trabajo de grado |
+| [Cronograma](docs/Cronograma_final.md) | Calendario del trabajo |
+| [Nota de nombre](docs/Nota_de_nombre.md) | Por qué no se llama gestión de ventas e inventario |
+| [01 Alcance](docs/01_Proyecto_y_Alcance.md) | Qué se construye y qué queda fuera |
+| [02 Requisitos](docs/02_Requisitos_y_UX.md) | Requisitos y experiencia de uso |
+| [03 Arquitectura](docs/03_SAD_Arquitectura.md) | Documento de arquitectura v1.1 |
+| [Diagramas](diagrams/README.md) | C1, C2 y casos de uso |
 
 ## Código
 
-- `backend/`: API Node.js, TypeScript, Express, PostgreSQL. Login y catálogo.
-- `mobile/`: carpeta de preparación. No hay APK.
+- `backend/`: API Node.js, TypeScript, Express y PostgreSQL. Login y catálogo.
+- `mobile/`: preparación de la aplicación. Aún no hay APK.
+
+## Referencias históricas
+
+Los documentos 04 a 12, y los borradores anteriores de stack y de UX, están en [docs/archive/referencias_historicas/](docs/archive/referencias_historicas/). Sirven para ver cómo se llegó a esta versión. No describen el alcance vigente.
