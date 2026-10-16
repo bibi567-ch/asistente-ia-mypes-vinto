@@ -6,61 +6,40 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.mypes.vinto.presentation.auth.LoginScreen
+import com.mypes.vinto.presentation.dashboard.DashboardScreen
+import com.mypes.vinto.presentation.inventario.InventarioScreen
+import com.mypes.vinto.presentation.onboarding.OnboardingPlantillaScreen
 
 class MainActivity : ComponentActivity() {
     private val solicitarAudio = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { concedido ->
-        if (!concedido) mostrarInicio()
-    }
+    ) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mostrarInicio()
+        setContent {
+            MaterialTheme {
+                val nav = rememberNavController()
+                NavHost(navController = nav, startDestination = "login") {
+                    composable("login") { LoginScreen(nav) }
+                    composable("onboarding_plantilla") { OnboardingPlantillaScreen(nav) }
+                    composable("dashboard") { DashboardScreen(nav) }
+                    composable("inventario") { InventarioScreen(nav) }
+                }
+            }
+        }
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.RECORD_AUDIO
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             solicitarAudio.launch(Manifest.permission.RECORD_AUDIO)
-        }
-    }
-
-    private fun mostrarInicio() {
-        setContent {
-            MaterialTheme {
-                Scaffold { padding ->
-                    Inicio(modifier = Modifier.padding(padding))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun Inicio(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text("MypesLocal", style = MaterialTheme.typography.headlineMedium)
-        Text("Catálogo local listo para trabajar sin conexión.")
-        Button(onClick = {}) {
-            Text("Comenzar")
         }
     }
 }

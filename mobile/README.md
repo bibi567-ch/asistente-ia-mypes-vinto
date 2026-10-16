@@ -13,16 +13,18 @@ El módulo `app/` contiene el primer esqueleto compilable de Android: Kotlin + J
 
 - Proyecto Android Studio bajo `mobile/`, con configuración Gradle y SDK mínimo 26.
 - Entidad `Producto`, DAO y base local Room persistente en `mypes-local.db`.
+- Usuario local con PIN derivado mediante PBKDF2-HMAC-SHA256 y bloqueo temporal tras intentos fallidos.
 - Plantillas iniciales de negocio y repositorio para cargarlas durante onboarding.
 - Clasificador de intenciones y extractor de entidades para texto en español.
 - Fachada y motor Vosk offline; el modelo se copia desde `app/src/main/assets/` al almacenamiento privado de la aplicación.
-- Pantalla Compose inicial y solicitud de permiso de micrófono en tiempo de ejecución.
+- Navegación Compose para login, onboarding de plantilla, dashboard e inventario.
+- Solicitud de permiso de micrófono en tiempo de ejecución.
 
 El modelo Vosk no se versiona por su tamaño. Descárgalo localmente en:
 
 `mobile/app/src/main/assets/vosk-model-small-es-0.42/`
 
-La aplicación sigue siendo un primer incremento: venta, outbox, WorkManager y sincronización con la API aún no están implementados.
+La aplicación sigue siendo un primer incremento: registro de ventas, outbox, WorkManager y sincronización con la API aún no están implementados. El botón de voz transcribe y clasifica texto, pero todavía no confirma ni persiste una venta.
 
 ## Siguientes incrementos
 
