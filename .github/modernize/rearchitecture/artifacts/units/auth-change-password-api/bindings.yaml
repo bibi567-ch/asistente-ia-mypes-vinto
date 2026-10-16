@@ -1,0 +1,15 @@
+unit: auth-change-password-api
+bindings:
+  - type: route-declaration
+    name: "POST /api/v1/auth/change-password"
+    source_loc: backend/src/routes/auth.routes.ts:41
+    target: authRouter
+    must_appear_in_target: true
+    notes: "Protected by requireAuth."
+  - type: middleware
+    name: requireAuth
+    source_loc: backend/src/routes/auth.routes.ts:41
+    target: "authRouter change-password handler"
+    must_appear_in_target: true
+    notes: "Claims must be attached before handler execution."
+runtime_config: []

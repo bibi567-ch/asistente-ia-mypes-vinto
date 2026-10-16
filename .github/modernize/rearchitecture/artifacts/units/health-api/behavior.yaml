@@ -1,0 +1,15 @@
+unit: health-api
+side_effects: []
+branches:
+  - source_loc: backend/src/routes/health.routes.ts:4
+    condition: "health request reaches the mounted route"
+    behavior: "return the health payload without authentication"
+    must_preserve: true
+error_paths: []
+concurrency:
+  model: async
+  tx_boundary:
+    source_loc: backend/src/routes/health.routes.ts:4
+    scope: "no database transaction declared"
+    isolation: "not specified"
+    must_preserve: true

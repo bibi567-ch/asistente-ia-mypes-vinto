@@ -1,0 +1,9 @@
+unit: mobile-inventory-page
+bindings:
+  - type: convention
+    name: "@Composable InventarioScreen"
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/inventario/InventarioScreen.kt:17
+    target: "NavHost route inventario"
+    must_appear_in_target: true
+    notes: "Obtains InventarioViewModel and observes product StateFlow."
+runtime_config: []

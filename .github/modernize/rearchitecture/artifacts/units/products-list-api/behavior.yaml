@@ -1,0 +1,24 @@
+unit: products-list-api
+side_effects: []
+branches:
+  - source_loc: backend/src/routes/products.routes.ts:8
+    condition: "businessId is absent"
+    behavior: "return 401 unauthorized"
+    must_preserve: true
+  - source_loc: backend/src/routes/products.routes.ts:12
+    condition: "limit or offset is outside accepted range"
+    behavior: "return 400 invalid_pagination"
+    must_preserve: true
+error_paths:
+  - source_loc: backend/src/routes/products.routes.ts:12
+    trigger: "invalid query pagination"
+    outcome: "bounded pagination error response"
+    contract: "400 {error:{code:'invalid_pagination',message}}"
+    must_preserve: true
+concurrency:
+  model: async
+  tx_boundary:
+    source_loc: backend/src/routes/products.routes.ts:18
+    scope: "single tenant-scoped SELECT"
+    isolation: "database default"
+    must_preserve: true

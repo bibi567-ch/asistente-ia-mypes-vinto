@@ -1,0 +1,15 @@
+unit: mobile-dashboard-page
+bindings:
+  - type: convention
+    name: "@Composable DashboardScreen"
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/dashboard/DashboardScreen.kt:17
+    target: "NavHost route dashboard"
+    must_appear_in_target: true
+    notes: "Obtains DashboardViewModel and observes StateFlow."
+  - type: listener
+    name: "RECORD_AUDIO permission request"
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/MainActivity.kt:18
+    target: MainActivity
+    must_appear_in_target: true
+    notes: "Permission is requested during activity startup."
+runtime_config: []

@@ -1,0 +1,15 @@
+unit: products-list-api
+bindings:
+  - type: route-declaration
+    name: "GET /api/v1/products"
+    source_loc: backend/src/routes/products.routes.ts:5
+    target: productsRouter
+    must_appear_in_target: true
+    notes: "Router-wide requireAuth middleware runs before handler."
+  - type: middleware
+    name: requireAuth
+    source_loc: backend/src/routes/products.routes.ts:5
+    target: productsRouter
+    must_appear_in_target: true
+    notes: "All products routes require bearer authentication."
+runtime_config: []
