@@ -71,33 +71,6 @@ productsRouter.post('/', async (request, response) => {
         message: 'Provide a name (1-160 characters), unit (1-40 characters), and non-negative salePrice with up to two decimals as a string.'
       }
     });
-
-    productsRouter.get('/sync', async (request, response) => {
-      const businessId = request.auth?.businessId;
-      if (!businessId) {
-        response.status(401).json({ error: { code: 'unauthorized', message: 'Authentication required.' } });
-        return;
-      }
-
-      const desdeParam = request.query.desde;
-      const desde = typeof desdeParam === 'string' ? Number(desdeParam) : 0;
-      if (!Number.isFinite(desde) || desde < 0) {
-        response.status(400).json({
-          error: { code: 'invalid_since', message: 'El parámetro "desde" debe ser un timestamp en milisegundos.' }
-        });
-        return;
-      }
-
-      try {
-        const productos = await obtenerProductosParaSync(businessId, desde);
-        response.status(200).json({ items: productos, total: productos.length, timestamp: Date.now() });
-      } catch {
-        console.error('Error al obtener productos para sync.');
-        response.status(500).json({
-          error: { code: 'sync_failed', message: 'No se pudo obtener el catálogo.' }
-        });
-      }
-    });
     return;
   }
 
@@ -130,6 +103,33 @@ productsRouter.post('/', async (request, response) => {
     createdAt: product.created_at,
     updatedAt: product.updated_at
   });
+});
+
+productsRouter.get('/sync', async (request, response) => {
+  const businessId = request.auth?.businessId;
+  if (!businessId) {
+    response.status(401).json({ error: { code: 'unauthorized', message: 'Authentication required.' } });
+    return;
+  }
+
+  const desdeParam = request.query.desde;
+  const desde = typeof desdeParam === 'string' ? Number(desdeParam) : 0;
+  if (!Number.isFinite(desde) || desde < 0) {
+    response.status(400).json({
+      error: { code: 'invalid_since', message: 'El parámetro "desde" debe ser un timestamp en milisegundos.' }
+    });
+    return;
+  }
+
+  try {
+    const productos = await obtenerProductosParaSync(businessId, desde);
+    response.status(200).json({ items: productos, total: productos.length, timestamp: Date.now() });
+  } catch {
+    console.error('Error al obtener productos para sync.');
+    response.status(500).json({
+      error: { code: 'sync_failed', message: 'No se pudo obtener el catálogo.' }
+    });
+  }
 });
 
 function parseInteger(value: unknown, fallback: number): number | null {
