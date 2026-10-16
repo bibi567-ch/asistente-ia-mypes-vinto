@@ -9,5 +9,5 @@ data class Producto(
     val nombre: String,
     val precio: Double,
     val stock: Double,
-    val actualizadoEn: Long
+    val actualizadoEn: Long = System.currentTimeMillis()
 )
