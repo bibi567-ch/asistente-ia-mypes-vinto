@@ -1,0 +1,30 @@
+unit: auth-login-api
+side_effects:
+  - source_loc: backend/src/routes/auth.routes.ts:26
+    effect: "query users by normalized email and verify password, including a dummy hash when absent"
+    must_preserve: true
+  - source_loc: backend/src/routes/auth.routes.ts:35
+    effect: "create and return a signed access token"
+    must_preserve: true
+branches:
+  - source_loc: backend/src/routes/auth.routes.ts:10
+    condition: "email/password shape or size is invalid"
+    behavior: "return 400 invalid_credentials_format"
+    must_preserve: true
+  - source_loc: backend/src/routes/auth.routes.ts:30
+    condition: "user is absent or password verification fails"
+    behavior: "return generic 401 invalid_credentials"
+    must_preserve: true
+error_paths:
+  - source_loc: backend/src/routes/auth.routes.ts:30
+    trigger: "unknown email or incorrect password"
+    outcome: "generic unauthorized JSON error"
+    contract: "401 {error:{code:'invalid_credentials',message}}"
+    must_preserve: true
+concurrency:
+  model: async
+  tx_boundary:
+    source_loc: backend/src/routes/auth.routes.ts:26
+    scope: "single user SELECT and password verification"
+    isolation: "database default"
+    must_preserve: true

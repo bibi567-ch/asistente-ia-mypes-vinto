@@ -1,0 +1,9 @@
+unit: mobile-onboarding-page
+bindings:
+  - type: convention
+    name: "@Composable OnboardingPlantillaScreen"
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/onboarding/OnboardingPlantillaScreen.kt:18
+    target: "NavHost route onboarding_plantilla"
+    must_appear_in_target: true
+    notes: "Uses LocalContext and rememberCoroutineScope."
+runtime_config: []

@@ -1,0 +1,34 @@
+unit: mobile-login-page
+side_effects:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/LoginViewModel.kt:27
+    effect: "create the first local user from a valid four-digit PIN"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/LoginViewModel.kt:46
+    effect: "persist failed-attempt count and lockout deadline"
+    must_preserve: true
+branches:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/auth/LoginScreen.kt:31
+    condition: "login state is Exito"
+    behavior: "navigate to dashboard and remove login from back stack"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/auth/LoginScreen.kt:57
+    condition: "PIN is incomplete or edited"
+    behavior: "limit entry to four digits and reset transient state"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/auth/LoginScreen.kt:41
+    condition: "error, verifying, or lockout state"
+    behavior: "show the corresponding visible status"
+    must_preserve: true
+error_paths:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/LoginViewModel.kt:57
+    trigger: "database or hashing exception"
+    outcome: "show Error state with message/fallback"
+    contract: "visible LoginEstado.Error"
+    must_preserve: true
+concurrency:
+  model: coroutine
+  tx_boundary:
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/LoginViewModel.kt:25
+    scope: "database and hashing work in viewModelScope"
+    isolation: "Room default"
+    must_preserve: true

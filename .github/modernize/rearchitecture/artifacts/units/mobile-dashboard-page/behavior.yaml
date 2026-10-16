@@ -1,0 +1,30 @@
+unit: mobile-dashboard-page
+side_effects:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/DashboardViewModel.kt:37
+    effect: "start and stop the voice assistant and update live recognition state"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/DashboardViewModel.kt:24
+    effect: "observe products and derive total and low-stock metrics"
+    must_preserve: true
+branches:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/dashboard/DashboardScreen.kt:27
+    condition: "estado.escuchando"
+    behavior: "toggle between start and stop voice listening and change microphone color"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/dashboard/DashboardScreen.kt:35
+    condition: "partial text or error exists"
+    behavior: "show the corresponding visible recognition state"
+    must_preserve: true
+error_paths:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/DashboardViewModel.kt:47
+    trigger: "voice engine reports an error"
+    outcome: "stop listening and show mensajeError"
+    contract: "visible dashboard error state"
+    must_preserve: true
+concurrency:
+  model: coroutine
+  tx_boundary:
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/DashboardViewModel.kt:23
+    scope: "continuous Room flow collection and voice callbacks"
+    isolation: "Room default"
+    must_preserve: true

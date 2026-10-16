@@ -1,0 +1,9 @@
+unit: health-api
+bindings:
+  - type: route-declaration
+    name: "GET /api/v1/health"
+    source_loc: backend/src/app.ts:9
+    target: healthRouter
+    must_appear_in_target: true
+    notes: "Mounted below the versioned API prefix."
+runtime_config: []

@@ -1,0 +1,27 @@
+unit: products-create-api
+side_effects:
+  - source_loc: backend/src/routes/products.routes.ts:60
+    effect: "insert a tenant-scoped product after trimming validated fields"
+    must_preserve: true
+branches:
+  - source_loc: backend/src/routes/products.routes.ts:45
+    condition: "name, unit, or decimal salePrice is invalid"
+    behavior: "return 400 invalid_product"
+    must_preserve: true
+  - source_loc: backend/src/routes/products.routes.ts:69
+    condition: "business/name unique constraint prevents insertion"
+    behavior: "return 409 product_already_exists"
+    must_preserve: true
+error_paths:
+  - source_loc: backend/src/routes/products.routes.ts:69
+    trigger: "duplicate product name in same business"
+    outcome: "conflict response"
+    contract: "409 {error:{code:'product_already_exists',message}}"
+    must_preserve: true
+concurrency:
+  model: async
+  tx_boundary:
+    source_loc: backend/src/routes/products.routes.ts:60
+    scope: "single INSERT ... ON CONFLICT ... RETURNING"
+    isolation: "database default"
+    must_preserve: true

@@ -1,0 +1,15 @@
+unit: products-create-api
+bindings:
+  - type: route-declaration
+    name: "POST /api/v1/products"
+    source_loc: backend/src/routes/products.routes.ts:40
+    target: productsRouter
+    must_appear_in_target: true
+    notes: "Router-wide requireAuth middleware runs before handler."
+  - type: middleware
+    name: requireAuth
+    source_loc: backend/src/routes/products.routes.ts:5
+    target: productsRouter
+    must_appear_in_target: true
+    notes: "businessId comes from verified bearer claims."
+runtime_config: []

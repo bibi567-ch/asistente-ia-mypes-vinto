@@ -1,0 +1,134 @@
+units:
+  - name: health-api
+    trigger: api
+    trigger_detail: "GET /api/v1/health"
+    source_anchors:
+      - path: backend/src/routes/health.routes.ts
+        line: 1
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: backend-app
+        used_fields: [healthRouter]
+  - name: auth-login-api
+    trigger: api
+    trigger_detail: "POST /api/v1/auth/login"
+    source_anchors:
+      - path: backend/src/routes/auth.routes.ts
+        line: 7
+    exported_signature:
+      - method: "HTTP 200 login response {accessToken, tokenType, expiresIn}"
+        source_loc: backend/src/routes/auth.routes.ts:35
+        stability: frozen
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: backend-pool
+        used_fields: [query]
+      - module: auth-token-contract
+        used_fields: [accessToken, tokenType, expiresIn]
+  - name: auth-change-password-api
+    trigger: api
+    trigger_detail: "POST /api/v1/auth/change-password"
+    source_anchors:
+      - path: backend/test/auth.test.ts
+        line: 1
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: backend-pool
+        used_fields: [query]
+      - module: auth-middleware
+        used_fields: [authorization, userId, businessId]
+  - name: products-list-api
+    trigger: api
+    trigger_detail: "GET /api/v1/products"
+    source_anchors:
+      - path: backend/src/routes/products.routes.ts
+        line: 4
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: backend-pool
+        used_fields: [query]
+      - module: auth-middleware
+        used_fields: [authorization, userId, businessId]
+  - name: products-create-api
+    trigger: api
+    trigger_detail: "POST /api/v1/products"
+    source_anchors:
+      - path: backend/test/products-auth.test.ts
+        line: 1
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: backend-pool
+        used_fields: [query]
+      - module: auth-middleware
+        used_fields: [authorization, userId, businessId]
+  - name: mobile-login-page
+    trigger: page
+    trigger_detail: "Compose route login"
+    source_anchors:
+      - path: mobile/app/src/main/java/com/mypes/vinto/presentation/auth/LoginScreen.kt
+        line: 26
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: mobile-database
+        used_fields: [obtener, usuarioDao]
+      - module: mobile-theme
+        used_fields: [FondoOscuro, TextoBlanco, TextoGris, VerdeNeon, RojoCancelar, NaranjaAlerta, SuperficieOscura]
+  - name: mobile-onboarding-page
+    trigger: page
+    trigger_detail: "Compose route onboarding_plantilla"
+    source_anchors:
+      - path: mobile/app/src/main/java/com/mypes/vinto/presentation/onboarding/OnboardingPlantillaScreen.kt
+        line: 18
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: mobile-database
+        used_fields: [obtener, productoDao]
+      - module: mobile-theme
+        used_fields: [FondoOscuro, TextoBlanco, TextoGris, VerdeNeon, SuperficieOscura]
+      - module: mobile-product-model
+        used_fields: [Producto, nombre, precio, stock]
+  - name: mobile-dashboard-page
+    trigger: page
+    trigger_detail: "Compose route dashboard"
+    source_anchors:
+      - path: mobile/app/src/main/java/com/mypes/vinto/presentation/dashboard/DashboardScreen.kt
+        line: 17
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: mobile-database
+        used_fields: [obtener, productoDao]
+      - module: mobile-theme
+        used_fields: [FondoOscuro, TextoBlanco, TextoGris, VerdeNeon, RojoCancelar, NaranjaAlerta]
+      - module: mobile-product-model
+        used_fields: [Producto, stock]
+  - name: mobile-inventory-page
+    trigger: page
+    trigger_detail: "Compose route inventario"
+    source_anchors:
+      - path: mobile/app/src/main/java/com/mypes/vinto/presentation/inventario/InventarioScreen.kt
+        line: 17
+    exported_signature: []
+    dynamic_entrypoints: []
+    depends_on: []
+    shared_refs:
+      - module: mobile-database
+        used_fields: [obtener, productoDao]
+      - module: mobile-theme
+        used_fields: [FondoOscuro, TextoBlanco, TextoGris, VerdeNeon, NaranjaAlerta, SuperficieOscura]
+      - module: mobile-product-model
+        used_fields: [Producto, id, nombre, precio, stock]

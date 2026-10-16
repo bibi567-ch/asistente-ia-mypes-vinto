@@ -1,0 +1,44 @@
+flows:
+  - name: login-token-to-protected-api
+    medium: jwt-claim
+    key: "accessToken -> Authorization: Bearer"
+    writer:
+      unit: auth-login-api
+      source_loc: backend/src/routes/auth.routes.ts:35
+    reader:
+      unit: products-list-api
+      source_loc: backend/src/auth/require-auth.ts:18
+    pairing: matched
+    must_preserve: true
+    must_confirm: null
+    verification_hint: "Authenticate, send the returned token to GET /api/v1/products, and assert tenant-scoped 200 response."
+    notes: "The client transports the token between independently triggered requests."
+  - name: login-token-to-product-create
+    medium: jwt-claim
+    key: "accessToken -> Authorization: Bearer"
+    writer:
+      unit: auth-login-api
+      source_loc: backend/src/routes/auth.routes.ts:35
+    reader:
+      unit: products-create-api
+      source_loc: backend/src/auth/require-auth.ts:18
+    pairing: matched
+    must_preserve: true
+    must_confirm: null
+    verification_hint: "Authenticate, create a product with the returned token, and assert business_id isolation."
+    notes: "The bearer claims provide userId and businessId to the protected route."
+  - name: login-token-to-password-change
+    medium: jwt-claim
+    key: "accessToken -> Authorization: Bearer"
+    writer:
+      unit: auth-login-api
+      source_loc: backend/src/routes/auth.routes.ts:35
+    reader:
+      unit: auth-change-password-api
+      source_loc: backend/src/auth/require-auth.ts:18
+    pairing: matched
+    must_preserve: true
+    must_confirm: null
+    verification_hint: "Authenticate and change the password using the returned token; assert subsequent login behavior."
+    notes: "Password change is scoped to both claims."
+

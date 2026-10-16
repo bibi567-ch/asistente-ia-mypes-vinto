@@ -1,0 +1,15 @@
+unit: auth-login-api
+bindings:
+  - type: route-declaration
+    name: "POST /api/v1/auth/login"
+    source_loc: backend/src/routes/auth.routes.ts:9
+    target: authRouter
+    must_appear_in_target: true
+    notes: "Unauthenticated JSON endpoint."
+runtime_config:
+  - key: "JWT signing/lifetime configuration"
+    source_loc: backend/src/auth/tokens.ts:1
+    source: env
+    default_value: "defined by env module"
+    must_appear_in_target: true
+    notes: "Controls token creation and expiresIn."

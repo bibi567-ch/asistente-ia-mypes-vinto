@@ -1,0 +1,31 @@
+unit: auth-change-password-api
+side_effects:
+  - source_loc: backend/src/routes/auth.routes.ts:70
+    effect: "replace the authenticated user's password hash"
+    must_preserve: true
+branches:
+  - source_loc: backend/src/routes/auth.routes.ts:45
+    condition: "claims or password input is missing/invalid"
+    behavior: "return 400 invalid_password_change"
+    must_preserve: true
+  - source_loc: backend/src/routes/auth.routes.ts:61
+    condition: "current password is invalid"
+    behavior: "return 401 invalid_current_password"
+    must_preserve: true
+  - source_loc: backend/src/routes/auth.routes.ts:65
+    condition: "new password matches current password"
+    behavior: "return 400 password_unchanged"
+    must_preserve: true
+error_paths:
+  - source_loc: backend/src/routes/auth.routes.ts:73
+    trigger: "authenticated row no longer exists"
+    outcome: "return unauthorized JSON error"
+    contract: "401 {error:{code:'unauthorized',message}}"
+    must_preserve: true
+concurrency:
+  model: async
+  tx_boundary:
+    source_loc: backend/src/routes/auth.routes.ts:57
+    scope: "password SELECT followed by independent UPDATE"
+    isolation: "database default; no explicit transaction"
+    must_preserve: true

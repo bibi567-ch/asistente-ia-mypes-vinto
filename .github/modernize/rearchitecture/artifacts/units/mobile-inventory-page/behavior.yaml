@@ -1,0 +1,29 @@
+unit: mobile-inventory-page
+side_effects:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/InventarioViewModel.kt:22
+    effect: "insert a trimmed product with generated UUID and supplied price/stock"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/InventarioViewModel.kt:26
+    effect: "adjust product stock through DAO"
+    must_preserve: true
+branches:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/inventario/InventarioScreen.kt:53
+    condition: "name is nonblank and price/stock parse as numbers"
+    behavior: "insert product and close/reset dialog"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/inventario/InventarioScreen.kt:53
+    condition: "input validation fails"
+    behavior: "leave dialog open without insertion"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/inventario/InventarioScreen.kt:65
+    condition: "stock is below five"
+    behavior: "show alert color"
+    must_preserve: true
+error_paths: []
+concurrency:
+  model: coroutine
+  tx_boundary:
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/viewmodel/InventarioViewModel.kt:15
+    scope: "continuous product observation and individual DAO writes"
+    isolation: "Room default"
+    must_preserve: true
