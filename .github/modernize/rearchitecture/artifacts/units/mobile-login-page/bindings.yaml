@@ -1,0 +1,9 @@
+unit: mobile-login-page
+bindings:
+  - type: convention
+    name: "@Composable LoginScreen"
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/auth/LoginScreen.kt:26
+    target: "NavHost route login"
+    must_appear_in_target: true
+    notes: "ViewModel is obtained through lifecycle-aware Compose integration."
+runtime_config: []

@@ -1,0 +1,85 @@
+contracts:
+  - name: health-check
+    unit: health-api
+    type: rest
+    stability: frozen
+    source_loc: backend/src/routes/health.routes.ts:4
+    contract:
+      method: "GET"
+      path: "/api/v1/health"
+      request: "none"
+      response: "health status object"
+      error: "standard Express error handling"
+      auth: "none"
+    target_contract:
+      method: "GET /api/v1/health"
+      notes: "Keep the mounted path and unauthenticated readiness semantics."
+    semantic_divergence: []
+  - name: login
+    unit: auth-login-api
+    type: rest
+    stability: frozen
+    source_loc: backend/src/routes/auth.routes.ts:9
+    contract:
+      method: "POST"
+      path: "/api/v1/auth/login"
+      request: "{email: string, password: string}"
+      response: "{accessToken: string, tokenType: 'Bearer', expiresIn: number}"
+      error: "400 invalid_credentials_format; 401 invalid_credentials"
+      auth: "none"
+    target_contract:
+      method: "POST /api/v1/auth/login -> 200|400|401"
+      notes: "Normalize email, preserve generic invalid-credential response, and issue Bearer token."
+    semantic_divergence: []
+  - name: change-password
+    unit: auth-change-password-api
+    type: rest
+    stability: frozen
+    source_loc: backend/src/routes/auth.routes.ts:41
+    contract:
+      method: "POST"
+      path: "/api/v1/auth/change-password"
+      request: "{currentPassword: string, newPassword: string}"
+      response: "204 empty body"
+      error: "400 invalid_password_change|password_unchanged; 401 unauthorized|invalid_current_password"
+      auth: "Bearer access token"
+    target_contract:
+      method: "POST /api/v1/auth/change-password -> 204|400|401"
+      notes: "Scope lookup and update by authenticated userId and businessId."
+    semantic_divergence: []
+  - name: list-products
+    unit: products-list-api
+    type: rest
+    stability: frozen
+    source_loc: backend/src/routes/products.routes.ts:5
+    contract:
+      method: "GET"
+      path: "/api/v1/products?limit=&offset="
+      request: "optional non-negative integer limit/offset"
+      response: "{items: [{id,name,unit,salePrice,createdAt,updatedAt}], pagination}"
+      error: "401 unauthorized; 400 invalid_pagination"
+      auth: "Bearer access token"
+    target_contract:
+      method: "GET /api/v1/products -> 200|400|401"
+      notes: "Preserve defaults limit=50, offset=0 and maximums limit=100, offset=100000."
+    semantic_divergence: []
+  - name: create-product
+    unit: products-create-api
+    type: rest
+    stability: frozen
+    source_loc: backend/src/routes/products.routes.ts:40
+    contract:
+      method: "POST"
+      path: "/api/v1/products"
+      request: "{name: string, unit: string, salePrice: decimal string}"
+      response: "created product object"
+      error: "400 invalid_product; 401 unauthorized; 409 product_already_exists"
+      auth: "Bearer access token"
+    target_contract:
+      method: "POST /api/v1/products -> 201|400|401|409"
+      notes: "Preserve decimal-string validation, trimming, tenant scope, and uniqueness conflict."
+    semantic_divergence:
+      - field: salePrice
+        issue: "The API deliberately transports price as a decimal string; converting to binary floating point can change precision."
+        source_loc: backend/src/routes/products.routes.ts:52
+

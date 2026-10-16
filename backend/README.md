@@ -2,9 +2,9 @@
 
 ## Estado actual
 
-API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, alta administrativa de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, JWT de 15 minutos y consulta/creación de productos limitadas al negocio del token. Hay pruebas automatizadas de autenticación, tokens y rechazo de acceso anónimo al catálogo.
+API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, alta administrativa de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token y recepción idempotente de lotes de transacciones offline. Hay pruebas automatizadas de autenticación, tokens y rechazo de acceso anónimo al catálogo.
 
-Ventas, sincronización, actualización/borrado de productos, recuperación de contraseña, limitación de intentos y despliegue todavía no están implementados. No exponer esta API a una red ni usarla con datos reales.
+Actualización/borrado de productos, recuperación de contraseña, limitación de intentos y despliegue todavía no están implementados. No exponer esta API a una red ni usarla con datos reales.
 
 ## Requisitos
 
@@ -88,6 +88,33 @@ Requiere el mismo encabezado de autorización y un cuerpo JSON:
 
 `salePrice` es una cadena decimal con hasta dos decimales para no introducir redondeo binario. Un nombre duplicado en el mismo negocio devuelve `409`.
 
+### Sincronización offline
+
+`POST /api/v1/transacciones/batch` requiere el token y recibe hasta 100 transacciones:
+
+```json
+{
+  "transacciones": [
+    {
+      "operationId": "00000000-0000-4000-8000-000000000001",
+      "tipo": "VENTA",
+      "payload": {
+        "ventaId": "00000000-0000-4000-8000-000000000002",
+        "productoId": "00000000-0000-4000-8000-000000000003",
+        "cantidad": 1,
+        "precioUnitario": 12.5,
+        "total": 12.5,
+        "formaPago": "CONTADO",
+        "creadoEn": 1760572800000
+      },
+      "schemaVersion": 1
+    }
+  ]
+}
+```
+
+Cada `operationId` es idempotente dentro del negocio del token. La respuesta devuelve `ACEPTADA`, `DUPLICADA`, `CONFLICTO` o `RECHAZADA` por operación. `GET /api/v1/products/sync?desde=<timestamp-ms>` devuelve hasta 500 productos modificados después del timestamp; el stock permanece en el móvil durante este MVP.
+
 ## Comandos
 
 ```powershell
@@ -106,7 +133,6 @@ npm run db:migrate
 2. Añadir actualización/borrado seguro de productos y paginación documentada.
 3. Añadir limitación de intentos y revocación de sesiones antes de permitir acceso desde una red.
 4. Añadir ventas, líneas y movimientos en transacción.
-5. Añadir recepción de Outbox con UUID idempotente y resultado por operación.
-6. Actualizar ADR/C4 y ampliar pruebas de seguridad antes de cualquier despliegue.
+5. Actualizar ADR/C4 y ampliar pruebas de seguridad antes de cualquier despliegue.
 
 La materia Tecnologías en Internet incluye MongoDB/Mongoose; la profesora debe confirmar si se exige módulo NoSQL dentro del producto o basta una evidencia didáctica acotada. PostgreSQL no equivale a MongoDB y este backend no declara cubrir ese punto.

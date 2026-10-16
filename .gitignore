@@ -6,6 +6,7 @@ backend/dist/
 backend/coverage/
 mobile/.gradle/
 mobile/**/build/
+mobile/app/src/main/assets/vosk-model-small-es-0.42/
 .idea/
 *.iml
 *.log

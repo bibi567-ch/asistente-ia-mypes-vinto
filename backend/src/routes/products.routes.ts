@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../auth/require-auth.js';
 import { pool } from '../db/pool.js';
+import { obtenerProductosParaSync } from '../sincronizacion/service/sincronizacion.service.js';
 
 export const productsRouter = Router();
 productsRouter.use(requireAuth);
@@ -102,6 +103,33 @@ productsRouter.post('/', async (request, response) => {
     createdAt: product.created_at,
     updatedAt: product.updated_at
   });
+});
+
+productsRouter.get('/sync', async (request, response) => {
+  const businessId = request.auth?.businessId;
+  if (!businessId) {
+    response.status(401).json({ error: { code: 'unauthorized', message: 'Authentication required.' } });
+    return;
+  }
+
+  const desdeParam = request.query.desde;
+  const desde = typeof desdeParam === 'string' ? Number(desdeParam) : 0;
+  if (!Number.isFinite(desde) || desde < 0) {
+    response.status(400).json({
+      error: { code: 'invalid_since', message: 'El parámetro "desde" debe ser un timestamp en milisegundos.' }
+    });
+    return;
+  }
+
+  try {
+    const productos = await obtenerProductosParaSync(businessId, desde);
+    response.status(200).json({ items: productos, total: productos.length, timestamp: Date.now() });
+  } catch {
+    console.error('Error al obtener productos para sync.');
+    response.status(500).json({
+      error: { code: 'sync_failed', message: 'No se pudo obtener el catálogo.' }
+    });
+  }
 });
 
 function parseInteger(value: unknown, fallback: number): number | null {

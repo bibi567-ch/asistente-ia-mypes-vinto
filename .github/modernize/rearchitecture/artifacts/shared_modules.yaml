@@ -1,0 +1,111 @@
+modules:
+  - name: backend-app
+    kind: config
+    source_loc: backend/src/app.ts:5
+    used_by_units: [health-api]
+    fields:
+      - name: healthRouter
+        type: "Express Router"
+    god_class: false
+    split_candidate: false
+    migration_strategy: wrap
+    notes: "Route mounting and error middleware are application-wide wiring."
+  - name: backend-pool
+    kind: config
+    source_loc: backend/src/db/pool.ts:1
+    used_by_units: [auth-login-api, auth-change-password-api, products-list-api, products-create-api]
+    fields:
+      - name: query
+        type: "Pool.query<T>(text, values)"
+    god_class: false
+    split_candidate: false
+    migration_strategy: wrap
+    notes: "Shared PostgreSQL connection boundary."
+  - name: auth-middleware
+    kind: utility
+    source_loc: backend/src/auth/require-auth.ts:17
+    used_by_units: [auth-change-password-api, products-list-api, products-create-api]
+    fields:
+      - name: authorization
+        type: "Bearer HTTP header"
+      - name: userId
+        type: string
+      - name: businessId
+        type: string
+    god_class: false
+    split_candidate: false
+    migration_strategy: wrap
+    notes: "Attaches verified claims to Express Request."
+  - name: auth-token-contract
+    kind: dto
+    source_loc: backend/src/routes/auth.routes.ts:35
+    used_by_units: [auth-login-api]
+    fields:
+      - name: accessToken
+        type: string
+      - name: tokenType
+        type: string
+      - name: expiresIn
+        type: number
+    god_class: false
+    split_candidate: false
+    migration_strategy: copy
+    notes: "Login response fields are externally visible."
+  - name: mobile-database
+    kind: config
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/data/MypesDatabase.kt:6
+    used_by_units: [mobile-login-page, mobile-onboarding-page, mobile-dashboard-page, mobile-inventory-page]
+    fields:
+      - name: obtener
+        type: "MypesDatabase.obtener(Context)"
+      - name: usuarioDao
+        type: UsuarioDao
+      - name: productoDao
+        type: ProductoDao
+    god_class: false
+    split_candidate: false
+    migration_strategy: wrap
+    notes: "Singleton Room database boundary."
+  - name: mobile-theme
+    kind: config
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/theme/Colors.kt:3
+    used_by_units: [mobile-login-page, mobile-onboarding-page, mobile-dashboard-page, mobile-inventory-page]
+    fields:
+      - name: FondoOscuro
+        type: "Compose Color"
+      - name: TextoBlanco
+        type: "Compose Color"
+      - name: TextoGris
+        type: "Compose Color"
+      - name: VerdeNeon
+        type: "Compose Color"
+      - name: RojoCancelar
+        type: "Compose Color"
+      - name: NaranjaAlerta
+        type: "Compose Color"
+      - name: SuperficieOscura
+        type: "Compose Color"
+    god_class: false
+    split_candidate: false
+    migration_strategy: copy
+    notes: "Shared visual constants."
+  - name: mobile-product-model
+    kind: dto
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/data/Producto.kt:5
+    used_by_units: [mobile-onboarding-page, mobile-dashboard-page, mobile-inventory-page]
+    fields:
+      - name: Producto
+        type: "Room entity"
+      - name: id
+        type: String
+      - name: nombre
+        type: String
+      - name: precio
+        type: Double
+      - name: stock
+        type: Double
+    god_class: false
+    split_candidate: false
+    migration_strategy: copy
+    notes: "Persisted local product model."
+

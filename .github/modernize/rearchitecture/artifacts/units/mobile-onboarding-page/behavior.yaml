@@ -1,0 +1,26 @@
+unit: mobile-onboarding-page
+side_effects:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/onboarding/OnboardingPlantillaScreen.kt:31
+    effect: "insert every example product belonging to the selected template"
+    must_preserve: true
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/onboarding/OnboardingPlantillaScreen.kt:33
+    effect: "navigate to dashboard and remove onboarding from back stack"
+    must_preserve: true
+branches:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/presentation/onboarding/OnboardingPlantillaScreen.kt:27
+    condition: "template application is in progress"
+    behavior: "disable template buttons and show progress indicator"
+    must_preserve: true
+error_paths:
+  - source_loc: mobile/app/src/main/java/com/mypes/vinto/data/PlantillaRepository.kt:7
+    trigger: "unknown template id"
+    outcome: "return zero inserted products"
+    contract: "suspend result Int = 0"
+    must_preserve: true
+concurrency:
+  model: coroutine
+  tx_boundary:
+    source_loc: mobile/app/src/main/java/com/mypes/vinto/data/PlantillaRepository.kt:8
+    scope: "sequential DAO insertions for one selected template"
+    isolation: "Room default; no explicit transaction"
+    must_preserve: true
