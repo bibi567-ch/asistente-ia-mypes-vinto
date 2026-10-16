@@ -1,6 +1,6 @@
 # Aplicación Android
 
-No existe todavía un proyecto Android Studio en esta carpeta. El repositorio contiene documentación de la arquitectura móvil propuesta; no la presentes como una app compilable.
+El módulo `app/` contiene el primer esqueleto compilable de Android: Kotlin + Jetpack Compose, Room/SQLite local y un pipeline NLU determinista preparado para Vosk.
 
 ## Línea base acordada
 
@@ -9,7 +9,22 @@ No existe todavía un proyecto Android Studio en esta carpeta. El repositorio co
 - WorkManager + Outbox para sincronización diferida.
 - Venta manual/local antes de voz y modelos de IA.
 
-## Primer incremento sugerido
+## Primer incremento implementado
+
+- Proyecto Android Studio bajo `mobile/`, con configuración Gradle y SDK mínimo 26.
+- Entidad `Producto`, DAO y base local Room persistente en `mypes-local.db`.
+- Plantillas iniciales de negocio y repositorio para cargarlas durante onboarding.
+- Clasificador de intenciones y extractor de entidades para texto en español.
+- Fachada y motor Vosk offline; el modelo se copia desde `app/src/main/assets/` al almacenamiento privado de la aplicación.
+- Pantalla Compose inicial y solicitud de permiso de micrófono en tiempo de ejecución.
+
+El modelo Vosk no se versiona por su tamaño. Descárgalo localmente en:
+
+`mobile/app/src/main/assets/vosk-model-small-es-0.42/`
+
+La aplicación sigue siendo un primer incremento: venta, outbox, WorkManager y sincronización con la API aún no están implementados.
+
+## Siguientes incrementos
 
 1. Crear proyecto Android Studio y documentar versiones/herramientas.
 2. Implementar catálogo local y formulario de venta.
