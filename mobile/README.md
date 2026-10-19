@@ -1,37 +1,39 @@
 # Aplicación Android
 
-El módulo `app/` contiene el primer esqueleto compilable de Android: Kotlin + Jetpack Compose, Room/SQLite local y un pipeline NLU determinista preparado para Vosk.
+Módulo Kotlin + Jetpack Compose bajo app/. La rama main revisada incluye persistencia local Room/SQLite, autenticación local por PIN y componentes de PLN, ventas y sincronización diferida. La presencia de código no demuestra que todos los flujos de UI estén integrados o probados de extremo a extremo.
 
-## Línea base acordada
+## Funciones y componentes en el código
 
-- Kotlin + Jetpack Compose.
-- Room sobre SQLite para lectura y persistencia local.
-- WorkManager + Outbox para sincronización diferida.
-- Venta manual/local antes de voz y modelos de IA.
+- Login local con PIN de cuatro dígitos, derivación PBKDF2-HMAC-SHA256 y política de bloqueo temporal. El login local no es el login JWT del backend.
+- Onboarding de plantilla, dashboard e inventario Compose.
+- Entidad, DAO y base de datos Room persistente en mypes-local.db.
+- El formulario de inventario permite crear productos. En la pantalla revisada no hay opción para eliminar un producto; el DAO tampoco define esa operación.
+- Código para ventas, detalles de venta, caja, Outbox, Retrofit y un Worker de WorkManager para sincronización.
+- Pipeline local de NLU/Vosk y solicitud de permiso de micrófono.
 
-## Primer incremento implementado
+La estudiante informó que el APK debug se instaló en un Motorola G60 y que un producto de prueba se guardó. Esta es una demostración puntual reportada en conversación; archivar pasos y evidencia anonimizada antes de llamarla prueba formal.
 
-- Proyecto Android Studio bajo `mobile/`, con configuración Gradle y SDK mínimo 26.
-- Entidad `Producto`, DAO y base local Room persistente en `mypes-local.db`.
-- Usuario local con PIN derivado mediante PBKDF2-HMAC-SHA256 y bloqueo temporal tras intentos fallidos.
-- Plantillas iniciales de negocio y repositorio para cargarlas durante onboarding.
-- Clasificador de intenciones y extractor de entidades para texto en español.
-- Fachada y motor Vosk offline; el modelo se copia desde `app/src/main/assets/` al almacenamiento privado de la aplicación.
-- Navegación Compose para login, onboarding de plantilla, dashboard e inventario.
-- Solicitud de permiso de micrófono en tiempo de ejecución.
+## Sincronización: límites conocidos
 
-El modelo Vosk no se versiona por su tamaño. Descárgalo localmente en:
+- El backend requiere un token Bearer para acceder a rutas protegidas. El worker móvil lee un token de AuthSession; el login por PIN es local y no debe confundirse con la autenticación de la API.
+- ApiClient usa http://10.0.2.2:3000/, dirección del host para emuladores Android. No es la dirección LAN del equipo para un teléfono físico.
+- Docker Compose inicia la API y PostgreSQL localmente; no configura por sí solo el acceso desde el teléfono ni el token de la app.
+- Probar por separado la API, el registro offline local y la sincronización. Registrar request/response con datos ficticios y sin copiar tokens a evidencia.
 
-`mobile/app/src/main/assets/vosk-model-small-es-0.42/`
+## Modelo Vosk
 
-La aplicación sigue siendo un primer incremento: registro de ventas, outbox, WorkManager y sincronización con la API aún no están implementados. El botón de voz transcribe y clasifica texto, pero todavía no confirma ni persiste una venta.
+El modelo no se versiona por su tamaño. El código espera los archivos locales del modelo en:
 
-## Siguientes incrementos
+mobile/app/src/main/assets/vosk-model-small-es-0.42/
 
-1. Crear proyecto Android Studio y documentar versiones/herramientas.
-2. Implementar catálogo local y formulario de venta.
-3. Probar persistencia tras cerrar la app y en modo avión.
-4. Integrar API/sync cuando exista contrato y auth.
-5. Añadir Vosk después de medir en el dispositivo disponible.
+Sin el modelo instalado, no afirmar que el reconocimiento de voz está probado en el teléfono. Registrar idioma, modelo, dispositivo, entorno y resultado.
 
-Asignar responsable, criterio de aceptación y evidencia a cada tarea en el tablero. No subir keystores, tokens, datos reales ni grabaciones identificables.
+## Compilar y probar
+
+1. Abrir la carpeta mobile/ en Android Studio y esperar la sincronización de Gradle.
+2. Seleccionar un dispositivo/emulador y compilar la variante debug.
+3. Probar cada flujo con datos ficticios: PIN, configuración inicial, alta de producto, persistencia tras reabrir y modo avión.
+4. Probar ventas, voz y sincronización por separado; anotar cualquier comportamiento pendiente.
+5. Guardar evidencia según evidence/README.md y relacionarla con la matriz de tres materias.
+
+No incluir APK, keystore, token, datos reales de comerciantes ni audios identificables en el repositorio.
