@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
     entities = [
@@ -81,11 +82,21 @@ abstract class MypesDatabase : RoomDatabase() {
 
         fun obtener(context: Context): MypesDatabase =
             instancia ?: synchronized(this) {
-                instancia ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    MypesDatabase::class.java,
-                    "mypes-local.db"
-                ).addMigrations(MIGRATION_1_2).build().also { instancia = it }
+                instancia ?: run {
+                    System.loadLibrary("sqlcipher")
+
+                    val factory = SupportOpenHelperFactory(ClaveDb.obtener(context))
+
+                    Room.databaseBuilder(
+                        context.applicationContext,
+                        MypesDatabase::class.java,
+                        "mypes-local.db"
+                    )
+                        .openHelperFactory(factory)
+                        .addMigrations(MIGRATION_1_2)
+                        .build()
+                        .also { instancia = it }
+                }
             }
     }
 }
