@@ -136,3 +136,14 @@ npm run db:migrate
 5. Actualizar ADR/C4 y ampliar pruebas de seguridad antes de cualquier despliegue.
 
 La materia Tecnologías en Internet incluye MongoDB/Mongoose; la profesora debe confirmar si se exige módulo NoSQL dentro del producto o basta una evidencia didáctica acotada. PostgreSQL no equivale a MongoDB y este backend no declara cubrir ese punto.
+
+
+## Justificación de Node.js y PostgreSQL para el proyecto
+
+Node.js, TypeScript y Express son la implementación actual del backend y coinciden con la unidad de desarrollo backend del sílabo de Tecnologías en Internet. Express expone las rutas REST; TypeScript permite revisar tipos durante la compilación. La evidencia de esta parte debe incluir arranque local, contrato de endpoints y pruebas reproducibles.
+
+PostgreSQL se eligió para el dominio central porque el backend relaciona negocios, propietarios, productos y transacciones. Las claves, restricciones y transacciones SQL ayudan a preservar integridad entre estas entidades y a procesar operaciones de venta de forma consistente. El equipo ya tiene migraciones SQL y API construidas sobre PostgreSQL; agregar una segunda base sin una necesidad del producto requeriría mantener otro esquema, duplicar/sincronizar datos y ampliar las pruebas.
+
+El sílabo TEC-644 sí incluye MongoDB/Mongoose. PostgreSQL no lo sustituye ni acredita por equivalencia ese resultado. Si la asignatura lo exige, confirmar con el docente si se acepta una práctica MongoDB/Mongoose separada; si se requiere cambiar la base del producto, registrar antes una decisión arquitectónica y un plan de migración. No afirmar que el proyecto usa MongoDB.
+
+La asignación de responsables, fechas y tareas de las tres materias se detalla en [el plan de segunda entrega](../docs/14_Segunda_Entrega_Tareas_por_Materia.md).
