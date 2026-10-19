@@ -18,6 +18,12 @@ Corte documental: 19/10/2026. Rama revisada: main, commit ec9028b.
 
 Consulta el estado, los criterios por materia y las brechas en la [Matriz de cumplimiento y evidencias](docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md).
 
+## Justificación del stack
+
+El backend usa Node.js 24, TypeScript y Express; Node.js/Express coincide con la unidad de backend de Tecnologías en Internet. PostgreSQL es la base central elegida para las relaciones entre negocios, productos, ventas y operaciones, y para sus restricciones y transacciones. La app Android guarda sus datos locales con Room/SQLite.
+
+La materia también incluye MongoDB/Mongoose y front-end web HTML/CSS/JavaScript. PostgreSQL no reemplaza MongoDB, y Android Compose no reemplaza un front-end web. La razón técnica del stack y las opciones académicas pendientes de confirmar están en el [plan de segunda entrega por materia](docs/14_Segunda_Entrega_Tareas_por_Materia.md).
+
 ## Arquitectura resumida
 
 ```mermaid
