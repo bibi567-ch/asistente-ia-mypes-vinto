@@ -11,6 +11,7 @@ La revisión de la rama main del 16/10/2026 encontró código fuente Android, ba
 | Documento | Contenido |
 |---|---|
 | [Matriz de cumplimiento 2026-2](docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md) | Cotejo de los sílabos ARQ-643, TEC-644 e INV-645, brechas y evidencia requerida |
+| [Segunda entrega por materia](docs/14_Segunda_Entrega_Tareas_por_Materia.md) | Tareas propuestas por integrante, tecnologías reales y fechas según los sílabos |
 | [Mapa de presentación](docs/MAPA_PRESENTACION.md) | Relación del trabajo con Investigación I, Arquitectura y Tecnologías en Internet |
 | [Perfil](docs/perfil/Perfil_final.md) | Perfil de Trabajo de Grado, versión 11 |
 | [Cronograma](docs/Cronograma_final.md) | Separación entre las entregas del semestre y el Trabajo de Grado |
