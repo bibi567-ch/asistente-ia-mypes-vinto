@@ -1,6 +1,6 @@
 # Mapa del trabajo y las tres materias
 
-**Corte:** 19/10/2026. La [Matriz de cumplimiento y evidencias](13_Matriz_Cumplimiento_Tres_Materias_2026-2.md) desglosa los criterios de los programas analíticos ARQ-643, TEC-644 e INV-645. No predice calificaciones ni sustituye las instrucciones docentes.
+ Para la explicación del stack real, la justificación de PostgreSQL/Node.js y el reparto de tareas por integrante, consultar el [plan de segunda entrega](14_Segunda_Entrega_Tareas_por_Materia.md).**Corte:** 19/10/2026. La [Matriz de cumplimiento y evidencias](13_Matriz_Cumplimiento_Tres_Materias_2026-2.md) desglosa los criterios de los programas analíticos ARQ-643, TEC-644 e INV-645. No predice calificaciones ni sustituye las instrucciones docentes.
 
 El proyecto es un prototipo de asistente conversacional offline, configurable por rubro, para registrar ventas y consultar el saldo local de existencias en MYPES del centro de Vinto. No es un sistema completo de almacén.
 
