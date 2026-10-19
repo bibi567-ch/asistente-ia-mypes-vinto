@@ -22,7 +22,9 @@ También se contrastó la documentación y el código de la rama `main` del repo
 | **Pendiente de evidencia** | El criterio requiere un resultado, prueba, entrega o defensa que no se encontró en el repositorio revisado. |
 | **Brecha de alcance/tecnología** | La expectativa del sílabo y la solución actual no coinciden; se debe consultar al docente antes de prometer cobertura. |
 
-Una característica solo debe marcarse **verificada** en una entrega cuando tenga pasos repetibles, entorno, fecha, commit y resultado observable. Un diagrama, una lista de requisitos o una compilación no bastan por sí solos para demostrar el comportamiento.
+
+
+La explicación del stack realmente usado (Node.js/Express, PostgreSQL, Kotlin/Compose y Room), la justificación técnica de PostgreSQL y la distribución de tareas para las próximas entregas están en el [Plan de segunda entrega por materia](14_Segunda_Entrega_Tareas_por_Materia.md).Una característica solo debe marcarse **verificada** en una entrega cuando tenga pasos repetibles, entorno, fecha, commit y resultado observable. Un diagrama, una lista de requisitos o una compilación no bastan por sí solos para demostrar el comportamiento.
 
 ## Resumen ejecutivo
 
