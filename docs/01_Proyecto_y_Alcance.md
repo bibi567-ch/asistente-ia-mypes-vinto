@@ -6,7 +6,7 @@
 
 **Equipo:** Eva Lizeth Chino Quispe, Christian Gonzales Mamani, Marializ Mamani Quispe, Kevin Jhonathan Rocha Rojas y Luis Gerardo Lazo Bustamante.
 
-El texto completo del perfil está en [Perfil_final.md](perfil/Perfil_final.md). Si este resumen y el perfil no coinciden, manda el perfil.
+> El **Perfil de Investigación / Trabajo de Grado** es un documento académico **aparte**. No forma parte de este repositorio. Si el perfil y este resumen de alcance no coinciden, manda el perfil (fuera del repo) y actualiza este archivo para que el alcance técnico quede alineado.
 
 ## De qué se trata
 
@@ -29,11 +29,17 @@ Compras a proveedores, lotes, costos, facturación, reconocimiento de voz en que
 
 Descontar lo vendido del saldo del teléfono forma parte de registrar la venta. No abre un módulo de almacén.
 
-## Cómo está construido
+## Cómo está construido (stack vigente)
 
-La aplicación prevista es Kotlin y Jetpack Compose, con SQLite en el teléfono. La API de esta versión del repositorio es Node.js, TypeScript, Express y PostgreSQL.
+| Capa | Tecnología | Notas |
+|---|---|---|
+| Cliente | Kotlin + Jetpack Compose | App Android nativa |
+| Persistencia local | Room / SQLite | Offline-first |
+| Backend | Node.js 24 + TypeScript + Express | API local de consolidación |
+| Persistencia central | PostgreSQL | Migraciones en `backend/db/migrations` |
+| Contenedores de desarrollo | Docker Compose | Solo entorno local |
 
-El documento de arquitectura v1.1 describe Spring Boot. Esa entrega se conserva. El código actual no usa Spring.
+El documento de arquitectura **SAD v1.1** describe Spring Boot en la entrega histórica. Esa entrega se conserva. El **código actual** no usa Spring; la arquitectura vigente es Node.js/Express/PostgreSQL + Android/Room. Debe emitirse un SAD v2 coherente con el código (ver `docs/03_SAD_Arquitectura.md`).
 
 ## Nombre
 
