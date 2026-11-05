@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+:root {
+  --mypes-green: #2e7d32;
+  --mypes-red: #f44336;
+}
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
