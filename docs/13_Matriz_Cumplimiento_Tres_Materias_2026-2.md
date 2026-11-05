@@ -1,16 +1,18 @@
 # Matriz de cumplimiento y evidencias para las tres materias — Gestión 2026-2
 
-**Corte de revisión:** 19/10/2026  
+**Corte de revisión:** rama `docs/arq-tec-cumplimiento-sin-perfil`  
 **Propósito:** ayudar a preparar revisiones y entregas desde el rol de documentación, control de versiones, trazabilidad y organización de evidencias.  
 **Proyecto:** prototipo de asistente conversacional offline, configurable por rubro, para registrar ventas y consultar el saldo local de existencias en MYPES del centro de Vinto.
 
 > Esta matriz traduce los resultados y la evaluación descritos en los tres programas analíticos compartidos. No es una rúbrica oficial, no predice notas ni reemplaza instrucciones del docente. Si existe una rúbrica adicional o una corrección docente, se debe incorporar antes de cerrar cada entrega.
 
+> **Perfil de Investigación (INV-645):** es un documento académico **aparte**. **No se versiona en este repositorio.** La matriz solo indica qué criterios de investigación se relacionan con el alcance técnico del prototipo.
+
 ## Base de la revisión
 
 Se revisaron los sílabos de **Arquitectura de Software (ARQ-643)**, **Tecnologías en Internet (TEC-644)** e **Investigación I (INV-645)**, Gestión 2026-2. Sus códigos de verificación son 242ae6ba-a945-4192-94b0-50fe73348d18, c84d0319-4908-495f-90e3-525d7137c007 y 37e51b11-c5eb-4414-8bf3-cd1ce8c48c24, respectivamente.
 
-También se contrastó la documentación y el código de la rama `main` del repositorio en el commit `ec9028b` (16/10/2026). El usuario reportó que instaló la app en un Motorola G60 y que un producto de prueba quedó guardado en Inventario; esa demostración aún no está archivada en `evidence/`.
+También se contrastó la documentación y el código del repositorio. El usuario reportó que instaló la app en un Motorola G60 y que un producto de prueba quedó guardado en Inventario; esa demostración aún no está archivada en `evidence/`.
 
 ### Cómo leer los estados
 
@@ -22,16 +24,16 @@ También se contrastó la documentación y el código de la rama `main` del repo
 | **Pendiente de evidencia** | El criterio requiere un resultado, prueba, entrega o defensa que no se encontró en el repositorio revisado. |
 | **Brecha de alcance/tecnología** | La expectativa del sílabo y la solución actual no coinciden; se debe consultar al docente antes de prometer cobertura. |
 
+La explicación del stack realmente usado (Node.js/Express, PostgreSQL, Kotlin/Compose y Room), la justificación técnica de PostgreSQL y la distribución de tareas para las próximas entregas están en el [Plan de segunda entrega por materia](14_Segunda_Entrega_Tareas_por_Materia.md).
 
-
-La explicación del stack realmente usado (Node.js/Express, PostgreSQL, Kotlin/Compose y Room), la justificación técnica de PostgreSQL y la distribución de tareas para las próximas entregas están en el [Plan de segunda entrega por materia](14_Segunda_Entrega_Tareas_por_Materia.md).Una característica solo debe marcarse **verificada** en una entrega cuando tenga pasos repetibles, entorno, fecha, commit y resultado observable. Un diagrama, una lista de requisitos o una compilación no bastan por sí solos para demostrar el comportamiento.
+Una característica solo debe marcarse **verificada** en una entrega cuando tenga pasos repetibles, entorno, fecha, commit y resultado observable. Un diagrama, una lista de requisitos o una compilación no bastan por sí solos para demostrar el comportamiento.
 
 ## Resumen ejecutivo
 
 | Materia | Evidencia principal disponible | Riesgo documental o técnico que debe atenderse |
 |---|---|---|
-| Investigación I | `docs/perfil/Perfil_final.md`, versión 11, con el problema, alcance y propuesta del perfil. | Preparar y revisar el ensayo, la versión final del perfil y su defensa; conservar trazabilidad de fuentes y evidencia. La existencia del perfil no demuestra que la evaluación haya sido aprobada. |
-| Arquitectura de Software | `docs/03_SAD_Arquitectura.md`, diagramas C4 y casos de uso. | El SAD 1.1 conserva Spring Boot, mientras el backend de `main` usa Node.js/TypeScript/Express/PostgreSQL. Hace falta una versión actualizada claramente identificada, con decisiones justificadas, evaluación de calidad y diagramas sincronizados con el código. |
+| Investigación I | Alcance técnico del prototipo en `docs/01` y cronograma. El **perfil escrito se entrega fuera del repo**. | Preparar y revisar el ensayo, la versión final del perfil y su defensa **fuera de este repositorio**; conservar trazabilidad de fuentes. |
+| Arquitectura de Software | `docs/03_SAD_Arquitectura.md`, diagramas C4 y casos de uso. | El SAD 1.1 conserva Spring Boot, mientras el backend usa Node.js/TypeScript/Express/PostgreSQL. Hace falta un **SAD v2** claramente identificado, con decisiones justificadas, evaluación de calidad y diagramas sincronizados con el código. |
 | Tecnologías en Internet | Requisitos/UX, API Node.js/Express/PostgreSQL y app Android Kotlin/Compose con Room. | El sílabo pide contenidos de web front-end y MongoDB/Mongoose; la implementación revisada es Android y PostgreSQL. Docker local no demuestra despliegue en nube, HTTPS/TLS, auditoría de seguridad ni auditoría de impacto. Consultar qué evidencia alternativa acepta el docente. |
 
 ## 1. Investigación I — INV-645
@@ -58,16 +60,16 @@ Las fechas anteriores son las del programa analítico. No se infiere de ellas qu
 
 | Criterio para revisar | Evidencia que se debe localizar o completar | Estado documental |
 |---|---|---|
-| Problema tecnológico situado en un contexto real | Situación actual, objeto de estudio, población/contexto, antecedentes y alcance de la evidencia primaria | Documentado en el perfil v11; revisar fuentes y consistencia antes de entregar |
-| Pregunta/problema y causas–efectos | Formulación clara, árbol o esquema causal enlazado con antecedentes y objetivos | Revisar en el perfil final y guardar la versión aceptada |
-| Objetivo general y objetivos específicos | Verbos, secuencia lógica, producto/aporte y relación explícita con el problema | Pendiente de cotejo final con la consigna del docente |
-| Justificación, beneficiarios e impacto | Razones técnicas, sociales y académicas, sin presentar beneficios hipotéticos como resultados medidos | Documentado parcialmente; sostener con fuentes y delimitaciones |
-| Alcance, límites y factibilidad | Usuarios, rubros, funciones, entorno Android, recursos, costos y plazo | Alcance descrito; confirmar que no se mezclen entregas de materia con el Trabajo de Grado |
-| Estado del arte y ensayo | Fuentes académicas pertinentes, síntesis crítica, brecha, citas y referencias verificables | Pendiente de adjuntar/revisar como producto separado |
-| Ética e integridad | Consentimiento cuando corresponda, anonimización, citas, derechos de autor y prevención de plagio | Mantener evidencia anonimizada y revisar referencias una por una |
+| Problema tecnológico situado en un contexto real | Situación actual, objeto de estudio, población/contexto, antecedentes y alcance de la evidencia primaria | Se revisa en el **perfil externo**; el alcance técnico del repo está en `docs/01` |
+| Pregunta/problema y causas–efectos | Formulación clara, árbol o esquema causal enlazado con antecedentes y objetivos | Perfil externo |
+| Objetivo general y objetivos específicos | Verbos, secuencia lógica, producto/aporte y relación explícita con el problema | Perfil externo; alinear con alcance de `docs/01` |
+| Justificación, beneficiarios e impacto | Razones técnicas, sociales y académicas, sin presentar beneficios hipotéticos como resultados medidos | Perfil externo |
+| Alcance, límites y factibilidad | Usuarios, rubros, funciones, entorno Android, recursos, costos y plazo | Alcance técnico en repo; confirmar que no se mezclen entregas de materia con el Trabajo de Grado |
+| Estado del arte y ensayo | Fuentes académicas pertinentes, síntesis crítica, brecha, citas y referencias verificables | Producto separado (fuera del repo) |
+| Ética e integridad | Consentimiento cuando corresponda, anonimización, citas, derechos de autor y prevención de plagio | Mantener evidencia anonimizada en `evidence/` |
 | Defensa | Presentación alineada con el perfil, respuesta a preguntas y registro de retroalimentación | Pendiente de preparar/archivar evidencia |
 
-**Artefacto base:** [Perfil final](perfil/Perfil_final.md). La versión 11 se identifica como el perfil que se presenta; cualquier corrección posterior debe quedar como nueva versión y no sobrescribir silenciosamente la entregada.
+**Artefacto base del perfil:** documento externo al repositorio (versión que el equipo defienda ante INV-645). Este repo no aloja `docs/perfil/`.
 
 ## 2. Arquitectura de Software — ARQ-643
 
@@ -94,16 +96,25 @@ Las fechas anteriores son las del programa analítico. No se infiere de ellas qu
 |---|---|---|
 | Problema, contexto y requisitos arquitectónicamente significativos | Drivers priorizados, restricciones y vínculo con requisitos funcionales/no funcionales | SAD v1.1 y requisitos existen; reconciliar nombres, alcance y stack |
 | Atributos y escenarios de calidad | Estímulo, entorno, respuesta y medida verificable para disponibilidad offline, rendimiento, seguridad, usabilidad y modificabilidad | Hay material arquitectónico previo; registrar resultados medidos y separar objetivos de resultados |
-| Alternativas y patrones arquitectónicos | Comparación, ventajas/desventajas, contexto, selección y justificación | Actualizar la decisión para la arquitectura del código actual |
+| Alternativas y patrones arquitectónicos | Comparación, ventajas/desventajas, contexto, selección y justificación | Actualizar la decisión para la arquitectura del código actual (Node + Android offline-first) |
 | Arquitectura distribuida | Diagramas de componentes, contenedores, despliegue e interacción; protocolos y contratos | C1/C2 y casos de uso existen; verificar que cada elemento coincide con el código vigente |
 | Calidad y evaluación | Métricas, checklist o método (por ejemplo ATAM/SAAM según la consigna), riesgos, sensibilidad, trade-offs y mejoras | Pendiente de incorporar evaluación fechada y resultados |
 | Tendencias | Comparación de nube, IA y blockchain; adopción o descarte razonado según alcance/viabilidad | Pendiente de una sección breve, específica al proyecto, sin añadir tecnologías solo para marcar casillas |
 | Decisiones de arquitectura | ADR con contexto, opciones, decisión, consecuencias y estado de aprobación | Revisar coherencia con Android/Room, backend Node/Express y PostgreSQL |
 | Artículo y defensa | Artículo científico con fuentes académicas, estructura/formato que solicite el docente y evidencia de defensa | Pendiente de localizar como archivo de entrega |
 
-**Artefactos base:** [SAD v1.1](03_SAD_Arquitectura.md), [diagramas](../diagrams/README.md) y decisiones históricas bajo `docs/archive/referencias_historicas/`.
+**Artefactos base:** [SAD v1.1](03_SAD_Arquitectura.md), [diagramas](../diagrams/README.md) y decisiones históricas bajo `docs/archive/`.
 
-El SAD 1.1 es una entrega histórica y no debe presentarse como arquitectura actual sin una nota de estado. La rama actual tiene backend Node.js/TypeScript/Express/PostgreSQL; el documento v1.1 aún describe Spring Boot en parte de sus decisiones. Preparar un SAD actualizado como versión nueva, conservar la versión entregada y solicitar revisión docente cuando corresponda.
+El SAD 1.1 es una entrega histórica y no debe presentarse como arquitectura actual sin una nota de estado. La rama actual tiene backend Node.js/TypeScript/Express/PostgreSQL; el documento v1.1 aún describe Spring Boot en parte de sus decisiones. **Preparar un SAD v2** como versión nueva, conservar la versión entregada y solicitar revisión docente cuando corresponda.
+
+### Checklist mínimo para la segunda entrega de ARQ (16/11)
+
+- [ ] SAD v2 con control de versiones y portada propia (no sobrescribir v1.1).
+- [ ] Drivers y escenarios de calidad alineados al alcance offline (RA/QS del v1.1 actualizados al stack Node).
+- [ ] ADR explícito del cambio Spring Boot → Node.js/Express (contexto, alternativas, consecuencias).
+- [ ] Diagramas C1/C2/despliegue coherentes con `backend/` y `mobile/`.
+- [ ] Tabla de trazabilidad requisito → escenario → decisión → evidencia/código.
+- [ ] Sección de evaluación de calidad (método, resultados o “pendiente de medición” honestos).
 
 ## 3. Tecnologías en Internet — TEC-644
 
@@ -139,6 +150,15 @@ El SAD 1.1 es una entrega histórica y no debe presentarse como arquitectura act
 
 **Artefactos base:** [Requisitos y UX/UI](02_Requisitos_y_UX.md), [README del backend](../backend/README.md), [README móvil](../mobile/README.md) y [evidencias](../evidence/README.md).
 
+### Checklist mínimo para la segunda entrega de TEC (11/11)
+
+- [ ] API Node/Express levantada con `docker compose` + migraciones; health y login documentados.
+- [ ] Colección Postman o comandos curl reproducibles (datos ficticios).
+- [ ] Justificación escrita de PostgreSQL vs. criterio MongoDB del sílabo + respuesta del docente.
+- [ ] Evidencia de autenticación (JWT / aislamiento por negocio) sin secretos en capturas.
+- [ ] Diferenciar Compose local de despliegue cloud; no afirmar HTTPS/TLS/monitoreo sin implementación.
+- [ ] Si el docente exige HTML/CSS/JS o Mongo: práctica separada con evidencia propia, no mezclada con el alcance del prototipo móvil.
+
 ## 4. Evidencias que debe reunir la responsable de documentación
 
 Guardar solamente datos de prueba y capturas anonimizadas. No incluir contraseñas, tokens, números de teléfono, nombres de comerciantes ni grabaciones identificables.
@@ -154,7 +174,7 @@ Guardar solamente datos de prueba y capturas anonimizadas. No incluir contraseñ
 | EV-ARQ-01 | Diagramas C1/C2/deployment y tabla de decisiones comparados con el commit | SAD y arquitectura | Pendiente de revisión de consistencia |
 | EV-QUAL-01 | Escenarios de calidad con método, carga/condición, resultado y evidencia | Calidad arquitectónica / rendimiento | Pendiente de medición |
 | EV-SEC-01 | Procedimiento de pruebas de seguridad, hallazgos, severidad y corrección | Seguridad web | Pendiente de auditoría documentada |
-| EV-INV-01 | Ensayo, perfil final, referencias verificadas y rúbrica/comentarios autorizados | Investigación I | Localizar y cotejar antes de cada entrega |
+| EV-INV-01 | Ensayo y perfil final (fuera del repo), referencias verificadas y rúbrica/comentarios autorizados | Investigación I | Localizar y cotejar fuera del repo |
 | EV-DEF-01 | Presentación, fecha, participantes, preguntas, retroalimentación y evidencia permitida | Defensas de las tres materias | Pendiente de archivar |
 
 ### Plantilla mínima para cada registro
@@ -169,18 +189,18 @@ Guardar solamente datos de prueba y capturas anonimizadas. No incluir contraseñ
 - **Adjuntos:** capturas anonimizadas, respuesta de API o reporte pertinente.
 - **Límites:** qué no cubrió la prueba y qué falta repetir.
 
-## 5. Prioridades para preparar las revisiones
+## 5. Prioridades para preparar las revisiones (ARQ + TEC)
 
-1. **Corregir contradicciones entre documentos y código.** El README principal, el índice, el mapa, el README móvil y el de diagramas contenían afirmaciones antiguas sobre funciones Android no implementadas. Esta rama propone alinearlos con la revisión de `main`, distinguiendo código, prueba reportada y evidencia formal.
-2. **Acordar brechas curriculares con los docentes.** Consultar si el front-end web y MongoDB/Mongoose deben desarrollarse dentro del proyecto o demostrarse en prácticas separadas. No presentar Compose como HTML/CSS/JavaScript ni PostgreSQL como MongoDB.
-3. **Actualizar SAD y diagramas como nuevas versiones.** No sobrescribir el SAD 1.1 entregado; preparar una versión actual, enlazar cada decisión con código y registrar aprobación o estado pendiente.
-4. **Capturar pruebas del móvil y backend.** Empezar con login local, guardado/reapertura, modo avión y flujo de venta. Después probar el API y, por separado, la sincronización desde el dispositivo físico.
-5. **Completar los productos académicos faltantes.** Ensayo de Investigación I, artículo de Arquitectura de Software, resultados de evaluación de calidad/seguridad y evidencias de defensa.
-6. **Mantener un control de cambios.** Cada corrección debe indicar versión, fecha, autor del cambio, motivo y artefactos afectados.
+1. **Corregir contradicciones entre documentos y código.** Distinguir código, prueba reportada y evidencia formal.
+2. **Acordar brechas curriculares con los docentes.** Front-end web y MongoDB/Mongoose: prácticas separadas o cambio de alcance. No presentar Compose como HTML/CSS/JS ni PostgreSQL como MongoDB.
+3. **Actualizar SAD y diagramas como nuevas versiones.** No sobrescribir el SAD 1.1 entregado; preparar SAD v2 enlazado al código Node/Android.
+4. **Capturar pruebas del móvil y backend.** Login local, guardado/reapertura, modo avión, API y (aparte) sincronización desde dispositivo físico.
+5. **Completar productos académicos faltantes de ARQ/TEC.** Artículo de Arquitectura, resultados de evaluación de calidad/seguridad y evidencias de defensa.
+6. **Mantener un control de cambios.** Cada corrección debe indicar versión, fecha, autor, motivo y artefactos afectados.
 
 ## Fuentes y límites de esta matriz
 
 - Programas analíticos ARQ-643, TEC-644 e INV-645, Gestión 2026-2, proporcionados por la estudiante.
-- Repositorio `bibi567-ch/asistente-ia-mypes-vinto`, rama `main`, commit `ec9028b`, consultado el 19/10/2026.
-- Demostración de guardado de un producto en el Motorola G60 reportada por la estudiante en esta conversación.
+- Repositorio `bibi567-ch/asistente-ia-mypes-vinto`, rama de trabajo documental sobre main.
+- Demostración de guardado de un producto en el Motorola G60 reportada por la estudiante.
 - No se proporcionaron rúbricas analíticas completas por criterio, calificaciones, comentarios docentes ni comprobantes de asistencia. Esos resultados no se inventan y deben agregarse únicamente cuando el equipo disponga de ellos.
