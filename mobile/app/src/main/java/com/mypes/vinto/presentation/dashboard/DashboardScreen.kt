@@ -2,6 +2,8 @@ package com.mypes.vinto.presentation.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.*
@@ -19,7 +21,7 @@ import com.mypes.vinto.viewmodel.DashboardViewModel
 @Composable
 fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
     val estado by vm.estado.collectAsState()
-    Column(Modifier.fillMaxSize().background(FondoOscuro).padding(16.dp)) {
+    Column(Modifier.fillMaxSize().background(FondoOscuro).verticalScroll(rememberScrollState()).padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Column {
                 Text("MypesLocal", color = TextoBlanco, fontSize = 24.sp)
@@ -42,6 +44,22 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
         Spacer(Modifier.height(20.dp))
         Button(onClick = { nav.navigate("inventario") }, modifier = Modifier.fillMaxWidth()) {
             Text("Abrir inventario")
+        }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { nav.navigate("venta_manual") }, modifier = Modifier.fillMaxWidth()) {
+            Text("Registrar venta")
+        }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { nav.navigate("chat") }, modifier = Modifier.fillMaxWidth()) {
+            Text("Asistente de voz")
+        }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { nav.navigate("sync") }, modifier = Modifier.fillMaxWidth()) {
+            Text("Sincronización")
+        }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { nav.navigate("api_login") }, modifier = Modifier.fillMaxWidth()) {
+            Text("Vincular cuenta del servidor")
         }
     }
 }

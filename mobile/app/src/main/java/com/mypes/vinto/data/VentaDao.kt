@@ -37,11 +37,25 @@ interface VentaDao {
         venta: Venta,
         detalles: List<DetalleVenta>,
         movimiento: MovimientoCaja,
-        outbox: OutboxEntry
+        outbox: OutboxEntry,
+        productoId: String,
+        cantidad: Double,
+        actualizadoEn: Long
     ) {
+        check(ajustarStock(productoId, cantidad, actualizadoEn) == 1) {
+            "El producto seleccionado ya no existe."
+        }
         insertarVenta(venta)
         insertarDetalles(detalles)
         insertarMovimiento(movimiento)
         insertarOutbox(outbox)
     }
+
+    @Query(
+        """UPDATE productos
+           SET stock = CASE WHEN stock - :cantidad < 0.000000001 THEN 0 ELSE stock - :cantidad END,
+               actualizadoEn = :actualizadoEn
+           WHERE id = :productoId AND stock + 0.000000001 >= :cantidad"""
+    )
+    suspend fun ajustarStock(productoId: String, cantidad: Double, actualizadoEn: Long): Int
 }

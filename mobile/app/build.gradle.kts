@@ -5,6 +5,16 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+val apiBaseUrl = providers.gradleProperty("MYPES_API_BASE_URL")
+    .orElse("http://10.0.2.2:3000/")
+    .get()
+require(apiBaseUrl.startsWith("http://") || apiBaseUrl.startsWith("https://")) {
+    "MYPES_API_BASE_URL must use HTTP or HTTPS."
+}
+require(apiBaseUrl.endsWith("/")) {
+    "MYPES_API_BASE_URL must end with a slash."
+}
+
 android {
     namespace = "com.mypes.vinto"
     compileSdk = 35
@@ -16,10 +26,12 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {
@@ -52,6 +64,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.3.0")
     implementation("androidx.navigation:navigation-compose:2.8.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation("androidx.compose.material:material-icons-extended:1.7.4")
 
     implementation("androidx.room:room-runtime:2.6.1")

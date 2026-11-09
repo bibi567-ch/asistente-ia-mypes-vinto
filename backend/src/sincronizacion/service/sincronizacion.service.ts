@@ -120,7 +120,9 @@ export interface ProductoSync {
 
 export async function obtenerProductosParaSync(
   businessId: string,
-  desde: number
+  desde: number,
+  cursorActualizadoEn: number | null = null,
+  cursorId: string | null = null
 ): Promise<ProductoSync[]> {
   const result = await pool.query<{
     id: string;
@@ -130,10 +132,19 @@ export async function obtenerProductosParaSync(
   }>(
     `SELECT id, name, sale_price, updated_at
      FROM products
-     WHERE business_id = $1 AND updated_at > to_timestamp($2 / 1000.0)
-     ORDER BY updated_at DESC
+     WHERE business_id = $1
+       AND updated_at > to_timestamp($2 / 1000.0)
+       AND (
+         $3::bigint IS NULL
+         OR floor(extract(epoch FROM updated_at) * 1000) < $3
+         OR (
+           floor(extract(epoch FROM updated_at) * 1000) = $3
+           AND id > $4::uuid
+         )
+       )
+     ORDER BY floor(extract(epoch FROM updated_at) * 1000) DESC, id ASC
      LIMIT 500`,
-    [businessId, desde]
+    [businessId, desde, cursorActualizadoEn, cursorId]
   );
 
   return result.rows.map((row) => ({

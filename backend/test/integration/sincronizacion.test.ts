@@ -50,6 +50,7 @@ after(async () => {
     });
   }
   if (businessId) {
+    await pool.query('DELETE FROM products WHERE business_id = $1', [businessId]);
     await pool.query('DELETE FROM conflictos WHERE business_id = $1', [businessId]);
     await pool.query('DELETE FROM transacciones WHERE business_id = $1', [businessId]);
     await pool.query('DELETE FROM users WHERE business_id = $1', [businessId]);
@@ -115,6 +116,44 @@ test('GET /productos/sync rechaza timestamps inválidos', async () => {
   const body = await response.json() as { error: { code: string } };
   assert.equal(response.status, 400);
   assert.equal(body.error.code, 'invalid_since');
+});
+
+test('GET /products/sync pagina más de 500 productos sin duplicarlos', async () => {
+  const ids = Array.from({ length: 501 }, () => randomUUID());
+  const updatedAt = new Date(Date.now() - 10_000);
+  await pool.query(
+    `INSERT INTO products (id, business_id, name, unit, sale_price, created_at, updated_at)
+     SELECT id, $2::uuid, 'Cursor product ' || ordinal::text, 'unit', 1.00, $3, $3
+     FROM unnest($1::uuid[]) WITH ORDINALITY AS products_to_add(id, ordinal)`,
+    [ids, businessId, updatedAt]
+  );
+
+  const firstUrl = new URL(`${baseUrl}/api/v1/products/sync`);
+  firstUrl.searchParams.set('desde', '0');
+  const firstResponse = await fetch(firstUrl, {
+    headers: { authorization: `Bearer ${token}` }
+  });
+  assert.equal(firstResponse.status, 200);
+  const firstPage = await firstResponse.json() as {
+    items: Array<{ id: string; actualizadoEn: number }>;
+  };
+  assert.equal(firstPage.items.length, 500);
+
+  const last = firstPage.items[firstPage.items.length - 1];
+  assert.ok(last);
+  const nextUrl = new URL(`${baseUrl}/api/v1/products/sync`);
+  nextUrl.searchParams.set('desde', '0');
+  nextUrl.searchParams.set('cursorActualizadoEn', String(last.actualizadoEn));
+  nextUrl.searchParams.set('cursorId', last.id);
+  const nextResponse = await fetch(nextUrl, {
+    headers: { authorization: `Bearer ${token}` }
+  });
+  assert.equal(nextResponse.status, 200);
+  const nextPage = await nextResponse.json() as {
+    items: Array<{ id: string }>;
+  };
+  assert.equal(nextPage.items.length, 1);
+  assert.equal(new Set([...firstPage.items.map(({ id }) => id), ...nextPage.items.map(({ id }) => id)]).size, 501);
 });
 
 async function postBatch(payload: object): Promise<{

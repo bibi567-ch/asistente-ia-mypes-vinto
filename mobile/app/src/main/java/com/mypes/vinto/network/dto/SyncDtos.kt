@@ -34,3 +34,17 @@ data class ResultadoOperacion(
     @SerializedName("estado") val estado: String,
     @SerializedName("mensaje") val mensaje: String?
 )
+
+data class ProductSyncResponse(
+    @SerializedName("items") val items: List<ProductSyncItem>,
+    @SerializedName("total") val total: Int,
+    @SerializedName("timestamp") val timestamp: Long
+)
+
+data class ProductSyncItem(
+    @SerializedName("id") val id: String,
+    @SerializedName("nombre") val nombre: String,
+    @SerializedName("precio") val precio: Double,
+    @SerializedName("stock") val stock: Double,
+    @SerializedName("actualizadoEn") val actualizadoEn: Long
+)

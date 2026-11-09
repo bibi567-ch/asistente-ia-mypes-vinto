@@ -113,7 +113,7 @@ Requiere el mismo encabezado de autorización y un cuerpo JSON:
 }
 ```
 
-Cada `operationId` es idempotente dentro del negocio del token. La respuesta devuelve `ACEPTADA`, `DUPLICADA`, `CONFLICTO` o `RECHAZADA` por operación. `GET /api/v1/products/sync?desde=<timestamp-ms>` devuelve hasta 500 productos modificados después del timestamp; el stock permanece en el móvil durante este MVP.
+Cada `operationId` es idempotente dentro del negocio del token. La respuesta devuelve `ACEPTADA`, `DUPLICADA`, `CONFLICTO` o `RECHAZADA` por operación. `GET /api/v1/products/sync?desde=<timestamp-ms>` devuelve hasta 500 productos modificados después del timestamp. Cuando la página contiene 500 elementos, solicita la siguiente página con `cursorActualizadoEn` y `cursorId` tomados del último producto; ambos parámetros deben ir juntos. Repite con el mismo `desde` y guarda el `timestamp` de la primera respuesta como cursor para la siguiente sincronización. El stock permanece en el móvil durante este MVP.
 
 ## Comandos
 

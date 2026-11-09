@@ -31,8 +31,9 @@ data class VentaFormulario(
 
     val esValido: Boolean
         get() = productoId.isNotBlank()
-            && cantidad > 0.0
-            && precioUnitario >= 0.0
+            && cantidad.isFinite() && cantidad > 0.0
+            && precioUnitario.isFinite() && precioUnitario >= 0.0
+            && total.isFinite()
             && formaPago in setOf("CONTADO", "FIADO")
             && (formaPago != "FIADO" || !clienteFiado.isNullOrBlank())
 }
@@ -87,8 +88,15 @@ class VentaViewModel(application: Application) : AndroidViewModel(application) {
                 }.toString()
                 val outbox = OutboxEntry(tipo = "VENTA", payloadJson = payload)
 
-                db.ventaDao().registrarVentaCompleta(venta, listOf(detalle), movimiento, outbox)
-                db.productoDao().ajustarStock(estado.productoId, -estado.cantidad, ahora)
+                db.ventaDao().registrarVentaCompleta(
+                    venta,
+                    listOf(detalle),
+                    movimiento,
+                    outbox,
+                    estado.productoId,
+                    estado.cantidad,
+                    ahora
+                )
                 SyncScheduler.programarSync(getApplication())
                 _form.value = estado.copy(guardando = false, exito = true)
             } catch (error: Exception) {

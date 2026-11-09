@@ -49,6 +49,29 @@ test('product catalog validates prices before accessing PostgreSQL', async (cont
   assert.equal(body.error?.code, 'invalid_product');
 });
 
+test('product sync validates cursor parameters before accessing PostgreSQL', async (context) => {
+  const server = await startTestServer();
+  context.after(server.close);
+  const token = await createAccessToken({
+    userId: '30a86a83-8809-4df4-80e4-2d0fcba0647e',
+    businessId: '228eae95-7c43-48ea-90bb-4e1fb9a0374c'
+  });
+  const urls = [
+    '/api/v1/products/sync?desde=0&cursorActualizadoEn=10',
+    '/api/v1/products/sync?desde=0&cursorActualizadoEn=10&cursorId=not-a-uuid',
+    '/api/v1/products/sync?desde=1.5'
+  ];
+
+  for (const path of urls) {
+    const response = await fetch(`${server.baseUrl}${path}`, {
+      headers: { authorization: `Bearer ${token}` }
+    });
+    const body = await response.json() as { error?: { code?: string } };
+    assert.equal(response.status, 400);
+    assert.equal(body.error?.code, 'invalid_since');
+  }
+});
+
 test('password changes require a new password of at least 12 characters', async (context) => {
   const server = await startTestServer();
   context.after(server.close);

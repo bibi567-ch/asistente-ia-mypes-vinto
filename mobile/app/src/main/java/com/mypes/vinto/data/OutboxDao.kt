@@ -16,6 +16,9 @@ interface OutboxDao {
     @Query("SELECT * FROM outbox WHERE estado = 'PENDIENTE' ORDER BY creadoEn ASC")
     fun observarPendientes(): Flow<List<OutboxEntry>>
 
+    @Query("SELECT COUNT(*) FROM outbox WHERE estado = 'ERROR'")
+    fun observarErrores(): Flow<Int>
+
     @Query("UPDATE outbox SET estado = 'SYNC' WHERE operationId = :operationId")
     suspend fun marcarSincronizada(operationId: String)
 

@@ -114,16 +114,39 @@ productsRouter.get('/sync', async (request, response) => {
 
   const desdeParam = request.query.desde;
   const desde = typeof desdeParam === 'string' ? Number(desdeParam) : 0;
-  if (!Number.isFinite(desde) || desde < 0) {
+  const cursorUpdatedAtParam = request.query.cursorActualizadoEn;
+  const cursorIdParam = request.query.cursorId;
+  const cursorUpdatedAt = typeof cursorUpdatedAtParam === 'string'
+    ? Number(cursorUpdatedAtParam)
+    : null;
+  const cursorId = typeof cursorIdParam === 'string' ? cursorIdParam : null;
+  const cursorIdIsUuid = cursorId === null
+    || /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cursorId);
+  if (
+    !Number.isSafeInteger(desde)
+    || desde < 0
+    || (cursorUpdatedAt !== null && (!Number.isSafeInteger(cursorUpdatedAt) || cursorUpdatedAt < 0))
+    || (cursorUpdatedAt === null) !== (cursorId === null)
+    || !cursorIdIsUuid
+  ) {
     response.status(400).json({
-      error: { code: 'invalid_since', message: 'El parámetro "desde" debe ser un timestamp en milisegundos.' }
+      error: {
+        code: 'invalid_since',
+        message: 'Use un timestamp válido en "desde" y proporcione juntos los parámetros del cursor cuando corresponda.'
+      }
     });
     return;
   }
 
   try {
-    const productos = await obtenerProductosParaSync(businessId, desde);
-    response.status(200).json({ items: productos, total: productos.length, timestamp: Date.now() });
+    const timestamp = Date.now();
+    const productos = await obtenerProductosParaSync(
+      businessId,
+      desde,
+      cursorUpdatedAt,
+      cursorId
+    );
+    response.status(200).json({ items: productos, total: productos.length, timestamp });
   } catch {
     console.error('Error al obtener productos para sync.');
     response.status(500).json({

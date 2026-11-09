@@ -1,5 +1,6 @@
 package com.mypes.vinto.network
 
+import com.mypes.vinto.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -7,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    private const val BASE_URL = "http://10.0.2.2:3000/"
+    private const val BASE_URL = BuildConfig.API_BASE_URL
 
     private val okHttp: OkHttpClient by lazy {
         val logging = HttpLoggingInterceptor().apply {
@@ -28,5 +29,14 @@ object ApiClient {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(SyncApi::class.java)
+    }
+
+    val authApi: AuthApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttp)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AuthApi::class.java)
     }
 }
