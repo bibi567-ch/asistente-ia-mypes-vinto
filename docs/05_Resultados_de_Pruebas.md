@@ -68,6 +68,15 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Resultado obtenido:** se verificó `gradlew.bat --version` con código 0 y se ejecutaron las pruebas JVM y el APK con `BUILD SUCCESSFUL`, código 0.
 - **Alcance:** el wrapper preserva éxito y fallo de Gradle para que CI local y scripts de Windows puedan interpretar el resultado.
 
+## Fase 9: Gráfico semanal y vista de demostración del reporte
+
+- **Fecha:** 2026-11-10
+- **Qué se implementó:** el reporte consulta los totales de cada uno de los últimos siete días mediante intervalos locales `[inicio, fin)`. Se añadió una vista demostrativa solo para builds debug; sus cifras ficticias afectan únicamente al gráfico y no se persisten. El selector de compartir sigue usando el total real del día.
+- **Comprobación técnica:** `:app:testDebugUnitTest :app:assembleDebug` finalizó con código 0 usando JBR 21 y el SDK Android instalado. JUnit reportó 5 pruebas, 0 fallos, 0 errores y 0 omitidas; el APK debug se compiló correctamente.
+- **Resultado funcional:** PENDIENTE de validar el gráfico, el cambio de día, el selector de compartir y la separación entre datos demo y reales en un dispositivo.
+- **Plan asociado:** `DASH-03`, `DASH-04` y `DASH-05` permanecen PENDIENTES hasta contar con esa validación.
+- **Evidencia:** reportes JUnit locales en `mobile/app/build/test-results/testDebugUnitTest/`; captura funcional pendiente en `evidencias/03_dashboard/`.
+
 ## Plantilla para nuevas ejecuciones
 
 ### Fase [n]: [módulo y escenario]

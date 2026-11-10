@@ -28,6 +28,9 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 |---|---|---|---|
 | DASH-01 | Abrir el reporte diario sin ventas | Total y cantidad son cero | PENDIENTE |
 | DASH-02 | Consultar el reporte después de una venta | Total y cantidad reflejan las ventas locales de hoy | PENDIENTE |
+| DASH-03 | Consultar el gráfico de los últimos siete días | Cada barra suma las ventas del día local correspondiente, usando intervalos sin solapamiento | PENDIENTE |
+| DASH-04 | Compartir el reporte con la vista demo activa | El texto compartido contiene únicamente los datos reales del día | PENDIENTE |
+| DASH-05 | Activar la vista demo en una compilación debug | Los valores ficticios se limitan al gráfico y no se guardan en la base | PENDIENTE |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Dashboard]
 
