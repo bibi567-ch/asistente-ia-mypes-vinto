@@ -2,7 +2,6 @@ name: Backend
 
 on:
   push:
-    branches: [main, doc-mypes-vinto]
   pull_request:
     branches: [main]
 
@@ -39,9 +38,49 @@ jobs:
           node-version: 24
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
-      - run: npm run db:migrate
-      - run: npm run build
-      - run: npm run typecheck:test
-      - run: npm test
-      - run: npm run test:integration
+      - id: install
+        run: npm ci
+      - id: migrate
+        run: npm run db:migrate
+      - id: build
+        run: npm run build
+      - id: typecheck
+        run: npm run typecheck:test
+      - id: unit
+        run: npm test
+      - id: integration
+        run: npm run test:integration
+      - name: Publish CI report
+        if: always()
+        env:
+          INSTALL_RESULT: ${{ steps.install.outcome }}
+          MIGRATE_RESULT: ${{ steps.migrate.outcome }}
+          BUILD_RESULT: ${{ steps.build.outcome }}
+          TYPECHECK_RESULT: ${{ steps.typecheck.outcome }}
+          UNIT_RESULT: ${{ steps.unit.outcome }}
+          INTEGRATION_RESULT: ${{ steps.integration.outcome }}
+          JOB_RESULT: ${{ job.status }}
+          COMMIT_SHA: ${{ github.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "# Backend CI report"
+            echo
+            echo "- Date (UTC): $(date -u '+%Y-%m-%d %H:%M:%S')"
+            echo "- Commit: \`$COMMIT_SHA\`"
+            echo "- Event: \`$EVENT_NAME\`"
+            echo "- Workflow run: $RUN_URL"
+            echo
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Install dependencies | $INSTALL_RESULT |"
+            echo "| PostgreSQL migrations | $MIGRATE_RESULT |"
+            echo "| TypeScript build | $BUILD_RESULT |"
+            echo "| Test typecheck | $TYPECHECK_RESULT |"
+            echo "| Unit tests | $UNIT_RESULT |"
+            echo "| Integration tests | $INTEGRATION_RESULT |"
+            echo "| Overall job | $JOB_RESULT |"
+            echo
+            echo "Results are taken from this workflow run; see the linked run and step logs for details."
+          } >> "$GITHUB_STEP_SUMMARY"

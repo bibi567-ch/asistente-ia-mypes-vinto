@@ -35,6 +35,6 @@ El modelo no se versiona por su tamaño. El código espera los archivos locales 
 2. Seleccionar un dispositivo o emulador y compilar la variante debug.
 3. Probar con datos ficticios el PIN, onboarding, alta y persistencia de productos, modo avión y registro de ventas.
 4. Probar voz y sincronización por separado; anotar cualquier comportamiento pendiente.
-5. Guardar evidencia según `evidence/README.md` y relacionarla con la matriz de las tres materias.
+5. Registrar la evidencia según [`COMO_DOCUMENTAR.md`](../COMO_DOCUMENTAR.md) y guardarla bajo `docs/evidencias/`.
 
 No incluir APK, keystore, token, datos reales de comerciantes ni audios identificables en el repositorio.
