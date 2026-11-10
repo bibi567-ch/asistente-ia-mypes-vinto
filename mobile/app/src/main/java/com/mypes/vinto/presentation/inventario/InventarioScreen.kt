@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -23,14 +25,33 @@ fun InventarioScreen(nav: NavController, vm: InventarioViewModel = viewModel()) 
     var nombre by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
     var stock by remember { mutableStateOf("") }
+    var busqueda by remember { mutableStateOf("") }
+    val productosFiltrados = productos.filter {
+        it.nombre.contains(busqueda.trim(), ignoreCase = true)
+    }
 
     Column(Modifier.fillMaxSize().background(FondoOscuro).padding(16.dp)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text("Inventario", color = TextoBlanco, fontSize = 24.sp)
             IconButton(onClick = { dialogo = true }) { Icon(Icons.Default.Add, "Agregar", tint = VerdeNeon) }
         }
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { busqueda = it },
+            placeholder = { Text("Buscar producto...", color = TextoGris) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = TextoGris) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = VerdeNeon,
+                unfocusedBorderColor = TextoGris,
+                focusedTextColor = TextoBlanco,
+                unfocusedTextColor = TextoBlanco
+            ),
+            shape = RoundedCornerShape(12.dp)
+        )
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(productos, key = { it.id }) { producto ->
+            items(productosFiltrados, key = { it.id }) { producto ->
                 Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = SuperficieOscura)) {
                     Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
@@ -39,6 +60,15 @@ fun InventarioScreen(nav: NavController, vm: InventarioViewModel = viewModel()) 
                         }
                         Text("${producto.stock} unidades", color = if (producto.stock < 5) NaranjaAlerta else VerdeNeon)
                     }
+                }
+            }
+            if (productosFiltrados.isEmpty()) {
+                item {
+                    Text(
+                        if (busqueda.isBlank()) "Todavía no hay productos." else "No se encontraron productos.",
+                        color = TextoGris,
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
                 }
             }
         }

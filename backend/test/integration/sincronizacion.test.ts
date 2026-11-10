@@ -109,6 +109,35 @@ test('POST /transacciones/batch marca cantidades altas como conflicto', async ()
   assert.equal(response.body.resultados[0]?.estado, 'CONFLICTO');
 });
 
+test('POST /transacciones/batch acepta y deduplica un cobro de fiado', async () => {
+  const operationId = randomUUID();
+  const payload = {
+    transacciones: [{
+      operationId,
+      tipo: 'COBRO',
+      payload: {
+        ventaId: randomUUID(),
+        productoId: randomUUID(),
+        cantidad: 2,
+        precioUnitario: 7.5,
+        total: 15,
+        formaPago: 'CONTADO',
+        clienteFiado: 'Cliente de prueba',
+        creadoEn: Date.now()
+      },
+      schemaVersion: 1
+    }]
+  };
+
+  const first = await postBatch(payload);
+  assert.equal(first.response.status, 200);
+  assert.equal(first.body.resultados[0]?.estado, 'ACEPTADA');
+
+  const duplicate = await postBatch(payload);
+  assert.equal(duplicate.response.status, 200);
+  assert.equal(duplicate.body.resultados[0]?.estado, 'DUPLICADA');
+});
+
 test('GET /productos/sync rechaza timestamps inválidos', async () => {
   const response = await fetch(`${baseUrl}/api/v1/products/sync?desde=-1`, {
     headers: { authorization: `Bearer ${token}` }

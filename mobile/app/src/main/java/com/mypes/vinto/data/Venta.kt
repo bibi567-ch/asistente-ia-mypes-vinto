@@ -2,6 +2,7 @@ package com.mypes.vinto.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 import java.util.UUID
 
 @Entity(tableName = "ventas")
@@ -10,5 +11,6 @@ data class Venta(
     val total: Double,
     val formaPago: String,
     val clienteFiado: String? = null,
+    @ColumnInfo(defaultValue = "0") val pagado: Boolean = false,
     val creadoEn: Long = System.currentTimeMillis()
 )

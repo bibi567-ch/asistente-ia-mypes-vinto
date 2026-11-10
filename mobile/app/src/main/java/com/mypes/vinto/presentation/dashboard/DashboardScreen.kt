@@ -70,5 +70,13 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
         Button(onClick = { nav.navigate("reportes") }, modifier = Modifier.fillMaxWidth()) {
             Text("Ver reporte del día")
         }
+        Spacer(Modifier.height(8.dp))
+        Button(
+            onClick = { nav.navigate("fiados") },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = NaranjaAlerta)
+        ) {
+            Text("Módulo de Fiados (Deudas)", color = FondoOscuro)
+        }
     }
 }

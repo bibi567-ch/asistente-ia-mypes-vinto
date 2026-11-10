@@ -103,6 +103,15 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Evidencia:** pendiente en `evidencias/01_login/perfil_usuario.png`.
 - **Prueba de backend relacionada:** `backend/test/integration/auth-registration.test.ts` ya valida el alta del negocio/propietario, lectura persistida, JWT utilizable, rechazo de campos incompletos y duplicados. No se creó el archivo de prueba duplicado propuesto.
 
+## Fase 13: Fiados, búsqueda y exportación CSV
+
+- **Fecha:** 2026-11-10
+- **Qué se implementó:** Room v4 añade `ventas.pagado` con migración 3→4 y valor inicial falso para conservar las deudas antiguas. La pantalla Fiados lista ventas fiadas pendientes y pide confirmación de cobro completo. El estado pagado, el ingreso de caja y el evento `COBRO` del Outbox se guardan atómicamente; el mismo `operationId` se sincroniza idempotentemente. Inventario filtra por nombre en tiempo real. El reporte exporta las ventas de hoy a CSV, escapa campos y comparte el archivo desde un `FileProvider` restringido al subdirectorio de reportes de caché.
+- **Comprobaciones Android:** `:app:testDebugUnitTest :app:assembleDebug` finalizó correctamente; 7 pruebas JVM, 0 fallos, incluidos casos de formato/escape CSV. Room generó el esquema versión 4.
+- **Comprobaciones backend:** build y chequeo de tipos correctos; migraciones y `npm run test:integration` contra PostgreSQL temporal pasaron con 9 pruebas, 0 fallos, incluida la aceptación e idempotencia de `COBRO`.
+- **Alcance pendiente:** no se ejecutó en dispositivo la migración de una base real versión 3, el cobro transaccional Room, búsqueda en pantalla ni el envío del URI CSV a otra app. Esas pruebas funcionales siguen PENDIENTES; no se declara probado el ciclo completo en interfaz.
+- **Evidencia:** reportes automatizados locales; capturas pendientes en `evidencias/09_fiados/`, `evidencias/05_inventario/` y `evidencias/03_dashboard/`.
+
 ## Plantilla para nuevas ejecuciones
 
 ### Fase [n]: [módulo y escenario]

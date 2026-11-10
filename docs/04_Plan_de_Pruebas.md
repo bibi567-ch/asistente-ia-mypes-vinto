@@ -45,6 +45,8 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 | DASH-03 | Consultar el gráfico de los últimos siete días | Cada barra suma las ventas del día local correspondiente, usando intervalos sin solapamiento | PENDIENTE |
 | DASH-04 | Compartir el reporte con la vista demo activa | El texto compartido contiene únicamente los datos reales del día | PENDIENTE |
 | DASH-05 | Activar la vista demo en una compilación debug | Los valores ficticios se limitan al gráfico y no se guardan en la base | PENDIENTE |
+| DASH-06 | Exportar el reporte diario como archivo CSV | El archivo contiene solo las ventas del día, con campos escapados y se comparte mediante URI `FileProvider` de solo lectura | PENDIENTE |
+| DASH-07 | Prueba JVM de cabecera CSV, formato de total y escape de comillas/separadores | El contenido CSV contiene la cabecera esperada y protege valores del cliente | APROBADO (unit test local; no valida el selector Android) |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Dashboard]
 
@@ -64,8 +66,21 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 |---|---|---|---|
 | INV-01 | Crear y consultar un producto local | El producto aparece en el inventario después de reabrir la pantalla | PENDIENTE |
 | INV-02 | Recibir actualización remota de nombre/precio | Cambian los campos remotos y se conserva el stock local | PENDIENTE |
+| INV-03 | Buscar un producto por nombre | La lista se filtra en tiempo real sin alterar los datos de Room y muestra estado vacío cuando no hay coincidencias | PENDIENTE |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Inventario]
+
+## Fiados
+
+| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
+|---|---|---|---|
+| FIADO-01 | Consultar las deudas pendientes | Se muestran las ventas FIADO no pagadas, el cliente, fecha y total pendiente | PENDIENTE |
+| FIADO-02 | Confirmar el cobro completo de una deuda | En una transacción local se marca pagada, se registra ingreso de caja y se crea operación COBRO en Outbox | PENDIENTE |
+| FIADO-03 | Intentar cobrar dos veces la misma deuda | La segunda operación no crea un ingreso ni un evento Outbox adicional | PENDIENTE |
+| FIADO-04 | Cobrar sin conexión y sincronizar después | El cobro queda registrado localmente y la operación COBRO se conserva pendiente hasta reconectar | PENDIENTE |
+| FIADO-05 | Prueba backend de sincronización de un cobro `COBRO` | PostgreSQL registra la operación y la repetición del mismo `operationId` se reconoce como duplicada | APROBADO (integración local con PostgreSQL temporal) |
+
+[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Fiados]
 
 ## Chat IA
 

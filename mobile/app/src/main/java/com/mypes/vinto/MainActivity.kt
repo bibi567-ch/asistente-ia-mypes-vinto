@@ -18,6 +18,7 @@ import com.mypes.vinto.presentation.auth.LoginScreen
 import com.mypes.vinto.presentation.auth.RegistroScreen
 import com.mypes.vinto.presentation.chat.ChatScreen
 import com.mypes.vinto.presentation.dashboard.DashboardScreen
+import com.mypes.vinto.presentation.fiados.FiadosScreen
 import com.mypes.vinto.presentation.inventario.InventarioScreen
 import com.mypes.vinto.presentation.onboarding.OnboardingPlantillaScreen
 import com.mypes.vinto.presentation.perfil.PerfilScreen
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
                     composable("onboarding_plantilla") { OnboardingPlantillaScreen(nav) }
                     composable("dashboard") { DashboardScreen(nav) }
                     composable("perfil") { PerfilScreen(nav) }
+                    composable("fiados") { FiadosScreen(nav) }
                     composable("inventario") { InventarioScreen(nav) }
                     composable(
                         route = "venta_manual?producto={producto}&cantidad={cantidad}",

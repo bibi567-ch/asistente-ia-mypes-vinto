@@ -1,6 +1,7 @@
 package com.mypes.vinto.presentation.reportes
 
 import android.content.Intent
+import android.content.ClipData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -36,9 +37,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.navigation.NavController
 import com.mypes.vinto.BuildConfig
 import com.mypes.vinto.data.MypesDatabase
+import com.mypes.vinto.data.Venta
 import com.mypes.vinto.presentation.theme.AzulElectrico
 import com.mypes.vinto.presentation.theme.FondoOscuro
 import com.mypes.vinto.presentation.theme.SuperficieOscura
@@ -47,9 +50,15 @@ import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.text.SimpleDateFormat
+import java.io.File
 import java.util.Locale
+import java.util.UUID
 
 @Composable
 fun ReportesScreen(nav: NavController) {
@@ -63,6 +72,12 @@ fun ReportesScreen(nav: NavController) {
     val cantidadVentas by database.ventaDao()
         .observarCantidadDesde(inicioDelDia)
         .collectAsState(initial = 0)
+    val ventasHoy by database.ventaDao()
+        .observarVentasEntre(inicioDelDia, finDelDia(inicioDelDia))
+        .collectAsState(initial = emptyList())
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var exportandoCsv by remember { mutableStateOf(false) }
+    var errorExportacion by remember { mutableStateOf<String?>(null) }
     val dias = remember(inicioDelDia) { ultimosSieteDias(inicioDelDia) }
     val totalesObservados by remember(dias) {
         combine(dias.map { dia ->
@@ -214,20 +229,58 @@ fun ReportesScreen(nav: NavController) {
         Spacer(Modifier.height(16.dp))
         Button(
             onClick = {
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "text/plain"
-                    putExtra(
-                        Intent.EXTRA_TEXT,
-                        "Reporte de ventas de hoy: ${String.format(Locale.getDefault(), "%.2f", totalVentas)} Bs en $cantidadVentas transacciones."
-                    )
+                scope.launch {
+                    exportandoCsv = true
+                    errorExportacion = null
+                    try {
+                        val archivoCsv = withContext(Dispatchers.IO) {
+                            val directorio = File(context.cacheDir, "reports")
+                            check(directorio.isDirectory || directorio.mkdirs()) {
+                                "No se pudo preparar el archivo del reporte."
+                            }
+                            File(directorio, "reporte_ventas_${UUID.randomUUID()}.csv").apply {
+                                writeText(crearContenidoCsv(ventasHoy), Charsets.UTF_8)
+                            }
+                        }
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            archivoCsv
+                        )
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/csv"
+                            putExtra(Intent.EXTRA_SUBJECT, "Reporte de ventas")
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "Reporte de ventas de hoy: ${String.format(Locale.getDefault(), "%.2f", totalVentas)} Bs en $cantidadVentas transacciones."
+                            )
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            clipData = ClipData.newUri(context.contentResolver, "Reporte CSV", uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "Exportar reporte a..."))
+                    } catch (error: CancellationException) {
+                        throw error
+                    } catch (error: Exception) {
+                        errorExportacion = error.message ?: "No se pudo exportar el reporte."
+                    } finally {
+                        exportandoCsv = false
+                    }
                 }
-                context.startActivity(Intent.createChooser(shareIntent, "Compartir reporte"))
             },
+            enabled = !exportandoCsv,
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = AzulElectrico)
         ) {
-            Text("Compartir reporte", color = TextoBlanco, fontWeight = FontWeight.Bold)
+            Text(
+                if (exportandoCsv) "Preparando CSV..." else "Exportar y compartir CSV",
+                color = TextoBlanco,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        errorExportacion?.let {
+            Text(it, color = TextoGris, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
         }
         Spacer(Modifier.height(12.dp))
         Button(
@@ -241,12 +294,39 @@ fun ReportesScreen(nav: NavController) {
     }
 }
 
+internal fun crearContenidoCsv(ventas: List<Venta>): String {
+    val fecha = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+    return buildString {
+        append('\uFEFF')
+        appendLine(listOf("Fecha", "Total Bs", "Forma de pago", "Cliente").joinToString(";") { escaparCsv(it) })
+        ventas.forEach { venta ->
+            appendLine(
+                listOf(
+                    fecha.format(java.util.Date(venta.creadoEn)),
+                    String.format(Locale.ROOT, "%.2f", venta.total),
+                    venta.formaPago,
+                    venta.clienteFiado.orEmpty()
+                ).joinToString(";") { escaparCsv(it) }
+            )
+        }
+    }
+}
+
+private fun escaparCsv(valor: String): String =
+    "\"${valor.replace("\"", "\"\"")}\""
+
 private fun inicioDeHoy(): Long =
     Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 0)
         set(Calendar.MINUTE, 0)
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
+    }.timeInMillis
+
+private fun finDelDia(inicio: Long): Long =
+    Calendar.getInstance().apply {
+        timeInMillis = inicio
+        add(Calendar.DAY_OF_YEAR, 1)
     }.timeInMillis
 
 private data class RangoDia(val inicio: Long, val fin: Long, val etiqueta: String)

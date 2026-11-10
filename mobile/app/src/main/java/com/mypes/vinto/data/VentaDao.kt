@@ -23,6 +23,26 @@ interface VentaDao {
     @Query("SELECT * FROM ventas ORDER BY creadoEn DESC")
     fun observarTodas(): Flow<List<Venta>>
 
+    @Query("SELECT * FROM ventas WHERE id = :ventaId LIMIT 1")
+    suspend fun obtenerVenta(ventaId: String): Venta?
+
+    @Query(
+        """SELECT * FROM ventas
+           WHERE formaPago = 'FIADO' AND pagado = 0
+           ORDER BY creadoEn DESC"""
+    )
+    fun observarFiadosPendientes(): Flow<List<Venta>>
+
+    @Query("SELECT * FROM detalle_ventas WHERE ventaId = :ventaId ORDER BY id LIMIT 1")
+    suspend fun obtenerDetallePrincipal(ventaId: String): DetalleVenta?
+
+    @Query(
+        """SELECT * FROM ventas
+           WHERE creadoEn >= :inicio AND creadoEn < :fin
+           ORDER BY creadoEn DESC"""
+    )
+    fun observarVentasEntre(inicio: Long, fin: Long): Flow<List<Venta>>
+
     @Query("SELECT COALESCE(SUM(total), 0) FROM ventas WHERE creadoEn >= :desde")
     suspend fun totalDesde(desde: Long): Double
 
@@ -43,6 +63,25 @@ interface VentaDao {
 
     @Query("SELECT COALESCE(SUM(monto), 0) FROM movimientos_caja WHERE tipo = 'INGRESO'")
     fun observarTotalCaja(): Flow<Double>
+
+    @Query(
+        """UPDATE ventas SET pagado = 1
+           WHERE id = :ventaId AND formaPago = 'FIADO' AND pagado = 0"""
+    )
+    suspend fun marcarComoPagado(ventaId: String): Int
+
+    @Transaction
+    suspend fun registrarCobroCompleto(
+        ventaId: String,
+        movimiento: MovimientoCaja,
+        outbox: OutboxEntry
+    ) {
+        check(marcarComoPagado(ventaId) == 1) {
+            "La deuda ya fue cobrada o no existe."
+        }
+        insertarMovimiento(movimiento)
+        insertarOutbox(outbox)
+    }
 
     @Transaction
     suspend fun registrarVentaCompleta(
