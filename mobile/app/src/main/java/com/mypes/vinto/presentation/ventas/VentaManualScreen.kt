@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -53,10 +52,13 @@ import com.mypes.vinto.presentation.theme.VerdeNeon
 import com.mypes.vinto.viewmodel.InventarioViewModel
 import com.mypes.vinto.viewmodel.VentaFormulario
 import com.mypes.vinto.viewmodel.VentaViewModel
+import java.text.Normalizer
 
 @Composable
 fun VentaManualScreen(
     nav: NavController,
+    productoSugerido: String? = null,
+    cantidadSugerida: String? = null,
     vm: VentaViewModel = viewModel(),
     invVm: InventarioViewModel = viewModel()
 ) {
@@ -66,6 +68,48 @@ fun VentaManualScreen(
     var clienteFiado by remember { mutableStateOf("") }
     var cantidadTexto by remember { mutableStateOf("") }
     var precioTexto by remember { mutableStateOf("") }
+    var sugerenciaNoEncontrada by remember { mutableStateOf<String?>(null) }
+    var prefijoAplicado by remember { mutableStateOf(false) }
+
+    LaunchedEffect(productoSugerido, cantidadSugerida, productos) {
+        if (prefijoAplicado) return@LaunchedEffect
+        if (productoSugerido.isNullOrBlank() || productos.isNotEmpty()) {
+            val cantidad = cantidadSugerida?.replace(',', '.')?.toDoubleOrNull()
+                ?.takeIf { it.isFinite() }
+            val producto = productoSugerido
+                ?.takeIf(String::isNotBlank)
+                ?.let { sugerido ->
+                    productos.firstOrNull {
+                        normalizarNombre(it.nombre) == normalizarNombre(sugerido)
+                    }
+                }
+            val cantidadFormulario = cantidad ?: if (!productoSugerido.isNullOrBlank()) 1.0 else null
+
+            if (cantidadFormulario != null) {
+                cantidadTexto = cantidadFormulario.toString()
+            }
+            if (producto != null) {
+                precioTexto = producto.precio.toString()
+                vm.actualizarFormulario(
+                    form.copy(
+                        productoId = producto.id,
+                        nombreProducto = producto.nombre,
+                        precioUnitario = producto.precio,
+                        cantidad = cantidadFormulario ?: 1.0
+                    )
+                )
+            } else {
+                if (!productoSugerido.isNullOrBlank()) {
+                    sugerenciaNoEncontrada = productoSugerido
+                    mostrarSelector = true
+                }
+                if (cantidadFormulario != null) {
+                    vm.actualizarFormulario(form.copy(cantidad = cantidadFormulario))
+                }
+            }
+            prefijoAplicado = true
+        }
+    }
 
     LaunchedEffect(form.exito) {
         if (form.exito) {
@@ -82,6 +126,14 @@ fun VentaManualScreen(
     ) {
         Text("Registrar venta", color = TextoBlanco, fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Text("Confirma el producto y la cantidad", color = TextoGris, fontSize = 14.sp)
+        sugerenciaNoEncontrada?.let {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "No encontré \"$it\" en el inventario. Selecciona el producto correcto.",
+                color = NaranjaAlerta,
+                fontSize = 13.sp
+            )
+        }
         Spacer(Modifier.height(24.dp))
 
         Card(
@@ -252,3 +304,7 @@ fun VentaManualScreen(
         )
     }
 }
+
+private fun normalizarNombre(nombre: String): String =
+    Normalizer.normalize(nombre.trim().lowercase(), Normalizer.Form.NFD)
+        .replace(Regex("\\p{Mn}+"), "")

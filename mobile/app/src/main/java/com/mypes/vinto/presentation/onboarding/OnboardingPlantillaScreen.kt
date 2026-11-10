@@ -24,6 +24,7 @@ fun OnboardingPlantillaScreen(nav: NavController) {
     val scope = rememberCoroutineScope()
     val repo = remember { PlantillaRepository(MypesDatabase.obtener(context).productoDao()) }
     var aplicando by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
 
     Column(Modifier.fillMaxSize().background(FondoOscuro).padding(24.dp)) {
         Text("Elige tu plantilla", color = TextoBlanco, fontSize = 28.sp, fontWeight = FontWeight.Bold)
@@ -36,8 +37,17 @@ fun OnboardingPlantillaScreen(nav: NavController) {
                     onClick = {
                         scope.launch {
                             aplicando = true
-                            repo.aplicarPlantilla(plantilla.id)
-                            nav.navigate("dashboard") { popUpTo("onboarding_plantilla") { inclusive = true } }
+                            error = null
+                            try {
+                                repo.aplicarPlantilla(plantilla.id)
+                                nav.navigate("dashboard") {
+                                    popUpTo("onboarding_plantilla") { inclusive = true }
+                                }
+                            } catch (failure: Exception) {
+                                error = failure.message ?: "No se pudo aplicar la plantilla."
+                            } finally {
+                                aplicando = false
+                            }
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -50,6 +60,7 @@ fun OnboardingPlantillaScreen(nav: NavController) {
                 }
             }
         }
+        error?.let { Text(it, color = RojoCancelar, modifier = Modifier.padding(top = 12.dp)) }
         if (aplicando) CircularProgressIndicator(color = VerdeNeon)
     }
 }

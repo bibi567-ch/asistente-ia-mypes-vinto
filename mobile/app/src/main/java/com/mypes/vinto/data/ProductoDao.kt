@@ -13,7 +13,16 @@ interface ProductoDao {
     suspend fun insertar(producto: Producto)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertarSiNoExiste(producto: Producto)
+    suspend fun insertarSiNoExiste(producto: Producto): Long
+
+    @Query("SELECT EXISTS(SELECT 1 FROM productos WHERE nombre = :nombre COLLATE NOCASE)")
+    suspend fun existeNombre(nombre: String): Boolean
+
+    @Transaction
+    suspend fun insertarPlantillaSiNoExiste(producto: Producto): Boolean {
+        if (existeNombre(producto.nombre)) return false
+        return insertarSiNoExiste(producto) != -1L
+    }
 
     @Query("UPDATE productos SET nombre = :nombre, precio = :precio, actualizadoEn = :actualizadoEn WHERE id = :id")
     suspend fun actualizarDesdeServidor(id: String, nombre: String, precio: Double, actualizadoEn: Long)

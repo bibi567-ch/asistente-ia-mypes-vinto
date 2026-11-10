@@ -61,5 +61,9 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
         Button(onClick = { nav.navigate("api_login") }, modifier = Modifier.fillMaxWidth()) {
             Text("Vincular cuenta del servidor")
         }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { nav.navigate("reportes") }, modifier = Modifier.fillMaxWidth()) {
+            Text("Ver reporte del día")
+        }
     }
 }

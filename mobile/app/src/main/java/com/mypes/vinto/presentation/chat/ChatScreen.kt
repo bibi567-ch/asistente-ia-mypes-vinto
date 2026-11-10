@@ -1,5 +1,6 @@
 package com.mypes.vinto.presentation.chat
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,14 +12,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -64,7 +63,6 @@ fun ChatScreen(nav: NavController) {
     var textoParcial by remember { mutableStateOf("") }
     var escuchando by remember { mutableStateOf(false) }
     var modeloDisponible by remember { mutableStateOf<Boolean?>(null) }
-    var mostrarRegistroVenta by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) { modeloDisponible = asistente.inicializar() }
@@ -103,11 +101,6 @@ fun ChatScreen(nav: NavController) {
         ) {
             mensajes.forEach { BurbujaMensaje(it) }
             if (textoParcial.isNotBlank()) BurbujaMensaje(Mensaje(textoParcial, true))
-            if (mostrarRegistroVenta) {
-                Button(onClick = { nav.navigate("venta_manual") }) {
-                    Text("Abrir registro de venta")
-                }
-            }
         }
 
         Row(
@@ -130,7 +123,6 @@ fun ChatScreen(nav: NavController) {
                             resultadoProcesado.set(false)
                             escuchando = true
                             textoParcial = ""
-                            mostrarRegistroVenta = false
                             asistente.escuchar(
                                 onParcial = { textoParcial = it },
                                 onResultado = { resultado ->
@@ -139,8 +131,14 @@ fun ChatScreen(nav: NavController) {
                                         textoParcial = ""
                                         mensajes.add(Mensaje(resultado.textoOriginal, true))
                                         mensajes.add(Mensaje(generarRespuesta(resultado), false))
-                                        mostrarRegistroVenta =
-                                            resultado.intencion == IntentClassifier.Intencion.VENTA
+                                        if (resultado.intencion == IntentClassifier.Intencion.VENTA) {
+                                            val producto = Uri.encode(resultado.entidades.producto.orEmpty())
+                                            val cantidad = resultado.entidades.cantidad
+                                                ?.takeIf { it.isFinite() } ?: 1.0
+                                            nav.navigate(
+                                                "venta_manual?producto=$producto&cantidad=${Uri.encode(cantidad.toString())}"
+                                            )
+                                        }
                                     }
                                 },
                                 onError = { error ->

@@ -26,8 +26,14 @@ interface VentaDao {
     @Query("SELECT COALESCE(SUM(total), 0) FROM ventas WHERE creadoEn >= :desde")
     suspend fun totalDesde(desde: Long): Double
 
+    @Query("SELECT COALESCE(SUM(total), 0) FROM ventas WHERE creadoEn >= :desde")
+    fun observarTotalDesde(desde: Long): Flow<Double>
+
     @Query("SELECT COUNT(*) FROM ventas WHERE creadoEn >= :desde")
     suspend fun contarDesde(desde: Long): Int
+
+    @Query("SELECT COUNT(*) FROM ventas WHERE creadoEn >= :desde")
+    fun observarCantidadDesde(desde: Long): Flow<Int>
 
     @Query("SELECT COALESCE(SUM(monto), 0) FROM movimientos_caja WHERE tipo = 'INGRESO'")
     fun observarTotalCaja(): Flow<Double>

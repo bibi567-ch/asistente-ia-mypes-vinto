@@ -10,6 +10,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
 import com.mypes.vinto.presentation.auth.ApiLoginScreen
 import com.mypes.vinto.presentation.auth.LoginScreen
@@ -17,6 +19,7 @@ import com.mypes.vinto.presentation.chat.ChatScreen
 import com.mypes.vinto.presentation.dashboard.DashboardScreen
 import com.mypes.vinto.presentation.inventario.InventarioScreen
 import com.mypes.vinto.presentation.onboarding.OnboardingPlantillaScreen
+import com.mypes.vinto.presentation.reportes.ReportesScreen
 import com.mypes.vinto.presentation.sync.SincronizacionScreen
 import com.mypes.vinto.presentation.ventas.VentaManualScreen
 
@@ -35,10 +38,31 @@ class MainActivity : ComponentActivity() {
                     composable("onboarding_plantilla") { OnboardingPlantillaScreen(nav) }
                     composable("dashboard") { DashboardScreen(nav) }
                     composable("inventario") { InventarioScreen(nav) }
-                    composable("venta_manual") { VentaManualScreen(nav) }
+                    composable(
+                        route = "venta_manual?producto={producto}&cantidad={cantidad}",
+                        arguments = listOf(
+                            navArgument("producto") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            },
+                            navArgument("cantidad") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ) { entry ->
+                        VentaManualScreen(
+                            nav = nav,
+                            productoSugerido = entry.arguments?.getString("producto"),
+                            cantidadSugerida = entry.arguments?.getString("cantidad")
+                        )
+                    }
                     composable("chat") { ChatScreen(nav) }
                     composable("sync") { SincronizacionScreen(nav) }
                     composable("api_login") { ApiLoginScreen(nav) }
+                    composable("reportes") { ReportesScreen(nav) }
                 }
             }
         }

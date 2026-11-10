@@ -8,6 +8,7 @@ Módulo Kotlin + Jetpack Compose bajo `app/`. Incluye persistencia local Room/SQ
 - Onboarding, dashboard e inventario Compose.
 - Persistencia Room para productos, ventas, caja y operaciones pendientes (Outbox).
 - Pantallas conectadas para registrar ventas, usar el asistente de voz y consultar el estado de sincronización.
+- Reporte local de ventas del día, con recálculo al cambiar la fecha.
 - Login API con email y contraseña, independiente del PIN local.
 - Procesamiento de voz local con Vosk. El asistente interpreta solicitudes; las ventas todavía requieren revisión y confirmación en el formulario manual.
 
@@ -19,6 +20,7 @@ La estudiante informó que instaló el APK debug en un Motorola G60 y guardó un
 - `http://10.0.2.2:3000/` es la URL predeterminada para emuladores Android. En `mobile/gradle.properties`, configura `MYPES_API_BASE_URL=http://<IP-LAN-del-equipo>:3000/` para un teléfono conectado a una red local confiable. No expongas el backend de desarrollo a Internet.
 - WorkManager envía las ventas pendientes a `POST /api/v1/transacciones/batch` y descarga productos modificados de `GET /api/v1/products/sync`, en páginas de hasta 500 elementos. Los cambios remotos de nombre y precio conservan el stock local.
 - Los productos creados solo en el dispositivo aún no se envían al catálogo del backend. La sincronización del catálogo es de descarga.
+- La voz puede sugerir producto y cantidad y abrir el formulario de venta; la persona debe revisar y confirmar. El PIN local no se utiliza para iniciar sesión automáticamente en la API ni hay credenciales de demostración integradas.
 - Docker Compose inicia el backend y PostgreSQL localmente, pero no configura acceso desde el teléfono ni crea cuentas API. Crea el propietario según [las instrucciones del backend](../backend/README.md); no uses credenciales fijas ni compartidas.
 
 Probar por separado la API, el registro offline local y la sincronización. Usar datos ficticios y no incluir tokens en la evidencia.
