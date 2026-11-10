@@ -46,6 +46,113 @@ authRouter.post('/login', async (request, response) => {
   });
 });
 
+authRouter.post('/register', async (request, response) => {
+  const body: unknown = request.body;
+  if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+    response.status(400).json({ error: { code: 'invalid_registration', message: 'Provide all required registration fields.' } });
+    return;
+  }
+
+  const fields = body as Record<string, unknown>;
+  const {
+    nombre,
+    carnet,
+    celular,
+    direccion,
+    email,
+    password,
+    nombreNegocio,
+    rubro
+  } = fields;
+  if (
+    typeof nombre !== 'string'
+    || nombre.trim().length < 1
+    || nombre.trim().length > 160
+    || typeof carnet !== 'string'
+    || carnet.trim().length < 1
+    || carnet.trim().length > 40
+    || typeof celular !== 'string'
+    || celular.trim().length < 1
+    || celular.trim().length > 40
+    || typeof direccion !== 'string'
+    || direccion.trim().length < 1
+    || direccion.trim().length > 240
+    || typeof email !== 'string'
+    || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+    || email.trim().length > 254
+    || typeof password !== 'string'
+    || password.length < 12
+    || password.length > 256
+    || Buffer.byteLength(password, 'utf8') > 1024
+    || typeof nombreNegocio !== 'string'
+    || nombreNegocio.trim().length < 1
+    || nombreNegocio.trim().length > 160
+    || typeof rubro !== 'string'
+    || rubro.trim().length < 1
+    || rubro.trim().length > 80
+  ) {
+    response.status(400).json({ error: { code: 'invalid_registration', message: 'Check the required fields and password length (12 to 256 characters).' } });
+    return;
+  }
+
+  const client = await pool.connect();
+  let transactionOpen = false;
+  try {
+    await client.query('BEGIN');
+    transactionOpen = true;
+    const businessResult = await client.query<{ id: string }>(
+      'INSERT INTO businesses (name, rubro) VALUES ($1, $2) RETURNING id',
+      [nombreNegocio.trim(), rubro.trim()]
+    );
+    const businessId = businessResult.rows[0]?.id;
+    if (!businessId) throw new Error('Business insert did not return an identifier.');
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const userResult = await client.query<{ id: string }>(
+      `INSERT INTO users (business_id, email, password_hash, role, nombre, carnet, celular, direccion)
+       VALUES ($1, $2, $3, 'owner', $4, $5, $6, $7) RETURNING id`,
+      [
+        businessId,
+        normalizedEmail,
+        await hashPassword(password),
+        nombre.trim(),
+        carnet.trim(),
+        celular.trim(),
+        direccion.trim()
+      ]
+    );
+    const userId = userResult.rows[0]?.id;
+    if (!userId) throw new Error('User insert did not return an identifier.');
+
+    const accessToken = await createAccessToken({ userId, businessId });
+    await client.query('COMMIT');
+    transactionOpen = false;
+    response.status(201).json({
+      accessToken,
+      tokenType: 'Bearer',
+      expiresIn: accessTokenLifetimeSeconds
+    });
+  } catch (error) {
+    if (transactionOpen) {
+      try {
+        await client.query('ROLLBACK');
+      } catch {
+        console.error('Registration transaction rollback failed.');
+      }
+    }
+
+    if (isUniqueViolation(error)) {
+      response.status(409).json({ error: { code: 'email_already_registered', message: 'An account with that email already exists.' } });
+      return;
+    }
+
+    console.error('Account registration failed.');
+    response.status(500).json({ error: { code: 'register_failed', message: 'The account could not be registered.' } });
+  } finally {
+    client.release();
+  }
+});
+
 authRouter.post('/change-password', requireAuth, async (request, response) => {
   const { currentPassword, newPassword } = request.body ?? {};
   const userId = request.auth?.userId;
@@ -90,3 +197,10 @@ authRouter.post('/change-password', requireAuth, async (request, response) => {
   }
   response.status(204).end();
 });
+
+function isUniqueViolation(error: unknown): boolean {
+  return typeof error === 'object'
+    && error !== null
+    && 'code' in error
+    && error.code === '23505';
+}

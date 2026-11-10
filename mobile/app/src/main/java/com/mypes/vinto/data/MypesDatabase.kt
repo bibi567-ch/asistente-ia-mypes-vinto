@@ -17,7 +17,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         MovimientoCaja::class,
         OutboxEntry::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class MypesDatabase : RoomDatabase() {
@@ -80,6 +80,17 @@ abstract class MypesDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE usuarios ADD COLUMN carnet TEXT")
+                db.execSQL("ALTER TABLE usuarios ADD COLUMN celular TEXT")
+                db.execSQL("ALTER TABLE usuarios ADD COLUMN direccion TEXT")
+                db.execSQL("ALTER TABLE usuarios ADD COLUMN email TEXT")
+                db.execSQL("ALTER TABLE usuarios ADD COLUMN nombreNegocio TEXT")
+                db.execSQL("ALTER TABLE usuarios ADD COLUMN rubro TEXT")
+            }
+        }
+
         fun obtener(context: Context): MypesDatabase =
             instancia ?: synchronized(this) {
                 instancia ?: run {
@@ -93,7 +104,7 @@ abstract class MypesDatabase : RoomDatabase() {
                         "mypes-local.db"
                     )
                         .openHelperFactory(factory)
-                        .addMigrations(MIGRATION_1_2)
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                         .build()
                         .also { instancia = it }
                 }

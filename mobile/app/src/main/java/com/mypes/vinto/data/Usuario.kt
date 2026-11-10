@@ -7,6 +7,12 @@ import androidx.room.PrimaryKey
 data class Usuario(
     @PrimaryKey val id: Long = 1,
     val nombre: String,
+    val carnet: String? = null,
+    val celular: String? = null,
+    val direccion: String? = null,
+    val email: String? = null,
+    val nombreNegocio: String? = null,
+    val rubro: String? = null,
     val pinHash: String,
     val salt: String,
     val iteraciones: Int,

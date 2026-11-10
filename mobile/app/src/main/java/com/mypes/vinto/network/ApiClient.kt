@@ -39,4 +39,13 @@ object ApiClient {
             .build()
             .create(AuthApi::class.java)
     }
+
+    val registroApi: RegistroApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttp)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(RegistroApi::class.java)
+    }
 }

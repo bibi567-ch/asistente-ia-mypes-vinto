@@ -77,6 +77,23 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Plan asociado:** `DASH-03`, `DASH-04` y `DASH-05` permanecen PENDIENTES hasta contar con esa validación.
 - **Evidencia:** reportes JUnit locales en `mobile/app/build/test-results/testDebugUnitTest/`; captura funcional pendiente en `evidencias/03_dashboard/`.
 
+## Fase 10: Registro local y alta de cuenta en backend
+
+- **Fecha:** 2026-11-10
+- **Qué se implementó:** formulario de registro Android con datos personales, negocio, PIN y contraseña de nube; migración Room 2→3 con columnas de perfil opcionales para conservar usuarios existentes; endpoint `POST /api/v1/auth/register` con validación, hash scrypt, transacción PostgreSQL para negocio/propietario y token Bearer. La contraseña de nube no se persiste en el dispositivo. Si la red falla, se puede continuar explícitamente con el perfil local y vincular la cuenta después.
+- **Comprobaciones backend:** `npm run build`, `npm run typecheck:test` y `npm test` pasaron (8 pruebas unitarias). En una base PostgreSQL temporal y aislada se aplicaron las migraciones 001–004 y `npm run test:integration` pasó (8 pruebas, 0 fallos), incluyendo registro exitoso, acceso con el token, correo duplicado sin negocio huérfano y rechazo de datos incompletos.
+- **Comprobaciones Android:** `:app:testDebugUnitTest :app:assembleDebug` pasó (5 pruebas, 0 fallos) con Java 21 y el SDK local.
+- **Resultado funcional Android:** PENDIENTE de completar el registro en un dispositivo y probar conexión, modo offline y migración de una base existente.
+- **Evidencia:** resultados automatizados locales; capturas pendientes en `evidencias/01_login/` o `evidencias/08_backend/`. No se usaron datos reales.
+
+## Fase 11: Instalación local del modelo de voz Vosk
+
+- **Fecha:** 2026-11-10
+- **Qué se hizo:** se descargó el modelo pequeño de español Vosk 0.42 desde su origen oficial y se extrajo en `mobile/app/src/main/assets/vosk-model-small-es-0.42/`. Se añadió `mobile/download-vosk-model.ps1` para instalarlo en otras máquinas y se comprobó su comportamiento idempotente.
+- **Comprobación técnica:** el APK debug se compiló con el modelo y contiene `assets/vosk-model-small-es-0.42/am/final.mdl`. Su tamaño resultó de 117,392,971 bytes; el modelo permanece excluido de Git, por lo que cada equipo debe ejecutar el script antes de compilar.
+- **Resultado funcional:** PENDIENTE de inicializar Vosk y dictar una frase en un dispositivo; la presencia del modelo en el APK no prueba el reconocimiento acústico.
+- **Evidencia:** compilación local; captura de reconocimiento pendiente en `evidencias/06_chat_ia/`.
+
 ## Plantilla para nuevas ejecuciones
 
 ### Fase [n]: [módulo y escenario]

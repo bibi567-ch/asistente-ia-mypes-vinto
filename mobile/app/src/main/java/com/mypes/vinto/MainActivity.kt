@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
 import com.mypes.vinto.presentation.auth.ApiLoginScreen
 import com.mypes.vinto.presentation.auth.LoginScreen
+import com.mypes.vinto.presentation.auth.RegistroScreen
 import com.mypes.vinto.presentation.chat.ChatScreen
 import com.mypes.vinto.presentation.dashboard.DashboardScreen
 import com.mypes.vinto.presentation.inventario.InventarioScreen
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
                 val nav = rememberNavController()
                 NavHost(navController = nav, startDestination = "login") {
                     composable("login") { LoginScreen(nav) }
+                    composable("registro") { RegistroScreen(nav) }
                     composable("onboarding_plantilla") { OnboardingPlantillaScreen(nav) }
                     composable("dashboard") { DashboardScreen(nav) }
                     composable("inventario") { InventarioScreen(nav) }

@@ -13,6 +13,19 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Login]
 
+## Registro
+
+| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
+|---|---|---|---|
+| REG-01 | Prueba de integración API: registrar propietario y negocio con correo único | Se guardan propietario y negocio, y la sesión Bearer permite usar una ruta protegida | APROBADO (integración local con PostgreSQL temporal) |
+| REG-02 | Prueba de integración API: volver a registrar el mismo correo | Se responde `409` y no se crea un negocio huérfano | APROBADO (integración local con PostgreSQL temporal) |
+| REG-03 | Prueba de integración API: enviar campos incompletos y contraseña corta | Se responde `400` antes de crear cuentas | APROBADO (integración local con PostgreSQL temporal) |
+| REG-04 | Completar el formulario Android con conexión | El perfil se conserva en Room, el token se guarda y la app avanza al onboarding | PENDIENTE de prueba funcional |
+| REG-05 | Registrar sin conexión y elegir continuar localmente | El PIN y perfil permanecen en Room; la contraseña de nube no se almacena y la UI informa que la cuenta no está vinculada | PENDIENTE de prueba funcional |
+| REG-06 | Migrar una base Room versión 2 con usuario existente | La actualización a versión 3 conserva el PIN y permite abrir la base con los campos de perfil opcionales | PENDIENTE de prueba en dispositivo/base existente |
+
+[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Registro]
+
 ## Onboarding
 
 | ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
@@ -62,6 +75,7 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 | IA-03 | Usar el chat sin modelo disponible o cancelar | Se informa el estado y no se registra una venta | PENDIENTE |
 | IA-04 | Prueba JVM de extracción de cantidad, producto, monto, unidad y cliente | Los ejemplos "cuartilla" y "al fiado" producen las entidades esperadas | APROBADO (unit test local) |
 | IA-05 | Prueba JVM de clasificación de "Vendí dos cuartillas de arroz" | Se clasifica como VENTA | APROBADO (unit test local) |
+| IA-06 | Inicializar Vosk desde los assets y reconocer voz sin conexión | El modelo se extrae de assets, inicializa y reconoce una frase en español en dispositivo | PENDIENTE |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Chat IA]
 

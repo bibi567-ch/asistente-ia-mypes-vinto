@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, alta administrativa de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token y recepción idempotente de lotes de transacciones offline. Hay pruebas automatizadas de autenticación, tokens y rechazo de acceso anónimo al catálogo.
+API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, registro de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token y recepción idempotente de lotes de transacciones offline. Hay pruebas automatizadas de autenticación, tokens y rechazo de acceso anónimo al catálogo.
 
 Actualización/borrado de productos, recuperación de contraseña, limitación de intentos y despliegue todavía no están implementados. No exponer esta API a una red ni usarla con datos reales.
 
@@ -62,7 +62,26 @@ backend/
 }
 ```
 
-La respuesta devuelve `accessToken`, `tokenType` y `expiresIn`. El token expira en 15 minutos. No hay endpoint de registro público: el propietario se crea mediante el comando administrativo.
+La respuesta devuelve `accessToken`, `tokenType` y `expiresIn`. El token expira en 15 minutos.
+
+### Registrar propietario y negocio
+
+`POST /api/v1/auth/register` crea el negocio y su propietario dentro de una transacción y devuelve una sesión Bearer:
+
+```json
+{
+  "nombre": "Nombre completo",
+  "carnet": "1234567",
+  "celular": "70000000",
+  "direccion": "Dirección",
+  "email": "propietario@example.test",
+  "password": "<mínimo 12 caracteres>",
+  "nombreNegocio": "Tienda",
+  "rubro": "Abarrotes"
+}
+```
+
+Los correos se normalizan a minúsculas. Los datos incompletos o inválidos reciben `400`; un correo ya registrado recibe `409`. No se guarda el PIN local en el backend. Este endpoint aún no tiene limitación de intentos; mantenerlo en un entorno local/de pruebas y no exponerlo a Internet.
 
 `POST /api/v1/auth/change-password` requiere el token Bearer y acepta `currentPassword` y `newPassword` (mínimo 12 caracteres). Úsalo para reemplazar la contraseña generada durante el alta.
 
