@@ -27,13 +27,18 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
                 Text("MypesLocal", color = TextoBlanco, fontSize = 24.sp)
                 Text("Tu negocio, incluso sin conexión", color = TextoGris)
             }
-            Button(
-                onClick = { if (estado.escuchando) vm.detenerEscucha() else vm.iniciarEscucha() },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (estado.escuchando) RojoCancelar else VerdeNeon
-                )
-            ) {
-                Icon(Icons.Default.Mic, contentDescription = "Hablar", tint = FondoOscuro)
+            Row {
+                IconButton(onClick = { nav.navigate("perfil") }) {
+                    Text("👤", fontSize = 24.sp)
+                }
+                IconButton(
+                    onClick = { if (estado.escuchando) vm.detenerEscucha() else vm.iniciarEscucha() },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = if (estado.escuchando) RojoCancelar else VerdeNeon
+                    )
+                ) {
+                    Icon(Icons.Default.Mic, contentDescription = "Hablar", tint = FondoOscuro)
+                }
             }
         }
         if (estado.textoParcial.isNotBlank()) Text(estado.textoParcial, color = VerdeNeon, modifier = Modifier.padding(vertical = 12.dp))

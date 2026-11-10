@@ -20,6 +20,7 @@ import com.mypes.vinto.presentation.chat.ChatScreen
 import com.mypes.vinto.presentation.dashboard.DashboardScreen
 import com.mypes.vinto.presentation.inventario.InventarioScreen
 import com.mypes.vinto.presentation.onboarding.OnboardingPlantillaScreen
+import com.mypes.vinto.presentation.perfil.PerfilScreen
 import com.mypes.vinto.presentation.reportes.ReportesScreen
 import com.mypes.vinto.presentation.sync.SincronizacionScreen
 import com.mypes.vinto.presentation.ventas.VentaManualScreen
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
                     composable("registro") { RegistroScreen(nav) }
                     composable("onboarding_plantilla") { OnboardingPlantillaScreen(nav) }
                     composable("dashboard") { DashboardScreen(nav) }
+                    composable("perfil") { PerfilScreen(nav) }
                     composable("inventario") { InventarioScreen(nav) }
                     composable(
                         route = "venta_manual?producto={producto}&cantidad={cantidad}",

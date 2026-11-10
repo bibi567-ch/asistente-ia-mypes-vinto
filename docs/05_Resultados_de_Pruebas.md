@@ -94,6 +94,15 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Resultado funcional:** PENDIENTE de inicializar Vosk y dictar una frase en un dispositivo; la presencia del modelo en el APK no prueba el reconocimiento acústico.
 - **Evidencia:** compilación local; captura de reconocimiento pendiente en `evidencias/06_chat_ia/`.
 
+## Fase 12: Pantalla de perfil del comerciante
+
+- **Fecha:** 2026-11-10
+- **Qué se implementó:** ruta `perfil` accesible desde el icono del encabezado del dashboard y pantalla de solo lectura que consulta el registro local Room fuera del hilo principal. Muestra los datos personales y del negocio, con estado de carga/error y un texto explícito para campos opcionales no registrados; no muestra PIN, hash ni sal.
+- **Comprobación técnica:** `:app:testDebugUnitTest :app:assembleDebug` finalizó con código 0 tras incorporar la pantalla.
+- **Resultado funcional:** PENDIENTE de registrar un perfil y verificar su visualización en dispositivo; no se declara APROBADO sin evidencia.
+- **Evidencia:** pendiente en `evidencias/01_login/perfil_usuario.png`.
+- **Prueba de backend relacionada:** `backend/test/integration/auth-registration.test.ts` ya valida el alta del negocio/propietario, lectura persistida, JWT utilizable, rechazo de campos incompletos y duplicados. No se creó el archivo de prueba duplicado propuesto.
+
 ## Plantilla para nuevas ejecuciones
 
 ### Fase [n]: [módulo y escenario]

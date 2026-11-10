@@ -23,6 +23,7 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 | REG-04 | Completar el formulario Android con conexión | El perfil se conserva en Room, el token se guarda y la app avanza al onboarding | PENDIENTE de prueba funcional |
 | REG-05 | Registrar sin conexión y elegir continuar localmente | El PIN y perfil permanecen en Room; la contraseña de nube no se almacena y la UI informa que la cuenta no está vinculada | PENDIENTE de prueba funcional |
 | REG-06 | Migrar una base Room versión 2 con usuario existente | La actualización a versión 3 conserva el PIN y permite abrir la base con los campos de perfil opcionales | PENDIENTE de prueba en dispositivo/base existente |
+| PERF-01 | Abrir Perfil desde el dashboard después del registro | Room muestra los campos disponibles del comerciante y negocio; los opcionales ausentes aparecen como "No registrado" | PENDIENTE de prueba funcional |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Registro]
 
