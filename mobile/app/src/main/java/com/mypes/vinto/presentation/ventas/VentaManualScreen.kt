@@ -57,8 +57,8 @@ import java.text.Normalizer
 @Composable
 fun VentaManualScreen(
     nav: NavController,
-    productoSugerido: String? = null,
-    cantidadSugerida: String? = null,
+    productoSugerido: String = "",
+    cantidadSugerida: Double = 1.0,
     vm: VentaViewModel = viewModel(),
     invVm: InventarioViewModel = viewModel()
 ) {
@@ -73,17 +73,14 @@ fun VentaManualScreen(
 
     LaunchedEffect(productoSugerido, cantidadSugerida, productos) {
         if (prefijoAplicado) return@LaunchedEffect
-        if (productoSugerido.isNullOrBlank() || productos.isNotEmpty()) {
-            val cantidad = cantidadSugerida?.replace(',', '.')?.toDoubleOrNull()
-                ?.takeIf { it.isFinite() }
+        if (productoSugerido.isBlank() || productos.isNotEmpty()) {
+            val cantidad = cantidadSugerida.takeIf { it.isFinite() }
             val producto = productoSugerido
-                ?.takeIf(String::isNotBlank)
+                .takeIf(String::isNotBlank)
                 ?.let { sugerido ->
-                    productos.firstOrNull {
-                        normalizarNombre(it.nombre) == normalizarNombre(sugerido)
-                    }
+                    productos.firstOrNull { normalizarNombre(it.nombre) == normalizarNombre(sugerido) }
                 }
-            val cantidadFormulario = cantidad ?: if (!productoSugerido.isNullOrBlank()) 1.0 else null
+            val cantidadFormulario = cantidad ?: if (productoSugerido.isNotBlank()) 1.0 else null
 
             if (cantidadFormulario != null) {
                 cantidadTexto = cantidadFormulario.toString()
@@ -99,7 +96,7 @@ fun VentaManualScreen(
                     )
                 )
             } else {
-                if (!productoSugerido.isNullOrBlank()) {
+                if (productoSugerido.isNotBlank()) {
                     sugerenciaNoEncontrada = productoSugerido
                     mostrarSelector = true
                 }

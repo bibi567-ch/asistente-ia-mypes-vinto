@@ -17,7 +17,14 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Resultado funcional:** PENDIENTE de prueba manual y captura/video.
 - **Evidencia:** pendiente; guardar en `evidencias/03_dashboard/`, `evidencias/04_ventas/` o `evidencias/06_chat_ia/` según el caso.
 
-## Fase 2: Backend - build, tipos y pruebas unitarias locales
+## Fase 2: Argumentos tipados para venta sugerida por voz
+
+- **Fecha:** 2026-11-10
+- **Qué se cambió:** el destino de venta recibe `producto` codificado y `cantidad` como texto numérico; la cantidad se valida y convierte a `Double` al entrar porque Navigation 2.8.3 no expone `NavType.DoubleType`. El formulario solo selecciona coincidencias normalizadas exactas.
+- **Comprobación técnica:** `:app:assembleDebug` finalizó correctamente; la compilación no valida el flujo en un dispositivo.
+- **Resultado funcional:** PENDIENTE de probar el dictado, confirmar el producto/cantidad y guardar evidencia en `evidencias/06_chat_ia/` y `evidencias/04_ventas/`.
+
+## Fase 3: Backend - build, tipos y pruebas unitarias locales
 
 - **Fecha:** 2026-11-10
 - **Qué se probó:** desde `backend/`, se ejecutaron `npm run build`, `npm run typecheck:test` y `npm test`.
@@ -25,7 +32,7 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Alcance:** ejecución local en el commit `c187bba`; no es una ejecución de GitHub Actions.
 - **Evidencia:** salida de consola observada en esta sesión; enlazar el workflow cuando se ejecute en GitHub. No hay captura añadida aún.
 
-## Fase 3: Backend - pruebas de integración PostgreSQL
+## Fase 4: Backend - pruebas de integración PostgreSQL
 
 - **Fecha:** 2026-11-10
 - **Qué se probó:** intento de preparar/migrar la base de pruebas local para ejecutar `npm run test:integration`.
@@ -33,7 +40,7 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Acción pendiente:** ejecutar el workflow, que configura un PostgreSQL temporal con credenciales de prueba aisladas, y registrar su resultado real.
 - **Evidencia:** pendiente; enlazar el workflow o guardar una captura anonimizada en `evidencias/08_backend/`.
 
-## Fase 4: Pruebas funcionales en dispositivo
+## Fase 5: Pruebas funcionales en dispositivo
 
 - **Fecha:** pendiente
 - **Qué se probó:** pendiente de confirmación por el equipo.

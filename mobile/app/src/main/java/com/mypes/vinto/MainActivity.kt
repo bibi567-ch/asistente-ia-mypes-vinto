@@ -55,8 +55,10 @@ class MainActivity : ComponentActivity() {
                     ) { entry ->
                         VentaManualScreen(
                             nav = nav,
-                            productoSugerido = entry.arguments?.getString("producto"),
+                            productoSugerido = entry.arguments?.getString("producto").orEmpty(),
                             cantidadSugerida = entry.arguments?.getString("cantidad")
+                                ?.toDoubleOrNull()
+                                ?.takeIf { it.isFinite() } ?: 1.0
                         )
                     }
                     composable("chat") { ChatScreen(nav) }

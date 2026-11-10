@@ -136,7 +136,7 @@ fun ChatScreen(nav: NavController) {
                                             val cantidad = resultado.entidades.cantidad
                                                 ?.takeIf { it.isFinite() } ?: 1.0
                                             nav.navigate(
-                                                "venta_manual?producto=$producto&cantidad=${Uri.encode(cantidad.toString())}"
+                                                "venta_manual?producto=$producto&cantidad=$cantidad"
                                             )
                                         }
                                     }
