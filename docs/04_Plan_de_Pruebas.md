@@ -57,6 +57,8 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 | IA-01 | Iniciar reconocimiento de voz con modelo disponible | Se muestra el texto reconocido | PENDIENTE |
 | IA-02 | Dictar una venta reconocible | Se abre el formulario con sugerencias, sin guardar automáticamente | PENDIENTE |
 | IA-03 | Usar el chat sin modelo disponible o cancelar | Se informa el estado y no se registra una venta | PENDIENTE |
+| IA-04 | Prueba JVM de extracción de cantidad, producto, monto, unidad y cliente | Los ejemplos "cuartilla" y "al fiado" producen las entidades esperadas | APROBADO (unit test local) |
+| IA-05 | Prueba JVM de clasificación de "Vendí dos cuartillas de arroz" | Se clasifica como VENTA | APROBADO (unit test local) |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Chat IA]
 
@@ -66,6 +68,7 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 |---|---|---|---|
 | SYNC-01 | Registrar una venta offline y recuperar conexión | La operación pendiente se envía al autenticarse y se conserva ante error | PENDIENTE |
 | SYNC-02 | Descargar catálogo paginado con más de 500 productos | Se recorren todas las páginas sin omitir productos | PENDIENTE |
+| SYNC-03 | Abrir la pantalla con operaciones Outbox pendientes | El conteo y el listado reflejan Room y cambian al actualizarse el Outbox | PENDIENTE de prueba funcional |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Sincronización]
 
@@ -81,3 +84,9 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Backend]
 
 El workflow genera un resumen de cada ejecución en GitHub Actions. Añade el enlace a la ejecución en [07_CI_CD_Report.md](07_CI_CD_Report.md); no marques los casos de CI como aprobados si el workflow falló o aún no se ejecutó.
+
+## Seguridad local
+
+| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
+|---|---|---|---|
+| SEC-01 | Pruebas JVM de `PinHasher`: verificar PIN correcto/incorrecto y sal aleatoria | Solo el PIN original verifica; no se almacena el PIN en claro y cada hash usa sal distinta | APROBADO (unit test local) |

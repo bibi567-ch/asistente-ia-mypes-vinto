@@ -8,6 +8,7 @@ Módulo Kotlin + Jetpack Compose bajo `app/`. Incluye persistencia local Room/SQ
 - Onboarding, dashboard e inventario Compose.
 - Persistencia Room para productos, ventas, caja y operaciones pendientes (Outbox).
 - Pantallas conectadas para registrar ventas, usar el asistente de voz y consultar el estado de sincronización.
+- La pantalla de sincronización observa el Outbox Room y muestra las operaciones pendientes, errores y el estado del trabajo de WorkManager.
 - Reporte local de ventas del día, con recálculo al cambiar la fecha.
 - Login API con email y contraseña, independiente del PIN local.
 - Procesamiento de voz local con Vosk. El asistente interpreta solicitudes; las ventas todavía requieren revisión y confirmación en el formulario manual.
@@ -33,8 +34,9 @@ El modelo no se versiona por su tamaño. El código espera los archivos locales 
 
 1. Abrir `mobile/` en Android Studio y esperar la sincronización de Gradle.
 2. Seleccionar un dispositivo o emulador y compilar la variante debug.
-3. Probar con datos ficticios el PIN, onboarding, alta y persistencia de productos, modo avión y registro de ventas.
-4. Probar voz y sincronización por separado; anotar cualquier comportamiento pendiente.
-5. Registrar la evidencia según [`COMO_DOCUMENTAR.md`](../COMO_DOCUMENTAR.md) y guardarla bajo `docs/evidencias/`.
+3. Ejecutar las pruebas unitarias JVM desde `mobile/` con `.\gradlew.bat :app:testDebugUnitTest`; los resultados JUnit quedan en `app/build/test-results/testDebugUnitTest/`.
+4. Probar con datos ficticios el PIN, onboarding, alta y persistencia de productos, modo avión y registro de ventas.
+5. Probar voz y sincronización por separado; anotar cualquier comportamiento pendiente.
+6. Registrar la evidencia según [`COMO_DOCUMENTAR.md`](../COMO_DOCUMENTAR.md) y guardarla bajo `docs/evidencias/`.
 
 No incluir APK, keystore, token, datos reales de comerciantes ni audios identificables en el repositorio.

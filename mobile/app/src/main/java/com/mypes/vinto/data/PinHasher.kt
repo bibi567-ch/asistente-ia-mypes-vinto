@@ -1,7 +1,7 @@
 package com.mypes.vinto.data
 
-import android.util.Base64
 import java.security.SecureRandom
+import java.util.Base64
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -16,13 +16,13 @@ object PinHasher {
         val iteraciones = ITERACIONES_POR_DEFECTO
         return PinHash(
             hash = derivar(pin, salt, iteraciones),
-            salt = Base64.encodeToString(salt, Base64.NO_WRAP),
+            salt = Base64.getEncoder().encodeToString(salt),
             iteraciones = iteraciones
         )
     }
 
     fun verificar(pin: String, esperado: PinHash): Boolean {
-        val salt = Base64.decode(esperado.salt, Base64.NO_WRAP)
+        val salt = Base64.getDecoder().decode(esperado.salt)
         val calculado = derivar(pin, salt, esperado.iteraciones)
         return calculado == esperado.hash
     }
@@ -32,7 +32,7 @@ object PinHasher {
         return try {
             val bytes = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
                 .generateSecret(spec).encoded
-            Base64.encodeToString(bytes, Base64.NO_WRAP)
+            Base64.getEncoder().encodeToString(bytes)
         } finally {
             spec.clearPassword()
         }

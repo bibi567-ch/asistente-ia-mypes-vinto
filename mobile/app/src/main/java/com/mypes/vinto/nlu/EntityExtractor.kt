@@ -1,5 +1,7 @@
 package com.mypes.vinto.nlu
 
+import java.util.Locale
+
 class EntityExtractor {
     data class Entidades(
         val producto: String? = null,
@@ -32,13 +34,13 @@ class EntityExtractor {
     )
 
     fun extraer(texto: String): Entidades {
-        val normalizado = normalizarNumerosHablados(texto.lowercase())
+        val normalizado = normalizarNumerosHablados(texto.lowercase(Locale.ROOT))
         return Entidades(
             producto = extraerProducto(normalizado),
             cantidad = extraerNumeros(normalizado).firstOrNull(),
             unidad = unidades.firstOrNull(normalizado::contains),
             monto = extraerMonto(normalizado),
-            cliente = extraerCliente(normalizado),
+            cliente = extraerCliente(texto),
             formaPago = extraerFormaPago(normalizado)
         )
     }
@@ -52,6 +54,16 @@ class EntityExtractor {
         }.toList()
 
     private fun extraerProducto(texto: String): String? {
+        val productoDespuesDeCantidad = Regex("""\b\d+(?:[.,]\d+)?\s+([\p{L}]+)\b""")
+            .findAll(texto)
+            .map { it.groupValues[1] }
+            .firstOrNull { palabra ->
+                palabra !in unidades &&
+                    palabra.removeSuffix("s") !in unidades &&
+                    palabra !in setOf("boliviano", "bolivianos", "peso", "pesos", "bs")
+            }
+        if (productoDespuesDeCantidad != null) return productoDespuesDeCantidad
+
         val palabras = texto.split(" ")
         palabras.forEachIndexed { indice, palabra ->
             if (palabra == "de" && indice + 1 < palabras.size) return palabras[indice + 1]
@@ -68,8 +80,10 @@ class EntityExtractor {
             .find(texto)?.groupValues?.get(1)?.replace(',', '.')?.toDoubleOrNull()
 
     private fun extraerCliente(texto: String): String? =
-        Regex("""(?:a|para)\s+(?:doña|don|casera|casero)\s+(\w+)""")
+        Regex("""(?:a|para)\s+(?:doña|don|casera|casero)\s+([\p{L}]+)""", RegexOption.IGNORE_CASE)
             .find(texto)?.groupValues?.get(1)
+            ?.lowercase(Locale.ROOT)
+            ?.replaceFirstChar { it.titlecase(Locale.ROOT) }
 
     private fun extraerFormaPago(texto: String): String? = when {
         "fiado" in texto -> "FIADO"

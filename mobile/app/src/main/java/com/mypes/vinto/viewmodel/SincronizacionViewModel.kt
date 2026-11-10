@@ -17,8 +17,7 @@ class SincronizacionViewModel(application: Application) : AndroidViewModel(appli
     private val workManager = WorkManager.getInstance(application)
 
     val pendientes = database.outboxDao().observarPendientes()
-        .map { it.size }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val errores = database.outboxDao().observarErrores()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)

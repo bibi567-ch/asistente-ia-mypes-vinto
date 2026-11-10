@@ -47,6 +47,27 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Resultado obtenido:** PENDIENTE. No hay capturas/videos confirmados en `evidencias/`.
 - **Evidencia:** añadir una entrada por escenario solo después de ejecutar la prueba y guardar su captura/video.
 
+## Fase 6: Pruebas unitarias JVM de NLU y PIN
+
+- **Fecha:** 2026-11-10
+- **Qué se probó:** `:app:testDebugUnitTest` con extracción de entidades (incluye "cuartillas", montos en bolivianos y "al fiado"), clasificación de intención de venta y hashing PBKDF2 del PIN.
+- **Resultado obtenido:** 5 pruebas reportadas por JUnit XML; 5 pasaron, 0 fallaron, 0 errores y 0 omitidas. Suites: 2 de extracción, 1 de clasificación y 2 de hash/PIN. Los resultados están en `mobile/app/build/test-results/testDebugUnitTest/`.
+- **Alcance:** pruebas JVM locales; validan componentes aislados, no reconocimiento acústico en un dispositivo ni la UI de sincronización. `:app:assembleDebug` también terminó correctamente.
+- **Evidencia:** reportes XML locales; las capturas indicadas por el equipo se agregarán tras obtenerlas.
+
+## Fase 7: Pantalla de sincronización conectada al Outbox
+
+- **Qué se verificó:** la pantalla observa las operaciones `PENDIENTE` y errores desde Room y presenta el conteo, los IDs abreviados y los intentos; el botón conserva la lógica existente de vinculación de cuenta y WorkManager.
+- **Estado técnico:** `:app:assembleDebug` finalizó correctamente y generó el APK debug.
+- **Resultado funcional:** PENDIENTE de verificar en el dispositivo y guardar `evidencias/07_sincronizacion/pantalla_sync_real.png`.
+- **Límite:** no se creó una captura ni se declaró aprobada la prueba de UI.
+
+## Fase 8: Corrección del wrapper de Gradle en Windows
+
+- **Qué se corrigió:** `mobile/gradlew.bat` devolvía código 1 incluso si Gradle terminaba correctamente, lo que hacía que automatizaciones interpretaran falsamente como fallida una compilación exitosa.
+- **Resultado obtenido:** se verificó `gradlew.bat --version` con código 0 y se ejecutaron las pruebas JVM y el APK con `BUILD SUCCESSFUL`, código 0.
+- **Alcance:** el wrapper preserva éxito y fallo de Gradle para que CI local y scripts de Windows puedan interpretar el resultado.
+
 ## Plantilla para nuevas ejecuciones
 
 ### Fase [n]: [módulo y escenario]
