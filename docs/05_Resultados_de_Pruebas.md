@@ -9,6 +9,14 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Validaciones técnicas reportadas en la sesión previa:** build backend, chequeo de tipos, 8 pruebas unitarias, 6 pruebas de integración PostgreSQL y compilación Android debug finalizaron correctamente.
 - **Límite de esta constancia:** no se conservaron el enlace de CI, la fecha exacta ni los logs primarios. Es un antecedente de trabajo, no evidencia de GitHub Actions ni prueba funcional manual. Las pruebas funcionales de Android permanecen pendientes de capturas.
 
+## Fase 0: Evidencia visual del login Android
+
+- **Fecha:** 2026-11-10
+- **Qué se probó:** se lanzó la app en un dispositivo Android conectado y se capturó la pantalla de login inicial.
+- **Resultado observado:** la pantallla de acceso cargó correctamente con el campo de carnet/celular/correo y la entrada del PIN con el botón de micrófono; la captura confirma la UI pero no la validación del dictado ni el acceso real del usuario.
+- **Evidencia:** ![Login local en dispositivo Android](evidencias/01_login/mypes_login.png)
+- **Estado:** evidencia de interfaz disponible; la validación funcional completa del PIN por voz y el acceso con credenciales sigue pendiente.
+
 ## Fase 1: Cambios Android recientes
 
 - **Fecha:** 2026-11-10

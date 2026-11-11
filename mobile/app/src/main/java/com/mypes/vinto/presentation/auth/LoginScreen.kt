@@ -105,17 +105,11 @@ fun LoginScreen(nav: NavController, vm: LoginViewModel = viewModel()) {
                     } else {
                         estadoVoz = null
                         escuchandoPin = true
-                        asistente.escuchar(
-                            onParcial = { },
-                            onResultado = { resultado ->
+                        asistente.procesarPinDictado(
+                            onPinDetectado = { pinDetectado, _ ->
                                 escuchandoPin = false
-                                val pinReconocido = extractor.extraerPin(resultado.textoOriginal)
-                                if (pinReconocido == null) {
-                                    estadoVoz = "No entendí los cuatro dígitos. Intenta de nuevo."
-                                } else {
-                                    pin = pinReconocido
-                                    vm.verificarPin(pinReconocido, identificador)
-                                }
+                                pin = pinDetectado
+                                vm.verificarPin(pinDetectado, identificador)
                             },
                             onError = { mensaje ->
                                 escuchandoPin = false

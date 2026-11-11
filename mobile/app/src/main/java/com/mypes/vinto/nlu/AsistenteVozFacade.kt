@@ -33,6 +33,40 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
         })
     }
 
+    fun procesarPinDictado(
+        onPinDetectado: (String, String) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        asr.escuchar(object : AsrEngine.Resultado {
+            override fun onTextoParcial(texto: String) = Unit
+            override fun onTextoFinal(texto: String) {
+                val pin = extractor.extraerPin(texto)
+                    ?: texto.lowercase()
+                        .replace("cero", "0")
+                        .replace("uno", "1")
+                        .replace("un", "1")
+                        .replace("una", "1")
+                        .replace("dos", "2")
+                        .replace("tres", "3")
+                        .replace("cuatro", "4")
+                        .replace("cinco", "5")
+                        .replace("seis", "6")
+                        .replace("siete", "7")
+                        .replace("ocho", "8")
+                        .replace("nueve", "9")
+                        .filter { it.isDigit() }
+
+                if (pin.length == 4 && pin.all(Char::isDigit)) {
+                    onPinDetectado(pin, texto)
+                } else {
+                    onError("No se entendió el PIN. Di los 4 números claramente.")
+                }
+            }
+
+            override fun onError(mensaje: String) = onError(mensaje)
+        })
+    }
+
     fun detener() = asr.detener()
     override fun close() = asr.close()
 }

@@ -13,7 +13,9 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 | LOGIN-03 | Ingresar identificador local válido con PIN | Se encuentra el perfil por carnet, celular o correo, sin distinguir mayúsculas/minúsculas | PENDIENTE |
 | LOGIN-04 | Dictar "uno, dos, tres, cuatro" en el login | El PIN se completa como `1234`; no se intenta el acceso con una extracción ambigua | PENDIENTE de prueba funcional en dispositivo |
 
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Login]
+![Pantalla de login capturada en dispositivo Android](evidencias/01_login/mypes_login.png)
+
+Evidencia disponible: captura real de la pantalla principal del login en un dispositivo Android conectado. Esta toma confirma que la UI carga correctamente, pero no sustituye la validación del dictado por voz ni del acceso con credenciales reales.
 
 ## Registro
 
