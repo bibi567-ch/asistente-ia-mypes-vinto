@@ -77,7 +77,7 @@ Eva Lizeth Chino Quispe, Christian Gonzales Mamani, Marializ Mamani Quispe, Kevi
 
 ## Diseño
 
-- [Prototipo en Figma](https://snake-dijon-92194767.figma.site/)
-- [Sistema de diseño](https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Dise%C3%B1o-MYPES-Vinto?p=f&fullscreen=1)
+- [Prototipo en Figma]([https://snake-dijon-92194767.figma.site/](https://www.figma.com/make/detrwbrxCanqoPjHb9TjwX/Mockup-Improvement-Request--Community---copia---copia-?p=f&t=qANDWN72XqQ9Pt4y-0))
+
 
 Figma muestra una propuesta de interfaz; no reemplaza la aplicación ni una prueba de funcionamiento.
