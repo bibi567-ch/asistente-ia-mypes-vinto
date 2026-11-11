@@ -17,6 +17,19 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Evidencia:** ![Login local en dispositivo Android](evidencias/01_login/mypes_login.png)
 - **Estado:** evidencia de interfaz disponible; la validación funcional completa del PIN por voz y el acceso con credenciales sigue pendiente.
 
+## Fase 0b: Plantilla de captura para login y registro
+
+- **Qué se necesita:** grabar la prueba funcional completa de login con PIN local y de registro persistido en PostgreSQL.
+- **Regla de integridad:** no se marca aprobada la prueba funcional de Android sin una captura o video en `docs/evidencias/`. Se usa la siguiente plantilla solo como referencia para insertar la evidencia real cuando exista.
+- **Markdown a insertar una vez se disponga de la captura real:**
+
+```markdown
+![Login exitoso](evidencias/01_login/login_exitoso.png)
+![Registro en PostgreSQL](evidencias/01_login/registro_en_postgres.png)
+```
+
+- **Estado actual:** las capturas `login_exitoso.png` y `registro_en_postgres.png` siguen pendientes; no se publican como evidencia aunque el flujo haya sido implementado y se haya validado la compilación.
+
 ## Fase 1: Cambios Android recientes
 
 - **Fecha:** 2026-11-10

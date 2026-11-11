@@ -105,6 +105,96 @@ productsRouter.post('/', async (request, response) => {
   });
 });
 
+productsRouter.put('/:id', async (request, response) => {
+  const businessId = request.auth?.businessId;
+  const { id } = request.params;
+  const { name, unit, salePrice } = request.body ?? {};
+
+  if (!businessId) {
+    response.status(401).json({ error: { code: 'unauthorized', message: 'Authentication is required.' } });
+    return;
+  }
+
+  if (
+    typeof name !== 'string'
+    || name.trim().length < 1
+    || name.trim().length > 160
+    || typeof unit !== 'string'
+    || unit.trim().length < 1
+    || unit.trim().length > 40
+    || typeof salePrice !== 'string'
+    || !/^(0|[1-9]\d{0,9})(\.\d{1,2})?$/.test(salePrice)
+  ) {
+    response.status(400).json({
+      error: {
+        code: 'invalid_product',
+        message: 'Provide a name, unit and a valid salePrice to update the product.'
+      }
+    });
+    return;
+  }
+
+  try {
+    const result = await pool.query<{
+      id: string;
+      name: string;
+      unit: string;
+      sale_price: string;
+      created_at: Date;
+      updated_at: Date;
+    }>(
+      `UPDATE products
+       SET name = $1, unit = $2, sale_price = $3, updated_at = NOW()
+       WHERE id = $4 AND business_id = $5
+       RETURNING id, name, unit, sale_price, created_at, updated_at`,
+      [name.trim(), unit.trim(), salePrice, id, businessId]
+    );
+
+    if (result.rowCount === 0) {
+      response.status(404).json({ error: { code: 'product_not_found', message: 'Product not found.' } });
+      return;
+    }
+
+    const product = result.rows[0];
+    response.status(200).json({
+      id: product.id,
+      name: product.name,
+      unit: product.unit,
+      salePrice: product.sale_price,
+      createdAt: product.created_at,
+      updatedAt: product.updated_at
+    });
+  } catch {
+    response.status(500).json({ error: { code: 'update_failed', message: 'Error updating product.' } });
+  }
+});
+
+productsRouter.delete('/:id', async (request, response) => {
+  const businessId = request.auth?.businessId;
+  const { id } = request.params;
+
+  if (!businessId) {
+    response.status(401).json({ error: { code: 'unauthorized', message: 'Authentication is required.' } });
+    return;
+  }
+
+  try {
+    const result = await pool.query(
+      'DELETE FROM products WHERE id = $1 AND business_id = $2',
+      [id, businessId]
+    );
+
+    if (result.rowCount === 0) {
+      response.status(404).json({ error: { code: 'product_not_found', message: 'Product not found.' } });
+      return;
+    }
+
+    response.status(204).end();
+  } catch {
+    response.status(500).json({ error: { code: 'delete_failed', message: 'Error deleting product.' } });
+  }
+});
+
 productsRouter.get('/sync', async (request, response) => {
   const businessId = request.auth?.businessId;
   if (!businessId) {

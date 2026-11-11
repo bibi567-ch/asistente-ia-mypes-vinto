@@ -17,6 +17,15 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 
 Evidencia disponible: captura real de la pantalla principal del login en un dispositivo Android conectado. Esta toma confirma que la UI carga correctamente, pero no sustituye la validación del dictado por voz ni del acceso con credenciales reales.
 
+No se marcan como aprobadas pruebas funcionales de Android sin captura o video en `docs/evidencias/`. Cuando se capturen los casos de acceso real, agregar los siguientes bloques en esta sección:
+
+```markdown
+![Login exitoso](evidencias/01_login/login_exitoso.png)
+![Registro en PostgreSQL](evidencias/01_login/registro_en_postgres.png)
+```
+
+Los archivos anteriores quedan pendientes de captura; la evidencia actual disponible solo cubre la carga visual de la pantalla.
+
 ## Registro
 
 | ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |

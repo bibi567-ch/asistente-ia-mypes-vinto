@@ -76,6 +76,37 @@ object PlantillasNegocio {
         )
     )
 
-    val TODAS = listOf(ABARROTES, PENSION, BROASTERIA, FERRETERIA)
+    val FARMACIA = Plantilla(
+        id = "farmacia",
+        nombre = "Farmacia",
+        rubro = "Farmacia",
+        categorias = listOf("Medicamentos", "Vitaminas", "Higiene", "Primeros Auxilios"),
+        unidades = listOf("caja", "frasco", "blister", "unidad"),
+        productosEjemplo = listOf(
+            ProductoEjemplo("Paracetamol", "blister", 2.0, "Medicamentos"),
+            ProductoEjemplo("Ibuprofeno", "blister", 3.0, "Medicamentos"),
+            ProductoEjemplo("Vitamina C", "frasco", 45.0, "Vitaminas"),
+            ProductoEjemplo("Alcohol en gel", "frasco", 15.0, "Higiene"),
+            ProductoEjemplo("Curitas", "caja", 5.0, "Primeros Auxilios")
+        )
+    )
+
+    val PASTELERIA = Plantilla(
+        id = "pasteleria",
+        nombre = "Pastelería / Panadería",
+        rubro = "Pastelería",
+        categorias = listOf("Panadería", "Repostería", "Tortas", "Bebidas"),
+        unidades = listOf("unidad", "docena", "porción", "caja"),
+        productosEjemplo = listOf(
+            ProductoEjemplo("Pan francés", "unidad", 0.5, "Panadería"),
+            ProductoEjemplo("Tortilla", "unidad", 1.0, "Panadería"),
+            ProductoEjemplo("Flan", "porción", 4.0, "Repostería"),
+            ProductoEjemplo("Gelatina", "porción", 2.0, "Repostería"),
+            ProductoEjemplo("Torta 20 personas", "unidad", 80.0, "Tortas"),
+            ProductoEjemplo("Coca-Cola", "unidad", 16.0, "Bebidas")
+        )
+    )
+
+    val TODAS = listOf(ABARROTES, PENSION, BROASTERIA, FERRETERIA, FARMACIA, PASTELERIA)
     fun porId(id: String): Plantilla? = TODAS.firstOrNull { it.id == id }
 }

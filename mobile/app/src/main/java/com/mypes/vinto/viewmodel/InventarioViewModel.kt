@@ -27,6 +27,14 @@ class InventarioViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    fun actualizarProducto(producto: Producto) {
+        viewModelScope.launch { dao.actualizar(producto) }
+    }
+
+    fun eliminarProducto(producto: Producto) {
+        viewModelScope.launch { dao.eliminar(producto) }
+    }
+
     fun ajustarStock(id: String, delta: Double) {
         viewModelScope.launch { dao.ajustarStock(id, delta) }
     }

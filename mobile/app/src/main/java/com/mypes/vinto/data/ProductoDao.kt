@@ -1,16 +1,24 @@
 package com.mypes.vinto.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProductoDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertar(producto: Producto)
+
+    @Update
+    suspend fun actualizar(producto: Producto)
+
+    @Delete
+    suspend fun eliminar(producto: Producto)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertarSiNoExiste(producto: Producto): Long
