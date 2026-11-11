@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -99,8 +100,17 @@ fun ApiLoginScreen(
             }
         }
         Spacer(Modifier.height(8.dp))
+        Button(
+            onClick = { vm.registrarCuentaLocal(email, password) },
+            enabled = estado !is ApiLoginEstado.Iniciando,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = VerdeNeon)
+        ) {
+            Text("Crear cuenta con perfil local", color = FondoOscuro)
+        }
+        Spacer(Modifier.height(8.dp))
         Text(
-            "La cuenta debe haber sido creada en el backend. La app no guarda esta contraseña.",
+            "Si registraste el perfil sin conexión, usa el mismo correo y crea aquí la cuenta en la nube. La contraseña no se guarda en el dispositivo.",
             color = TextoGris
         )
     }

@@ -95,8 +95,14 @@ fun PerfilScreen(nav: NavController) {
                         Modifier.padding(24.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        PerfilRow("Nombre", perfil.nombre)
+                        PerfilRow(
+                            "Nombre",
+                            "${perfil.nombres} ${perfil.apellidos}".trim().takeIf(String::isNotBlank) ?: perfil.nombre
+                        )
                         PerfilRow("Carnet", perfil.carnet)
+                        PerfilRow("Expedido", perfil.expedido)
+                        PerfilRow("Fecha de nacimiento", perfil.fechaNacimiento)
+                        PerfilRow("Lugar de nacimiento", perfil.lugarNacimiento)
                         PerfilRow("Celular", perfil.celular)
                         PerfilRow("Dirección", perfil.direccion)
                         PerfilRow("Correo", perfil.email)

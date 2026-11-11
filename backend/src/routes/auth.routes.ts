@@ -56,7 +56,12 @@ authRouter.post('/register', async (request, response) => {
   const fields = body as Record<string, unknown>;
   const {
     nombre,
+    nombres,
+    apellidos,
     carnet,
+    expedido,
+    fechaNacimiento,
+    lugarNacimiento,
     celular,
     direccion,
     email,
@@ -68,15 +73,41 @@ authRouter.post('/register', async (request, response) => {
     typeof nombre !== 'string'
     || nombre.trim().length < 1
     || nombre.trim().length > 160
+    || (nombres !== undefined && (
+      typeof nombres !== 'string'
+      || nombres.trim().length < 1
+      || nombres.trim().length > 80
+    ))
+    || (apellidos !== undefined && (
+      typeof apellidos !== 'string'
+      || apellidos.trim().length < 1
+      || apellidos.trim().length > 100
+    ))
     || typeof carnet !== 'string'
     || carnet.trim().length < 1
     || carnet.trim().length > 40
+    || (expedido !== undefined && (
+      typeof expedido !== 'string'
+      || expedido.trim().length < 1
+      || expedido.trim().length > 40
+    ))
+    || (fechaNacimiento !== undefined && (
+      typeof fechaNacimiento !== 'string'
+      || fechaNacimiento.trim().length < 1
+      || fechaNacimiento.trim().length > 32
+    ))
+    || (lugarNacimiento !== undefined && (
+      typeof lugarNacimiento !== 'string'
+      || lugarNacimiento.trim().length < 1
+      || lugarNacimiento.trim().length > 120
+    ))
     || typeof celular !== 'string'
     || celular.trim().length < 1
     || celular.trim().length > 40
-    || typeof direccion !== 'string'
-    || direccion.trim().length < 1
-    || direccion.trim().length > 240
+    || (direccion !== undefined && (
+      typeof direccion !== 'string'
+      || direccion.trim().length > 240
+    ))
     || typeof email !== 'string'
     || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
     || email.trim().length > 254
@@ -84,12 +115,14 @@ authRouter.post('/register', async (request, response) => {
     || password.length < 12
     || password.length > 256
     || Buffer.byteLength(password, 'utf8') > 1024
-    || typeof nombreNegocio !== 'string'
-    || nombreNegocio.trim().length < 1
-    || nombreNegocio.trim().length > 160
-    || typeof rubro !== 'string'
-    || rubro.trim().length < 1
-    || rubro.trim().length > 80
+    || (nombreNegocio !== undefined && nombreNegocio !== null && (
+      typeof nombreNegocio !== 'string'
+      || nombreNegocio.trim().length > 160
+    ))
+    || (rubro !== undefined && rubro !== null && (
+      typeof rubro !== 'string'
+      || rubro.trim().length > 80
+    ))
   ) {
     response.status(400).json({ error: { code: 'invalid_registration', message: 'Check the required fields and password length (12 to 256 characters).' } });
     return;
@@ -102,23 +135,35 @@ authRouter.post('/register', async (request, response) => {
     transactionOpen = true;
     const businessResult = await client.query<{ id: string }>(
       'INSERT INTO businesses (name, rubro) VALUES ($1, $2) RETURNING id',
-      [nombreNegocio.trim(), rubro.trim()]
+      [
+        typeof nombreNegocio === 'string' && nombreNegocio.trim()
+          ? nombreNegocio.trim()
+          : `Negocio de ${nombre.trim()}`.slice(0, 160),
+        typeof rubro === 'string' && rubro.trim() ? rubro.trim() : null
+      ]
     );
     const businessId = businessResult.rows[0]?.id;
     if (!businessId) throw new Error('Business insert did not return an identifier.');
 
     const normalizedEmail = email.trim().toLowerCase();
     const userResult = await client.query<{ id: string }>(
-      `INSERT INTO users (business_id, email, password_hash, role, nombre, carnet, celular, direccion)
-       VALUES ($1, $2, $3, 'owner', $4, $5, $6, $7) RETURNING id`,
+      `INSERT INTO users (
+         business_id, email, password_hash, role, nombre, nombres, apellidos, carnet,
+         expedido, fecha_nacimiento, lugar_nacimiento, celular, direccion
+       ) VALUES ($1, $2, $3, 'owner', $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id`,
       [
         businessId,
         normalizedEmail,
         await hashPassword(password),
         nombre.trim(),
+        typeof nombres === 'string' ? nombres.trim() : nombre.trim(),
+        typeof apellidos === 'string' ? apellidos.trim() : null,
         carnet.trim(),
+        typeof expedido === 'string' ? expedido.trim() : null,
+        typeof fechaNacimiento === 'string' ? fechaNacimiento.trim() : null,
+        typeof lugarNacimiento === 'string' ? lugarNacimiento.trim() : null,
         celular.trim(),
-        direccion.trim()
+        typeof direccion === 'string' && direccion.trim() ? direccion.trim() : null
       ]
     );
     const userId = userResult.rows[0]?.id;
@@ -151,6 +196,35 @@ authRouter.post('/register', async (request, response) => {
   } finally {
     client.release();
   }
+});
+
+authRouter.put('/business', requireAuth, async (request, response) => {
+  const { nombreNegocio, rubro } = request.body ?? {};
+  const businessId = request.auth?.businessId;
+  if (
+    !businessId
+    || typeof nombreNegocio !== 'string'
+    || nombreNegocio.trim().length < 1
+    || nombreNegocio.trim().length > 160
+    || typeof rubro !== 'string'
+    || rubro.trim().length < 1
+    || rubro.trim().length > 80
+  ) {
+    response.status(400).json({
+      error: { code: 'invalid_business_profile', message: 'Provide a business name and category.' }
+    });
+    return;
+  }
+
+  const result = await pool.query(
+    'UPDATE businesses SET name = $1, rubro = $2 WHERE id = $3',
+    [nombreNegocio.trim(), rubro.trim(), businessId]
+  );
+  if (result.rowCount !== 1) {
+    response.status(404).json({ error: { code: 'business_not_found', message: 'The business no longer exists.' } });
+    return;
+  }
+  response.status(204).end();
 });
 
 authRouter.post('/change-password', requireAuth, async (request, response) => {

@@ -10,6 +10,8 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 |---|---|---|---|
 | LOGIN-01 | Ingresar con PIN local válido | Se abre el panel sin requerir Internet | PENDIENTE |
 | LOGIN-02 | Ingresar con PIN incorrecto | Se rechaza el acceso y se aplica la política local de intentos | PENDIENTE |
+| LOGIN-03 | Ingresar identificador local válido con PIN | Se encuentra el perfil por carnet, celular o correo, sin distinguir mayúsculas/minúsculas | PENDIENTE |
+| LOGIN-04 | Dictar "uno, dos, tres, cuatro" en el login | El PIN se completa como `1234`; no se intenta el acceso con una extracción ambigua | PENDIENTE de prueba funcional en dispositivo |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Login]
 
@@ -20,9 +22,11 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 | REG-01 | Prueba de integración API: registrar propietario y negocio con correo único | Se guardan propietario y negocio, y la sesión Bearer permite usar una ruta protegida | APROBADO (integración local con PostgreSQL temporal) |
 | REG-02 | Prueba de integración API: volver a registrar el mismo correo | Se responde `409` y no se crea un negocio huérfano | APROBADO (integración local con PostgreSQL temporal) |
 | REG-03 | Prueba de integración API: enviar campos incompletos y contraseña corta | Se responde `400` antes de crear cuentas | APROBADO (integración local con PostgreSQL temporal) |
-| REG-04 | Completar el formulario Android con conexión | El perfil se conserva en Room, el token se guarda y la app avanza al onboarding | PENDIENTE de prueba funcional |
-| REG-05 | Registrar sin conexión y elegir continuar localmente | El PIN y perfil permanecen en Room; la contraseña de nube no se almacena y la UI informa que la cuenta no está vinculada | PENDIENTE de prueba funcional |
-| REG-06 | Migrar una base Room versión 2 con usuario existente | La actualización a versión 3 conserva el PIN y permite abrir la base con los campos de perfil opcionales | PENDIENTE de prueba en dispositivo/base existente |
+| REG-04 | Completar el formulario Android con conexión | El perfil personal se conserva en Room y PostgreSQL, el token se guarda y se crea un negocio provisional para completar en onboarding | PENDIENTE de prueba funcional |
+| REG-05 | Registrar sin conexión, completar onboarding y crear la cuenta desde Sincronización | El perfil permanece local, la contraseña no se persiste; al reingresarla se crea la cuenta remota con los datos actuales del perfil | PENDIENTE de prueba funcional |
+| REG-06 | Migrar una base Room versión 4 con usuario existente | La actualización a versión 6 conserva el PIN y los datos anteriores y agrega los campos personales nuevos | PENDIENTE de prueba en dispositivo/base existente |
+| REG-07 | Crear la cuenta remota desde un perfil local con conexión | Se registran perfil y negocio en PostgreSQL, se guarda el token y se puede iniciar la sincronización | PENDIENTE de prueba funcional |
+| REG-08 | Integración backend del perfil ampliado, negocio provisional y actualización protegida | La migración 005 aplica y `PUT /api/v1/auth/business` modifica solo el negocio del token | BLOQUEADO por disponibilidad/autenticación de PostgreSQL |
 | PERF-01 | Abrir Perfil desde el dashboard después del registro | Room muestra los campos disponibles del comerciante y negocio; los opcionales ausentes aparecen como "No registrado" | PENDIENTE de prueba funcional |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Registro]
@@ -33,6 +37,7 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 |---|---|---|---|
 | ONB-01 | Aplicar una plantilla de negocio | Se agregan ejemplos y la pantalla muestra el resultado | PENDIENTE |
 | ONB-02 | Aplicar de nuevo la misma plantilla | No se duplican productos existentes | PENDIENTE |
+| ONB-03 | Guardar nombre/rubro del negocio y elegir plantilla con conexión | Room y el negocio asociado al token muestran los mismos datos antes de abrir el dashboard | PENDIENTE de prueba funcional |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Onboarding]
 
@@ -92,6 +97,7 @@ Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
 | IA-04 | Prueba JVM de extracción de cantidad, producto, monto, unidad y cliente | Los ejemplos "cuartilla" y "al fiado" producen las entidades esperadas | APROBADO (unit test local) |
 | IA-05 | Prueba JVM de clasificación de "Vendí dos cuartillas de arroz" | Se clasifica como VENTA | APROBADO (unit test local) |
 | IA-06 | Inicializar Vosk desde los assets y reconocer voz sin conexión | El modelo se extrae de assets, inicializa y reconoce una frase en español en dispositivo | PENDIENTE |
+| IA-07 | Prueba JVM de extracción de PIN hablado | Reconoce cuatro dígitos en palabras con puntuación y rechaza frases incompletas/ambiguas | APROBADO (unit test local) |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Chat IA]
 

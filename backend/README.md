@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, registro de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token y recepción idempotente de lotes de transacciones offline. Hay pruebas automatizadas de autenticación, tokens y rechazo de acceso anónimo al catálogo.
+API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, registro de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, actualización protegida del perfil del negocio, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token y recepción idempotente de lotes de transacciones offline. Hay pruebas automatizadas de autenticación, tokens y rechazo de acceso anónimo al catálogo.
 
 Actualización/borrado de productos, recuperación de contraseña, limitación de intentos y despliegue todavía no están implementados. No exponer esta API a una red ni usarla con datos reales.
 
@@ -71,17 +71,21 @@ La respuesta devuelve `accessToken`, `tokenType` y `expiresIn`. El token expira 
 ```json
 {
   "nombre": "Nombre completo",
+  "nombres": "Nombres",
+  "apellidos": "Apellidos",
   "carnet": "1234567",
+  "expedido": "La Paz (LP)",
+  "fechaNacimiento": "10/02/1980",
+  "lugarNacimiento": "La Paz",
   "celular": "70000000",
-  "direccion": "Dirección",
   "email": "propietario@example.test",
-  "password": "<mínimo 12 caracteres>",
-  "nombreNegocio": "Tienda",
-  "rubro": "Abarrotes"
+  "password": "<mínimo 12 caracteres>"
 }
 ```
 
-Los correos se normalizan a minúsculas. Los datos incompletos o inválidos reciben `400`; un correo ya registrado recibe `409`. No se guarda el PIN local en el backend. Este endpoint aún no tiene limitación de intentos; mantenerlo en un entorno local/de pruebas y no exponerlo a Internet.
+Los correos se normalizan a minúsculas y la contraseña se almacena como hash scrypt; el PIN local nunca se envía al backend. El registro crea un negocio provisional con nombre derivado del propietario, que se completa después con el onboarding. Los datos incompletos o inválidos reciben `400`; un correo ya registrado recibe `409`.
+
+`PUT /api/v1/auth/business` requiere `Authorization: Bearer <accessToken>` y un cuerpo con `nombreNegocio` y `rubro`. Actualiza únicamente el negocio asociado al token. El endpoint de registro aún no tiene limitación de intentos; mantenerlo en un entorno local/de pruebas y no exponerlo a Internet.
 
 `POST /api/v1/auth/change-password` requiere el token Bearer y acepta `currentPassword` y `newPassword` (mínimo 12 caracteres). Úsalo para reemplazar la contraseña generada durante el alta.
 

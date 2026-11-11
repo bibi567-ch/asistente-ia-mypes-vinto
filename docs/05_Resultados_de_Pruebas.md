@@ -112,6 +112,15 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Alcance pendiente:** no se ejecutó en dispositivo la migración de una base real versión 3, el cobro transaccional Room, búsqueda en pantalla ni el envío del URI CSV a otra app. Esas pruebas funcionales siguen PENDIENTES; no se declara probado el ciclo completo en interfaz.
 - **Evidencia:** reportes automatizados locales; capturas pendientes en `evidencias/09_fiados/`, `evidencias/05_inventario/` y `evidencias/03_dashboard/`.
 
+## Fase 14: Perfil personal ampliado, login por identificador y PIN por voz
+
+- **Fecha:** 2026-11-10
+- **Qué se implementó:** Room v6 conserva los campos anteriores y añade nombres, apellidos, expedición y datos de nacimiento; el login local busca por carnet, celular o correo y ya no crea una cuenta al introducir un PIN en una base vacía. Se añadió extracción unitaria de cuatro dígitos hablados. Registro envía los datos del perfil al backend; la contraseña se almacena como hash scrypt en PostgreSQL y no se conserva en Room. El onboarding guarda nombre/rubro localmente y los actualiza en el negocio asociado al token. Si el registro fue offline, Sincronización permite volver a ingresar correo/contraseña para crear la cuenta con el perfil local.
+- **Android:** `:app:testDebugUnitTest :app:assembleDebug` finalizó correctamente con SDK explícito. JUnit reportó 9 pruebas, 0 fallos, 0 errores y 0 omitidas. La prueba incluye extracción de PIN hablado y casos ambiguos. La compilación no valida el flujo ni la migración Room en un dispositivo.
+- **Backend:** `npm run build`, `npm run typecheck:test` y `npm test` finalizaron correctamente; 8 pruebas unitarias pasaron. `npm run test:integration` terminó con 10 fallos y 0 aprobadas porque PostgreSQL rechazó la autenticación para `mypes_local`; Docker Desktop tampoco estaba disponible para iniciar la base temporal. La migración 005 y el endpoint de actualización del negocio no se verificaron contra PostgreSQL; REG-08 queda BLOQUEADO.
+- **Estado funcional Android:** PENDIENTE de ejecutar login por identificador/voz, registro, onboarding y migración 4→6 en dispositivo. No se generó captura/video ni se marca ninguna prueba funcional como aprobada.
+- **Evidencia:** reportes JUnit locales en `mobile/app/build/test-results/testDebugUnitTest/`; captura funcional pendiente en `evidencias/01_login/`, `evidencias/02_onboarding/` y `evidencias/06_chat_ia/`.
+
 ## Plantilla para nuevas ejecuciones
 
 ### Fase [n]: [módulo y escenario]

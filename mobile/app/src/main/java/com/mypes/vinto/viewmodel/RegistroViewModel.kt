@@ -35,31 +35,38 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
     private var perfilGuardadoLocalmente = false
 
     fun registrar(
-        nombre: String,
+        nombres: String,
+        apellidos: String,
         carnet: String,
+        expedido: String,
+        fechaNacimiento: String,
+        lugarNacimiento: String,
         celular: String,
-        direccion: String,
         email: String,
         password: String,
-        nombreNegocio: String,
-        rubro: String,
         pin: String
     ) {
         if (_estado.value is EstadoRegistro.Cargando) return
 
         viewModelScope.launch {
             _estado.value = EstadoRegistro.Cargando
+            val nombreCompleto = "$nombres $apellidos".trim()
             try {
                 val hash = PinHasher.crear(pin)
                 database.usuarioDao().actualizar(
                     Usuario(
-                        nombre = nombre.trim(),
+                        nombre = nombreCompleto,
+                        nombres = nombres.trim(),
+                        apellidos = apellidos.trim(),
                         carnet = carnet.trim(),
+                        expedido = expedido.trim(),
+                        fechaNacimiento = fechaNacimiento.trim(),
+                        lugarNacimiento = lugarNacimiento.trim(),
                         celular = celular.trim(),
-                        direccion = direccion.trim(),
+                        direccion = null,
                         email = email.trim().lowercase(),
-                        nombreNegocio = nombreNegocio.trim(),
-                        rubro = rubro.trim(),
+                        nombreNegocio = "Negocio de ${nombres.trim()}",
+                        rubro = "",
                         pinHash = hash.hash,
                         salt = hash.salt,
                         iteraciones = hash.iteraciones
@@ -79,14 +86,17 @@ class RegistroViewModel(application: Application) : AndroidViewModel(application
             try {
                 val response = ApiClient.registroApi.registrar(
                     RegisterRequest(
-                        nombre = nombre.trim(),
+                        nombre = nombreCompleto,
+                        nombres = nombres.trim(),
+                        apellidos = apellidos.trim(),
                         carnet = carnet.trim(),
+                        expedido = expedido.trim(),
+                        fechaNacimiento = fechaNacimiento.trim(),
+                        lugarNacimiento = lugarNacimiento.trim(),
                         celular = celular.trim(),
-                        direccion = direccion.trim(),
+                        direccion = "",
                         email = email.trim().lowercase(),
                         password = password,
-                        nombreNegocio = nombreNegocio.trim(),
-                        rubro = rubro.trim()
                     )
                 )
                 val accessToken = response.accessToken

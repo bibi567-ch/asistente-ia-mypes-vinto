@@ -24,4 +24,16 @@ class EntityExtractorTest {
         assertEquals("FIADO", resultado.formaPago)
         assertEquals("Maria", resultado.cliente)
     }
+
+    @Test
+    fun `extrae PIN de palabras separadas y puntuacion`() {
+        assertEquals("1234", extractor.extraerPin("Mi PIN es uno, dos, tres y cuatro"))
+        assertEquals("0123", extractor.extraerPin("cero uno dos tres"))
+    }
+
+    @Test
+    fun `rechaza PIN hablado incompleto o ambiguo`() {
+        assertEquals(null, extractor.extraerPin("uno dos tres"))
+        assertEquals(null, extractor.extraerPin("mi pin es doce treinta y cuatro"))
+    }
 }

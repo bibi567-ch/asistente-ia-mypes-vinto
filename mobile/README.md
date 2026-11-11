@@ -13,7 +13,8 @@ Módulo Kotlin + Jetpack Compose bajo `app/`. Incluye persistencia local Room/SQ
 - La pantalla de sincronización observa el Outbox Room y muestra las operaciones pendientes, errores y el estado del trabajo de WorkManager.
 - Reporte local de ventas del día, con recálculo al cambiar la fecha.
 - Login API con email y contraseña, independiente del PIN local.
-- Registro local/API: el PIN se guarda como hash en Room y la contraseña de nube solo se envía al endpoint de registro, sin persistirla en el dispositivo.
+- Registro local/API: los datos personales se guardan primero en Room y, al registrar con conexión, también en PostgreSQL; el PIN se guarda como hash solo en Room y la contraseña de nube se almacena como hash scrypt en el servidor, sin persistirla en el dispositivo. El nombre/rubro del negocio se completa en el onboarding y se actualiza en la API cuando hay conexión. Si el alta se hizo offline, la pantalla de sincronización permite registrar posteriormente el perfil local en la nube volviendo a introducir el correo y la contraseña.
+- Login local por carnet, celular o correo y PIN; el PIN también puede dictarse en español con el reconocimiento Vosk offline.
 - Procesamiento de voz local con Vosk. El asistente interpreta solicitudes; las ventas todavía requieren revisión y confirmación en el formulario manual.
 
 La estudiante informó que instaló el APK debug en un Motorola G60 y guardó un producto de prueba. Es un resultado reportado, no una prueba formal; archivar pasos y evidencia anonimizada antes de presentarlo como tal.

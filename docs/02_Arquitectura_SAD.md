@@ -12,17 +12,18 @@ El documento académico existente [03_SAD_Arquitectura.md](03_SAD_Arquitectura.m
 |---|---|---|
 | Aplicación móvil | Kotlin, Android, Jetpack Compose | Interfaz, acceso local, inventario, ventas, voz y sincronización |
 | Persistencia móvil | Room/SQLite y SQLCipher | Datos locales y cola Outbox para operación offline |
-| API | Node.js 24, TypeScript, Express | Autenticación, catálogo y recepción de lotes de transacciones |
+| API | Node.js 24, TypeScript, Express | Registro/autenticación, actualización del negocio, catálogo y recepción de lotes de transacciones |
 | Persistencia del servidor | PostgreSQL | Usuarios, negocios, productos y transacciones |
 | Automatización backend | GitHub Actions | Migraciones, compilación, chequeo de tipos y pruebas unitarias/de integración |
 
 ## Flujos y límites
 
-1. El comerciante usa el PIN local para entrar a la aplicación. La autenticación de la API es un flujo separado por email/contraseña que entrega un JWT.
-2. Las ventas se guardan localmente con sus cambios de stock y operación pendiente dentro de una transacción Room.
-3. El worker de sincronización envía el Outbox al backend autenticado. La API procesa lotes con identificadores de operación idempotentes.
-4. El catálogo del servidor se descarga de forma paginada; el stock local se conserva durante la sincronización.
-5. El asistente de voz solo traslada sugerencias al formulario de venta. No persiste una venta sin confirmación.
+1. El comerciante entra localmente con carnet, celular o correo y PIN; el PIN puede escribirse o dictarse con el modelo Vosk offline. La autenticación remota es independiente: usa email/contraseña y entrega un JWT. El servidor conserva solo el hash scrypt de la contraseña; Room conserva solo el hash del PIN.
+2. El registro guarda primero el perfil personal en Room y, cuando hay conexión, también en PostgreSQL. El negocio remoto se crea provisionalmente y se actualiza con nombre/rubro durante el onboarding cuando existe conexión. Si el alta se hizo offline, Sincronización puede registrar el perfil local al volver a introducir el correo y la contraseña; la contraseña no se persiste en el dispositivo.
+3. Las ventas se guardan localmente con sus cambios de stock y operación pendiente dentro de una transacción Room.
+4. El worker de sincronización envía el Outbox al backend autenticado. La API procesa lotes con identificadores de operación idempotentes.
+5. El catálogo del servidor se descarga de forma paginada; el stock local se conserva durante la sincronización.
+6. El asistente de voz solo traslada sugerencias al formulario de venta. No persiste una venta sin confirmación.
 
 ## Contratos de API
 

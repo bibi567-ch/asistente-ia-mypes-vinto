@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.mypes.vinto.data.MypesDatabase
 import com.mypes.vinto.data.PinHasher
 import com.mypes.vinto.data.PoliticaAcceso
-import com.mypes.vinto.data.Usuario
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -15,6 +14,7 @@ sealed class LoginEstado {
     data object Inicial : LoginEstado()
     data object Verificando : LoginEstado()
     data object Exito : LoginEstado()
+    data object RequiereRegistro : LoginEstado()
     data class Error(val mensaje: String) : LoginEstado()
     data class Bloqueado(val segundosRestantes: Long) : LoginEstado()
 }
@@ -24,18 +24,22 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _estado = MutableStateFlow<LoginEstado>(LoginEstado.Inicial)
     val estado: StateFlow<LoginEstado> = _estado
 
-    fun verificarPin(pin: String) {
-        if (pin.length != 4 || _estado.value is LoginEstado.Verificando) return
+    fun verificarPin(pin: String, identificador: String) {
+        if (pin.length != 4 || !pin.all(Char::isDigit) || _estado.value is LoginEstado.Verificando) return
+        if (identificador.isBlank()) {
+            _estado.value = LoginEstado.Error("Ingresa tu carnet, celular o correo.")
+            return
+        }
         viewModelScope.launch {
             _estado.value = LoginEstado.Verificando
             try {
-                val usuario = db.usuarioDao().obtener()
+                val usuario = db.usuarioDao().buscarPorIdentificador(identificador.trim())
                 if (usuario == null) {
-                    val hash = PinHasher.crear(pin)
-                    db.usuarioDao().insertar(
-                        Usuario(nombre = "Comerciante", pinHash = hash.hash, salt = hash.salt, iteraciones = hash.iteraciones)
-                    )
-                    _estado.value = LoginEstado.Exito
+                    _estado.value = if (db.usuarioDao().obtener() == null) {
+                        LoginEstado.RequiereRegistro
+                    } else {
+                        LoginEstado.Error("No se encontró una cuenta con ese dato.")
+                    }
                     return@launch
                 }
 

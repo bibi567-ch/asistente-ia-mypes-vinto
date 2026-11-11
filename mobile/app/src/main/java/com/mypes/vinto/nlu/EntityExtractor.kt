@@ -1,5 +1,6 @@
 package com.mypes.vinto.nlu
 
+import java.text.Normalizer
 import java.util.Locale
 
 class EntityExtractor {
@@ -32,6 +33,29 @@ class EntityExtractor {
         "setenta" to "70", "ochenta" to "80", "noventa" to "90",
         "cien" to "100", "ciento" to "100", "mil" to "1000"
     )
+
+    private val digitosHablados = mapOf(
+        "cero" to '0', "uno" to '1', "un" to '1', "una" to '1',
+        "dos" to '2', "tres" to '3', "cuatro" to '4', "cinco" to '5',
+        "seis" to '6', "siete" to '7', "ocho" to '8', "nueve" to '9'
+    )
+    private val conectoresPin = setOf("mi", "el", "es", "pin", "clave", "por", "favor", "y")
+
+    fun extraerPin(texto: String): String? {
+        val tokens = Regex("""[\p{L}\d]+""")
+            .findAll(texto.lowercase(Locale.ROOT))
+            .map { Normalizer.normalize(it.value, Normalizer.Form.NFD).replace(Regex("\\p{M}+"), "") }
+            .toList()
+        val digitos = tokens.mapNotNull { token ->
+            when {
+                token in conectoresPin -> null
+                token.length == 1 && token[0].isDigit() -> token[0]
+                else -> digitosHablados[token]
+            }
+        }
+        if (tokens.any { it !in conectoresPin && it.length != 1 && it !in digitosHablados }) return null
+        return digitos.joinToString("").takeIf { it.length == 4 }
+    }
 
     fun extraer(texto: String): Entidades {
         val normalizado = normalizarNumerosHablados(texto.lowercase(Locale.ROOT))
