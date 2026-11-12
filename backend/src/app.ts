@@ -1,5 +1,6 @@
 import express from 'express';
 import { authRouter } from './routes/auth.routes.js';
+import { cloudRouter } from './routes/cloud.routes.js';
 import { healthRouter } from './routes/health.routes.js';
 import { productsRouter } from './routes/products.routes.js';
 import { transaccionesRouter } from './routes/transacciones.routes.js';
@@ -9,6 +10,7 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '100kb' }));
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1', cloudRouter);
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/transacciones', transaccionesRouter);
 

@@ -8,6 +8,8 @@ Módulo Kotlin + Jetpack Compose bajo `app/`. Incluye persistencia local Room/SQ
 - Onboarding, dashboard e inventario Compose.
 - Persistencia Room para productos, ventas, caja y operaciones pendientes (Outbox).
 - Pantallas conectadas para registrar ventas, usar el asistente de voz y consultar el estado de sincronización.
+- Plantillas locales de farmacia, pastelería, ferretería, licorería, broastería y minimarket, con categorías, márgenes orientativos y al menos diez productos sugeridos por rubro. Los precios/márgenes son ejemplos editables, no cotizaciones verificadas.
+- Yapay incluye un flujo local simulado de consulta de ventas y alta de producto con confirmación explícita. No conecta un LLM, no ejecuta CRUD remoto ni responde realmente en quechua/aymara; ese prompt queda preparado para una futura integración.
 - Módulo de fiados para listar deudas pendientes; al confirmar un cobro completo, el estado pagado, el ingreso de caja y el evento `COBRO` del Outbox se guardan en una misma transacción Room.
 - Inventario con búsqueda local por nombre y exportación del reporte diario de ventas a CSV compartido mediante `FileProvider`.
 - La pantalla de sincronización observa el Outbox Room y muestra las operaciones pendientes, errores y el estado del trabajo de WorkManager.
@@ -28,6 +30,7 @@ La estudiante informó que instaló el APK debug en un Motorola G60 y guardó un
 - Los cobros de fiados se ponen en el Outbox con tipo `COBRO` y se envían idempotentemente por el mismo endpoint. El reporte CSV incluye las ventas locales del día y se comparte solo después de una acción explícita del usuario.
 - Los productos creados solo en el dispositivo aún no se envían al catálogo del backend. La sincronización del catálogo es de descarga.
 - La voz puede sugerir producto y cantidad y abrir el formulario de venta; la persona debe revisar y confirmar. El PIN local no se utiliza para iniciar sesión automáticamente en la API ni hay credenciales de demostración integradas.
+- La pantalla de chat conecta la voz reconocida con `YapayAgent`, cuyo `StateFlow` alimenta la conversación. Permite consultar el total local de ventas del día y preparar un producto con nombre, precio y stock. El alta se realiza en Room únicamente tras contestar afirmativamente; cancelar no modifica datos. El consejo financiero no calcula márgenes porque el modelo local de productos aún no almacena costos de compra.
 - Docker Compose inicia el backend y PostgreSQL localmente, pero no configura acceso desde el teléfono ni crea cuentas API. Crea el propietario según [las instrucciones del backend](../backend/README.md); no uses credenciales fijas ni compartidas.
 
 Probar por separado la API, el registro offline local y la sincronización. Usar datos ficticios y no incluir tokens en la evidencia.

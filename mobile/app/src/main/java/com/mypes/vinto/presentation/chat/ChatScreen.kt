@@ -26,10 +26,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.mypes.vinto.nlu.AsistenteVozFacade
 import com.mypes.vinto.nlu.IntentClassifier
+import com.mypes.vinto.nlu.YapayAgent
 import com.mypes.vinto.presentation.theme.AzulElectrico
 import com.mypes.vinto.presentation.theme.FondoOscuro
 import com.mypes.vinto.presentation.theme.NaranjaAlerta
@@ -49,6 +51,7 @@ import com.mypes.vinto.presentation.theme.TextoBlanco
 import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.launch
 
 data class Mensaje(val texto: String, val esUsuario: Boolean)
 
@@ -56,9 +59,9 @@ data class Mensaje(val texto: String, val esUsuario: Boolean)
 fun ChatScreen(nav: NavController) {
     val context = LocalContext.current
     val asistente = remember { AsistenteVozFacade(context) }
-    val mensajes = remember {
-        mutableStateListOf(Mensaje("¡Buenos días! Estoy aquí para ayudarte con tu negocio.", false))
-    }
+    val yapay = remember { YapayAgent(context) }
+    val mensajesYapay by yapay.estadoChat.collectAsState()
+    val scope = rememberCoroutineScope()
     val resultadoProcesado = remember { AtomicBoolean(false) }
     var textoParcial by remember { mutableStateOf("") }
     var escuchando by remember { mutableStateOf(false) }
@@ -66,7 +69,7 @@ fun ChatScreen(nav: NavController) {
     val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) { modeloDisponible = asistente.inicializar() }
-    LaunchedEffect(mensajes.size, textoParcial) { scrollState.animateScrollTo(scrollState.maxValue) }
+    LaunchedEffect(mensajesYapay.size, textoParcial) { scrollState.animateScrollTo(scrollState.maxValue) }
     DisposableEffect(asistente) { onDispose { asistente.close() } }
 
     Column(Modifier.fillMaxSize().background(FondoOscuro)) {
@@ -99,7 +102,7 @@ fun ChatScreen(nav: NavController) {
             Modifier.weight(1f).verticalScroll(scrollState).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            mensajes.forEach { BurbujaMensaje(it) }
+            mensajesYapay.forEach { BurbujaMensaje(Mensaje(it.texto, it.esUsuario)) }
             if (textoParcial.isNotBlank()) BurbujaMensaje(Mensaje(textoParcial, true))
         }
 
@@ -129,15 +132,21 @@ fun ChatScreen(nav: NavController) {
                                     if (resultadoProcesado.compareAndSet(false, true)) {
                                         escuchando = false
                                         textoParcial = ""
-                                        mensajes.add(Mensaje(resultado.textoOriginal, true))
-                                        mensajes.add(Mensaje(generarRespuesta(resultado), false))
                                         if (resultado.intencion == IntentClassifier.Intencion.VENTA) {
+                                            yapay.registrarInteraccion(
+                                                resultado.textoOriginal,
+                                                generarRespuesta(resultado)
+                                            )
                                             val producto = Uri.encode(resultado.entidades.producto.orEmpty())
                                             val cantidad = resultado.entidades.cantidad
                                                 ?.takeIf { it.isFinite() } ?: 1.0
                                             nav.navigate(
                                                 "venta_manual?producto=$producto&cantidad=$cantidad"
                                             )
+                                        } else {
+                                            scope.launch {
+                                                yapay.procesarComando(resultado.textoOriginal)
+                                            }
                                         }
                                     }
                                 },
@@ -145,7 +154,10 @@ fun ChatScreen(nav: NavController) {
                                     if (resultadoProcesado.compareAndSet(false, true)) {
                                         escuchando = false
                                         textoParcial = ""
-                                        mensajes.add(Mensaje("No se pudo reconocer la voz: $error", false))
+                                        yapay.registrarInteraccion(
+                                            "",
+                                            "No se pudo reconocer la voz: $error"
+                                        )
                                     }
                                 }
                             )

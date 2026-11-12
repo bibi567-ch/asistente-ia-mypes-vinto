@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, registro de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, actualización protegida del perfil del negocio, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token y recepción idempotente de lotes de transacciones offline. Hay pruebas automatizadas de autenticación, tokens y rechazo de acceso anónimo al catálogo.
+API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, registro de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, actualización protegida del perfil del negocio, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token, recepción idempotente de lotes de transacciones offline, facturas simuladas en PDF, almacenamiento del QR de pagos por negocio y notificaciones SSE en proceso.
 
 Actualización/borrado de productos, recuperación de contraseña, limitación de intentos y despliegue todavía no están implementados. No exponer esta API a una red ni usarla con datos reales.
 
@@ -137,6 +137,18 @@ Requiere el mismo encabezado de autorización y un cuerpo JSON:
 ```
 
 Cada `operationId` es idempotente dentro del negocio del token. La respuesta devuelve `ACEPTADA`, `DUPLICADA`, `CONFLICTO` o `RECHAZADA` por operación; el tipo `COBRO` registra de forma idempotente el evento de cobro enviado desde el móvil. El backend de este MVP no mantiene un saldo de deuda remoto. `GET /api/v1/products/sync?desde=<timestamp-ms>` devuelve hasta 500 productos modificados después del timestamp. Cuando la página contiene 500 elementos, solicita la siguiente página con `cursorActualizadoEn` y `cursorId` tomados del último producto; ambos parámetros deben ir juntos. Repite con el mismo `desde` y guarda el `timestamp` de la primera respuesta como cursor para la siguiente sincronización. El stock permanece en el móvil durante este MVP.
+
+### Facturas simuladas
+
+`POST /api/v1/facturas` requiere Bearer JWT y recibe `customerName` opcional y de 1 a 100 artículos (`name`, `quantity`, `unitPrice`). PostgreSQL conserva los artículos y el total; la respuesta contiene un número de factura y `pdfBase64` con un PDF generado localmente. El documento se identifica como simulado y no es una factura fiscal autorizada.
+
+### QR de pagos
+
+`POST /api/v1/qr` requiere Bearer JWT y recibe `{ "qrBase64": "..." }`. Acepta hasta 48 KiB decodificados y conserva un único QR por negocio; las escrituras posteriores lo reemplazan.
+
+### Eventos SSE de sincronización
+
+`GET /api/v1/sync/updates` requiere Bearer JWT y mantiene una conexión Server-Sent Events. Emite cambios de catálogo (`product.created`, `product.updated`, `product.deleted`), facturas y QR solo a conexiones del mismo negocio, además de comentarios keep-alive. La publicación es en memoria del proceso: es apta para una instancia de desarrollo, no garantiza entrega/replay y no coordina varias réplicas; usar un broker compartido antes de escalar.
 
 ## Comandos
 

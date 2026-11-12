@@ -49,6 +49,7 @@ Los archivos anteriores quedan pendientes de captura; la evidencia actual dispon
 | ONB-01 | Aplicar una plantilla de negocio | Se agregan ejemplos y la pantalla muestra el resultado | PENDIENTE |
 | ONB-02 | Aplicar de nuevo la misma plantilla | No se duplican productos existentes | PENDIENTE |
 | ONB-03 | Guardar nombre/rubro del negocio y elegir plantilla con conexión | Room y el negocio asociado al token muestran los mismos datos antes de abrir el dashboard | PENDIENTE de prueba funcional |
+| ONB-04 | Prueba JVM de las seis plantillas | Cada plantilla tiene categorías y márgenes válidos, al menos 10 productos y categorías/unidades asociadas | APROBADO (unit test local) |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Onboarding]
 
@@ -109,6 +110,7 @@ Los archivos anteriores quedan pendientes de captura; la evidencia actual dispon
 | IA-05 | Prueba JVM de clasificación de "Vendí dos cuartillas de arroz" | Se clasifica como VENTA | APROBADO (unit test local) |
 | IA-06 | Inicializar Vosk desde los assets y reconocer voz sin conexión | El modelo se extrae de assets, inicializa y reconoce una frase en español en dispositivo | PENDIENTE |
 | IA-07 | Prueba JVM de extracción de PIN hablado | Reconoce cuatro dígitos en palabras con puntuación y rechaza frases incompletas/ambiguas | APROBADO (unit test local) |
+| IA-08 | Prueba JVM de Yapay al preparar y confirmar un producto | No llama al almacenamiento antes de la confirmación; al confirmar intenta guardar una sola vez | APROBADO (unit test local) |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Chat IA]
 
@@ -130,6 +132,10 @@ Los archivos anteriores quedan pendientes de captura; la evidencia actual dispon
 | API-02 | Ejecutar `npm run typecheck:test` en CI | Código de pruebas pasa el chequeo de tipos | PENDIENTE DE CI |
 | API-03 | Ejecutar `npm test` en CI | Todas las pruebas unitarias pasan | PENDIENTE DE CI |
 | API-04 | Ejecutar migraciones y `npm run test:integration` contra PostgreSQL aislado | Migraciones y pruebas de integración pasan | PENDIENTE DE CI |
+| API-05 | Solicitar facturas, QR y SSE sin JWT | Los tres endpoints rechazan el acceso con `401` | APROBADO (prueba unitaria HTTP local) |
+| API-06 | Enviar artículo de factura/QR con payload inválido autenticado | Se responde `400` antes de consultar PostgreSQL | APROBADO (prueba unitaria HTTP local) |
+| API-07 | Prueba de unidad del bus de eventos por negocio | Solo suscriptores del negocio afectado reciben el evento; la baja elimina la suscripción | APROBADO (unit test local) |
+| API-08 | Crear factura y guardar/reemplazar QR con PostgreSQL | Se persisten por negocio, la factura responde PDF simulado y el evento se emite después de guardar | PENDIENTE DE INTEGRACIÓN |
 
 [ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Backend]
 

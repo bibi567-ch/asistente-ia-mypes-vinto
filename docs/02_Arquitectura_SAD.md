@@ -10,10 +10,10 @@ El documento académico existente [03_SAD_Arquitectura.md](03_SAD_Arquitectura.m
 
 | Componente | Tecnología | Responsabilidad |
 |---|---|---|
-| Aplicación móvil | Kotlin, Android, Jetpack Compose | Interfaz, acceso local, inventario, ventas, voz y sincronización |
+| Aplicación móvil | Kotlin, Android, Jetpack Compose | Interfaz, acceso local, inventario, ventas, voz y sincronización; plantillas de negocio y Yapay local simulado |
 | Persistencia móvil | Room/SQLite y SQLCipher | Datos locales y cola Outbox para operación offline |
-| API | Node.js 24, TypeScript, Express | Registro/autenticación, actualización del negocio, catálogo y recepción de lotes de transacciones |
-| Persistencia del servidor | PostgreSQL | Usuarios, negocios, productos y transacciones |
+| API | Node.js 24, TypeScript, Express | Registro/autenticación, actualización del negocio, catálogo, lotes offline, facturas simuladas, QR y eventos SSE |
+| Persistencia del servidor | PostgreSQL | Usuarios, negocios, productos, transacciones, facturas y QR de pago |
 | Automatización backend | GitHub Actions | Migraciones, compilación, chequeo de tipos y pruebas unitarias/de integración |
 
 ## Flujos y límites
@@ -24,10 +24,13 @@ El documento académico existente [03_SAD_Arquitectura.md](03_SAD_Arquitectura.m
 4. El worker de sincronización envía el Outbox al backend autenticado. La API procesa lotes con identificadores de operación idempotentes.
 5. El catálogo del servidor se descarga de forma paginada; el stock local se conserva durante la sincronización.
 6. El asistente de voz solo traslada sugerencias al formulario de venta. No persiste una venta sin confirmación.
+7. Yapay agrega productos a Room solo después de confirmar; las consultas y consejos son reglas locales demostrativas, no inferencias de un LLM. El catálogo no conserva costos de compra ni categoría actualmente.
+8. La API puede emitir eventos SSE a conexiones autenticadas del mismo negocio. La distribución es en memoria por instancia y no reemplaza el mecanismo paginado de sincronización del móvil.
+9. Las facturas devuelven un PDF simulado no fiscal, y el QR se almacena como Base64 con límite de tamaño en PostgreSQL.
 
 ## Contratos de API
 
-El backend actual documenta rutas, autenticación, paginación y sincronización en [README del backend](../backend/README.md). La configuración y límites del cliente móvil están en [README móvil](../mobile/README.md).
+El backend actual documenta rutas, autenticación, paginación, sincronización y límites de facturación/QR/SSE en [README del backend](../backend/README.md). La configuración y límites del cliente móvil están en [README móvil](../mobile/README.md). Los precios y márgenes de las nuevas plantillas son orientativos: no se encontró el documento comercial fuente en el repositorio.
 
 ## Verificación
 
