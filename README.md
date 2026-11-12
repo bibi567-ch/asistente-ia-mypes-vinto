@@ -64,6 +64,7 @@ Para compilar e instalar Android, abre mobile/ en Android Studio, sincroniza Gra
 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Alcance vigente y exclusiones |
 | [Requisitos y UX/UI](docs/02_Requisitos_y_UX.md) | Requisitos y diseño |
 | [SAD](docs/03_SAD_Arquitectura.md) | SAD 1.1 entregado y nota sobre su estado |
+| [Informe de Segunda Entrega - TI](docs/Informe_Segunda_Entrega_TI.md) | Informe técnico de alcance, requisitos, arquitectura, persistencia y API |
 | [Backend](backend/README.md) | Inicio local, autenticación, catálogo y API |
 | [Android](mobile/README.md) | Módulo móvil y estado de integración |
 | [Diagramas](diagrams/README.md) | Fuentes C4, casos de uso y coherencia pendiente |
