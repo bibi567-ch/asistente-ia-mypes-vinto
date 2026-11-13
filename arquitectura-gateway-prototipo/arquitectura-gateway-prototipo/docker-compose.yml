@@ -1,0 +1,20 @@
+services:
+  auth:
+    build: .
+    command: npx tsx src/authMock.ts
+    ports:
+      - "3001:3001"
+
+  sync:
+    build: .
+    command: npx tsx src/syncMock.ts
+    ports:
+      - "4000:4000"
+
+  ia:
+    build: .
+    command: npx tsx src/iaMock.ts
+    environment:
+      IA_MODO: aleatorio
+    ports:
+      - "5000:5000"
