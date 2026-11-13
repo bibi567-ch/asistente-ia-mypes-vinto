@@ -144,6 +144,18 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 
 ## Plantilla para nuevas ejecuciones
 
+## Fase 15: Plantillas ampliadas, Yapay local y endpoints cloud
+
+- **Fecha:** 2026-11-11
+- **Qué se implementó:** seis plantillas locales con categorías, márgenes orientativos y al menos diez productos; Yapay consulta el total local del día y exige confirmación antes de insertar; la API añade facturas con PDF simulado, QR Base64 por negocio y SSE autenticado con eventos aislados por negocio. Se añadió migración PostgreSQL 006.
+- **Android:** `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` finalizó correctamente; 12 pruebas JVM, 0 fallos, 0 errores y 0 omitidas. Incluye la cobertura nueva de las plantillas y confirmación de producto. Gradle emitió una advertencia de compatibilidad entre Android Gradle Plugin 8.5.2 y `compileSdk` 35; no impidió el build.
+- **Backend:** desde `backend/`, `npm run build`, `npm run typecheck:test` y `npm test` finalizaron correctamente; 11 pruebas, 0 fallos. Incluye autenticación/rechazo de payload inválido para los endpoints nuevos y aislamiento unitario del bus de eventos.
+- **Integridad de iteración:** durante el desarrollo, una compilación Kotlin inicial detectó un error de tipo y una ejecución intermedia detectó un fallo en el fixture de prueba; se corrigieron y la ejecución final descrita arriba pasó.
+- **Comprobación de diff:** `git diff --check` finalizó sin errores.
+- **Pendiente:** no se ejecutaron `npm run test:integration` ni la migración 006 contra PostgreSQL. Tampoco se validaron factura/QR persistidos, transporte SSE real, interfaz en un dispositivo, ni un LLM o respuestas reales en quechua/aymara. No hay evidencia funcional ni ejecución GitHub Actions asociada.
+- **Datos de plantillas:** no se encontró el documento fuente citado para Farmacia Eliana/Pastelería Pampas; los precios y porcentajes cargados son ejemplos editables, no datos confirmados como exactos.
+- **Estado funcional Android:** PENDIENTE de validar en dispositivo; no se declara aprobada ninguna prueba funcional.
+
 ### Fase [n]: [módulo y escenario]
 
 - **Fecha:**

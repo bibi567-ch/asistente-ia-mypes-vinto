@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../auth/require-auth.js';
 import { pool } from '../db/pool.js';
+import { publishBusinessUpdate } from '../sincronizacion/cloud-events.js';
 import { obtenerProductosParaSync } from '../sincronizacion/service/sincronizacion.service.js';
 
 export const productsRouter = Router();
@@ -95,6 +96,12 @@ productsRouter.post('/', async (request, response) => {
   }
 
   const product = result.rows[0];
+  publishBusinessUpdate(businessId, 'product.created', {
+    id: product.id,
+    name: product.name,
+    unit: product.unit,
+    salePrice: product.sale_price
+  });
   response.status(201).json({
     id: product.id,
     name: product.name,
@@ -156,6 +163,12 @@ productsRouter.put('/:id', async (request, response) => {
     }
 
     const product = result.rows[0];
+    publishBusinessUpdate(businessId, 'product.updated', {
+      id: product.id,
+      name: product.name,
+      unit: product.unit,
+      salePrice: product.sale_price
+    });
     response.status(200).json({
       id: product.id,
       name: product.name,
@@ -189,6 +202,7 @@ productsRouter.delete('/:id', async (request, response) => {
       return;
     }
 
+    publishBusinessUpdate(businessId, 'product.deleted', { id });
     response.status(204).end();
   } catch {
     response.status(500).json({ error: { code: 'delete_failed', message: 'Error deleting product.' } });

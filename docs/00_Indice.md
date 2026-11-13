@@ -9,6 +9,7 @@
 5. [Resultados y evidencias](05_Resultados_de_Pruebas.md) — bitácora fechada de ejecuciones confirmadas.
 6. [Guía de configuración y despliegue local](06_Guia_de_Despliegue.md).
 7. [Reporte CI/CD](07_CI_CD_Report.md) — registro de ejecuciones reales de GitHub Actions.
+8. [Informe de Segunda Entrega - Tecnologías en Internet](Informe_Segunda_Entrega_TI.md) — alcance, trazabilidad, arquitectura, persistencia, API y ejecución local.
 
 La [guía del equipo](../COMO_DOCUMENTAR.md) define cómo agregar resultados y evidencias en `evidencias/`.
 

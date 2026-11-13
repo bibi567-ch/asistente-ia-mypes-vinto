@@ -21,7 +21,16 @@ import com.mypes.vinto.presentation.theme.*
 import com.mypes.vinto.sync.AuthSession
 import kotlinx.coroutines.launch
 
-private val rubrosDisponibles = listOf("Abarrotes", "Pensión", "Broastería", "Ferretería")
+private val rubrosDisponibles = listOf(
+    "Abarrotes",
+    "Minimarket",
+    "Pensión",
+    "Broastería",
+    "Ferretería",
+    "Farmacia",
+    "Pastelería",
+    "Licorería"
+)
 
 @Composable
 fun OnboardingPlantillaScreen(nav: NavController) {
