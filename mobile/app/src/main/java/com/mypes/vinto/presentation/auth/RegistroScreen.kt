@@ -251,3 +251,4 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
         }
     }
 }
+
