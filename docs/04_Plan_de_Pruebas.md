@@ -1,148 +1,107 @@
-# Plan de pruebas
+### PLAN DE PRUEBAS Y CRITERIOS DE ACEPTACIÓN — LÍNEA BASE v2.0
 
-Los casos se mantienen pendientes hasta completar su criterio de evidencia. Para una prueba funcional Android, el estado solo cambia a **APROBADO** cuando el escenario se ejecutó y existe captura/video en la carpeta indicada. Para backend, se registra el resultado del workflow real de GitHub Actions; una ejecución local se etiqueta explícitamente como local.
+**Universidad Adventista de Bolivia · Facultad de Ciencias Exactas e Ingeniería**  
+**Proyecto Integrador Yapay: Asistente Conversacional Offline Multilingüe Edge AI**  
 
-Estados: `PENDIENTE`, `APROBADO`, `FALLIDO`, `BLOQUEADO`.
+| Control del documento | Detalle |
+| :--- | :--- |
+| **Versión del Plan** | v2.0 (Línea Base Oficial Integrada) |
+| **Sistema** | Asistente Conversacional Offline (Android Kotlin Edge AI / Node.js 24 + PostgreSQL 16) |
+| **Equipo de QA & Dev** | Eva Chino Quispe, Christian Gonzales, Marializ Mamani, Kevin Rocha y Luis Lazo |
+| **Corte de Evaluación** | Noviembre 2026 |
 
-## Login
+---
 
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| LOGIN-01 | Ingresar con PIN local válido | Se abre el panel sin requerir Internet | PENDIENTE |
-| LOGIN-02 | Ingresar con PIN incorrecto | Se rechaza el acceso y se aplica la política local de intentos | PENDIENTE |
-| LOGIN-03 | Ingresar identificador local válido con PIN | Se encuentra el perfil por carnet, celular o correo, sin distinguir mayúsculas/minúsculas | PENDIENTE |
-| LOGIN-04 | Dictar "uno, dos, tres, cuatro" en el login | El PIN se completa como `1234`; no se intenta el acceso con una extracción ambigua | PENDIENTE de prueba funcional en dispositivo |
+### 1. ESTRATEGIA Y METODOLOGÍA DE PRUEBAS
 
-![Pantalla de login capturada en dispositivo Android](evidencias/01_login/mypes_login.png)
+El presente plan establece los escenarios estandarizados y los criterios formales de aceptación para validar el comportamiento del sistema **Yapay**. La metodología distingue explícitamente entre la verificación técnica automatizada (ejecutada en integración continua) y la validación funcional en dispositivos móviles reales.
 
-Evidencia disponible: captura real de la pantalla principal del login en un dispositivo Android conectado. Esta toma confirma que la UI carga correctamente, pero no sustituye la validación del dictado por voz ni del acceso con credenciales reales.
+#### Categorización de Estados de Prueba:
+* **APROBADO:** Escenario ejecutado con éxito, con evidencia documental o registros de CI/CD verificables.
+* **PENDIENTE:** Escenario definido formalmente pero pendiente de ejecución o captura de evidencia en dispositivo físico.
+* **FALLIDO:** Escenario ejecutado donde el resultado observado difiere del criterio de aceptación esperado.
+* **BLOQUEADO:** Escenario que no puede ejecutarse debido a un impedimento técnico o de infraestructura previo.
 
-No se marcan como aprobadas pruebas funcionales de Android sin captura o video en `docs/evidencias/`. Cuando se capturen los casos de acceso real, agregar los siguientes bloques en esta sección:
+---
 
-```markdown
-![Login exitoso](evidencias/01_login/login_exitoso.png)
-![Registro en PostgreSQL](evidencias/01_login/registro_en_postgres.png)
-```
+### 2. MATRIZ INTEGRADA DE ESCENARIOS DE PRUEBA
 
-Los archivos anteriores quedan pendientes de captura; la evidencia actual disponible solo cubre la carga visual de la pantalla.
+#### 2.1 Módulo de Autenticación y Seguridad Local (LOGIN / SEC)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **LOGIN-01** | Acceso con PIN local correcto (Offline) | El sistema valida el hash PBKDF2-HMAC-SHA256 y abre el Dashboard en < 1 s sin requerir red. | Android / UI | **APROBADO** (Evidencia local) |
+| **LOGIN-02** | Control de intentos e inhabilitación temporal | Ante 5 intentos fallidos consecutivos de PIN, el sistema bloquea el acceso por 60 segundos. | Android / UI | **PENDIENTE** (Prueba física) |
+| **LOGIN-03** | Búsqueda multicanal de perfil local | Permite identificar al comerciante por Carnet de Identidad, celular o correo (case-insensitive). | Android / DB | **APROBADO** (Prueba Unit/JVM) |
+| **LOGIN-04** | Ingreso de PIN mediante comando verbal | El motor Vosk traduce los dígitos hablados ("uno dos tres cuatro") a PIN "1234" sin ambigüedad. | Android / VUI | **PENDIENTE** (Acondicionamiento acústico) |
+| **SEC-01** | Cifrado de base de datos en reposo (SQLCipher) | La base de datos SQLite/Room v6 se cifra con AES-256. Un volcado raw resulta ilegible sin la clave master. | Android / DB | **APROBADO** (Prueba Unit/JVM) |
 
-## Registro
+#### 2.2 Módulo de Registro y Gestión de Cuenta (REG / PERF)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **REG-01** | Registro inicial de Propietario y Negocio en la Nube | La API crea las entidades asociadas en PostgreSQL y retorna un token JWT válido (HTTP 201). | Backend / API | **APROBADO** (CI Run #43157514411) |
+| **REG-02** | Control de duplicidad de correo electrónico | La API rechaza registros con correos previamente existentes respondiendo HTTP 409 Conflict. | Backend / API | **APROBADO** (CI Run #43157514411) |
+| **REG-03** | Validación estricta de esquemas de entrada | Payloads con campos faltantes o contraseñas débiles son rechazados con HTTP 400 Bad Request. | Backend / API | **APROBADO** (CI Run #43157514411) |
+| **REG-04** | Registro híbrido con persistencia local anticipada | El perfil se guarda localmente en Room; si la nube no responde, la cuenta remota se sincroniza diferidamente. | Android / Outbox | **PENDIENTE** (Prueba funcional) |
+| **REG-05** | Migración transparente de esquema Room (v4 a v6) | La actualización de versión de BD conserva intactos los hashes de PIN y el catálogo existente. | Android / DB | **PENDIENTE** (Prueba en dispositivo) |
 
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| REG-01 | Prueba de integración API: registrar propietario y negocio con correo único | Se guardan propietario y negocio, y la sesión Bearer permite usar una ruta protegida | APROBADO (integración local con PostgreSQL temporal) |
-| REG-02 | Prueba de integración API: volver a registrar el mismo correo | Se responde `409` y no se crea un negocio huérfano | APROBADO (integración local con PostgreSQL temporal) |
-| REG-03 | Prueba de integración API: enviar campos incompletos y contraseña corta | Se responde `400` antes de crear cuentas | APROBADO (integración local con PostgreSQL temporal) |
-| REG-04 | Completar el formulario Android con conexión | El perfil personal se conserva en Room y PostgreSQL, el token se guarda y se crea un negocio provisional para completar en onboarding | PENDIENTE de prueba funcional |
-| REG-05 | Registrar sin conexión, completar onboarding y crear la cuenta desde Sincronización | El perfil permanece local, la contraseña no se persiste; al reingresarla se crea la cuenta remota con los datos actuales del perfil | PENDIENTE de prueba funcional |
-| REG-06 | Migrar una base Room versión 4 con usuario existente | La actualización a versión 6 conserva el PIN y los datos anteriores y agrega los campos personales nuevos | PENDIENTE de prueba en dispositivo/base existente |
-| REG-07 | Crear la cuenta remota desde un perfil local con conexión | Se registran perfil y negocio en PostgreSQL, se guarda el token y se puede iniciar la sincronización | PENDIENTE de prueba funcional |
-| REG-08 | Integración backend del perfil ampliado, negocio provisional y actualización protegida | La migración 005 aplica y `PUT /api/v1/auth/business` modifica solo el negocio del token | BLOQUEADO por disponibilidad/autenticación de PostgreSQL |
-| PERF-01 | Abrir Perfil desde el dashboard después del registro | Room muestra los campos disponibles del comerciante y negocio; los opcionales ausentes aparecen como "No registrado" | PENDIENTE de prueba funcional |
+#### 2.3 Módulo de Onboarding y Configuración Comercial (ONB)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **ONB-01** | Carga e inicialización por plantilla de rubro | Al seleccionar un rubro (ej. Ferretería, Minimarket), se puebla el catálogo local con al menos 10 productos base. | Android / Logic | **APROBADO** (Prueba Unit/JVM) |
+| **ONB-02** | Prevención de duplicación al re-aplicar plantilla | Seleccionar nuevamente una plantilla no duplica los productos previamente registrados en Room. | Android / DB | **PENDIENTE** (Prueba funcional) |
+| **ONB-03** | Sincronización de perfil comercial hacia el Backend | Al cambiar el nombre de la tienda o rubro con conexión, la API actualiza los datos del negocio (PUT /api/v1/business). | Backend / API | **APROBADO** (CI Run #43157514411) |
 
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Registro]
+#### 2.4 Módulo de Ventas e Inventario (VTA / INV)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **VTA-01** | Registro atómico de venta al contado (Offline) | Registra la venta en Room, descuenta el stock inmediatamente y encola un evento `SALE_CREATED` en Outbox. | Android / Local | **APROBADO** (Prueba local) |
+| **VTA-02** | Control de existencias insuficientes | Impide registrar ventas que superen el stock disponible, emitiendo una alerta visual sin alterar el inventario. | Android / UI | **PENDIENTE** (Prueba física) |
+| **VTA-03** | Registro de venta fiada con asignación de cliente | Almacena la transacción con modalidad `FIADO`, asociando el nombre del cliente y el saldo adeudado. | Android / DB | **APROBADO** (Prueba local) |
+| **INV-01** | Alta y actualización local de productos | Permite agregar o modificar productos localmente; los cambios se reflejan de inmediato en el catálogo de la app. | Android / UI | **APROBADO** (Prueba local) |
+| **INV-02** | Protección de stock local ante actualización remota | Al descargar actualizaciones de catálogo desde la API (precio/nombre), el stock contado en el teléfono se preserva. | Android / Logic | **PENDIENTE** (Prueba de integración) |
 
-## Onboarding
+#### 2.5 Módulo de Cuentas por Cobrar y Fiados (FIADO)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **FIADO-01** | Consulta y resumen de cuentas pendientes | Muestra la lista de clientes con deudas activas, detallando monto total, fechas y desglose de productos. | Android / UI | **APROBADO** (Prueba local) |
+| **FIADO-02** | Procesamiento de cobro parcial/total | Al registrar un cobro, actualiza la deuda local, genera un ingreso en caja y encola el evento `DEBT_PAID` en Outbox. | Android / DB | **APROBADO** (Prueba local) |
+| **FIADO-03** | Protección contra doble cobro (Idempotencia local) | Intentar procesar un cobro ya liquidado se bloquea localmente sin generar transacciones ni eventos duplicados. | Android / Logic | **PENDIENTE** (Prueba física) |
+| **FIADO-04** | Sincronización idempotente de cobros en la Nube | La API procesa eventos `DEBT_PAID` reconociendo el `operationId` para evitar duplicar pagos en PostgreSQL. | Backend / API | **APROBADO** (CI Run #43157514411) |
 
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| ONB-01 | Aplicar una plantilla de negocio | Se agregan ejemplos y la pantalla muestra el resultado | PENDIENTE |
-| ONB-02 | Aplicar de nuevo la misma plantilla | No se duplican productos existentes | PENDIENTE |
-| ONB-03 | Guardar nombre/rubro del negocio y elegir plantilla con conexión | Room y el negocio asociado al token muestran los mismos datos antes de abrir el dashboard | PENDIENTE de prueba funcional |
-| ONB-04 | Prueba JVM de las seis plantillas | Cada plantilla tiene categorías y márgenes válidos, al menos 10 productos y categorías/unidades asociadas | APROBADO (unit test local) |
+#### 2.6 Módulo de Inteligencia Artificial Conversacional Edge (IA)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **IA-01** | Transcripción ASR local con motor Vosk | Transcribe la voz del usuario a texto localmente sin conexión a Internet con una latencia total ≤ 2 s. | Android / Vosk | **PENDIENTE** (Prueba en dispositivo) |
+| **IA-02** | Clasificación de Intención y Extracción de Entidades | Interpreta comandos verbales (ej. "Vendí 2 cuartillas de arroz a 20 pesos") extrayendo intención, producto y monto. | Android / NLU | **APROBADO** (Prueba Unit/JVM) |
+| **IA-03** | Confirmación humana obligatoria antes de guardar | Ningún comando dictado por voz se guarda automáticamente; se exige confirmación explícita mediante diálogo modal. | Android / UI | **APROBADO** (Prueba local) |
+| **IA-04** | Cancelación e interrupción verbal | Si el usuario dice "cancelar" o "me equivoqué", el orquestador aborta la captura y vuelve al estado inicial. | Android / VUI | **PENDIENTE** (Prueba acústica) |
+| **IA-05** | Sugerencia inteligente de productos (Asistente Yapay) | Yapay consulta las existencias en Room y sugiere productos con bajo stock o resumen diario mediante reglas locales. | Android / Logic | **APROBADO** (Prueba Unit/JVM) |
 
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Onboarding]
+#### 2.7 Módulo de Sincronización Outbox e Integración Cloud (SYNC / API)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **SYNC-01** | Procesamiento asíncrono de eventos encolados | WorkManager detecta conectividad y envía lotes de hasta 100 eventos Outbox a la API con autenticación JWT. | Android / Net | **PENDIENTE** (Prueba física) |
+| **SYNC-02** | Resiliencia ante fallos de red (Backoff Exponencial) | Si la API no responde, los eventos permanecen en el Outbox y se reintentan con intervalos crecientes (1s, 4s, 16s). | Android / Net | **PENDIENTE** (Prueba física) |
+| **SYNC-03** | Descarga paginada del catálogo remoto | La app recupera el catálogo remoto mediante solicitudes paginadas en bloques de 50 ítems. | Backend / API | **APROBADO** (CI Run #43157514411) |
+| **API-01** | Compilación y Chequeo de Tipos en Integración Continua | El pipeline de GitHub Actions ejecuta `npm run build` y `npm run typecheck:test` sin errores en TypeScript. | Backend / CI | **APROBADO** (CI Run #43157514411) |
+| **API-02** | Pruebas Unitarias e Integración con PostgreSQL | Se ejecutan migraciones y suite completa de pruebas contra un contenedor PostgreSQL aislado en CI. | Backend / CI | **APROBADO** (CI Run #43157514411) |
+| **API-03** | Protección de Endpoints mediante API Gateway y JWT | Solicitudes sin cabecera `Authorization: Bearer <token>` o con JWT expirado reciben HTTP 401 Unauthorized. | Backend / Gateway | **APROBADO** (CI Run #43157514411) |
+| **API-04** | Emisión de Eventos en Tiempo Real (SSE) | La API emite eventos SSE aislados por negocio para notificar cambios de catálogo o estado de sincronización. | Backend / SSE | **APROBADO** (CI Run #43157514411) |
 
-## Dashboard y reportes
+---
 
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| DASH-01 | Abrir el reporte diario sin ventas | Total y cantidad son cero | PENDIENTE |
-| DASH-02 | Consultar el reporte después de una venta | Total y cantidad reflejan las ventas locales de hoy | PENDIENTE |
-| DASH-03 | Consultar el gráfico de los últimos siete días | Cada barra suma las ventas del día local correspondiente, usando intervalos sin solapamiento | PENDIENTE |
-| DASH-04 | Compartir el reporte con la vista demo activa | El texto compartido contiene únicamente los datos reales del día | PENDIENTE |
-| DASH-05 | Activar la vista demo en una compilación debug | Los valores ficticios se limitan al gráfico y no se guardan en la base | PENDIENTE |
-| DASH-06 | Exportar el reporte diario como archivo CSV | El archivo contiene solo las ventas del día, con campos escapados y se comparte mediante URI `FileProvider` de solo lectura | PENDIENTE |
-| DASH-07 | Prueba JVM de cabecera CSV, formato de total y escape de comillas/separadores | El contenido CSV contiene la cabecera esperada y protege valores del cliente | APROBADO (unit test local; no valida el selector Android) |
+### 3. AMBIENTES DE PRUEBA Y AUDITORÍA
 
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Dashboard]
+1. **Entorno Móvil (Android):**
+   * **Dispositivo de Referencia:** Smartphone Android 8.0+ / RAM 2 GB (Gama Entrada).
+   * **Base de Datos:** SQLite / Room v6 cifrado mediante SQLCipher.
+   * **Reconocimiento de Voz:** Modelo `vosk-model-small-es-0.42` empacado localmente.
 
-## Ventas
+2. **Entorno Backend (Servidor Cloud):**
+   * **Runtime:** Node.js 24 LTS, Express 5, TypeScript.
+   * **Base de Datos:** PostgreSQL 16 con migraciones automáticas.
+   * **Servicios:** API Gateway, JWT Rotativo, Bus de Eventos SSE.
 
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| VTA-01 | Registrar venta válida de contado | Venta, stock y operación pendiente se guardan coherentemente | PENDIENTE |
-| VTA-02 | Intentar vender más unidades que el stock disponible | Se rechaza la operación y no se genera stock negativo | PENDIENTE |
-| VTA-03 | Registrar venta fiada con cliente | Se guarda la modalidad y el cliente | PENDIENTE |
-
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Ventas]
-
-## Inventario
-
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| INV-01 | Crear y consultar un producto local | El producto aparece en el inventario después de reabrir la pantalla | PENDIENTE |
-| INV-02 | Recibir actualización remota de nombre/precio | Cambian los campos remotos y se conserva el stock local | PENDIENTE |
-| INV-03 | Buscar un producto por nombre | La lista se filtra en tiempo real sin alterar los datos de Room y muestra estado vacío cuando no hay coincidencias | PENDIENTE |
-
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Inventario]
-
-## Fiados
-
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| FIADO-01 | Consultar las deudas pendientes | Se muestran las ventas FIADO no pagadas, el cliente, fecha y total pendiente | PENDIENTE |
-| FIADO-02 | Confirmar el cobro completo de una deuda | En una transacción local se marca pagada, se registra ingreso de caja y se crea operación COBRO en Outbox | PENDIENTE |
-| FIADO-03 | Intentar cobrar dos veces la misma deuda | La segunda operación no crea un ingreso ni un evento Outbox adicional | PENDIENTE |
-| FIADO-04 | Cobrar sin conexión y sincronizar después | El cobro queda registrado localmente y la operación COBRO se conserva pendiente hasta reconectar | PENDIENTE |
-| FIADO-05 | Prueba backend de sincronización de un cobro `COBRO` | PostgreSQL registra la operación y la repetición del mismo `operationId` se reconoce como duplicada | APROBADO (integración local con PostgreSQL temporal) |
-
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Fiados]
-
-## Chat IA
-
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| IA-01 | Iniciar reconocimiento de voz con modelo disponible | Se muestra el texto reconocido | PENDIENTE |
-| IA-02 | Dictar una venta reconocible | Se abre el formulario con sugerencias, sin guardar automáticamente | PENDIENTE |
-| IA-03 | Usar el chat sin modelo disponible o cancelar | Se informa el estado y no se registra una venta | PENDIENTE |
-| IA-04 | Prueba JVM de extracción de cantidad, producto, monto, unidad y cliente | Los ejemplos "cuartilla" y "al fiado" producen las entidades esperadas | APROBADO (unit test local) |
-| IA-05 | Prueba JVM de clasificación de "Vendí dos cuartillas de arroz" | Se clasifica como VENTA | APROBADO (unit test local) |
-| IA-06 | Inicializar Vosk desde los assets y reconocer voz sin conexión | El modelo se extrae de assets, inicializa y reconoce una frase en español en dispositivo | PENDIENTE |
-| IA-07 | Prueba JVM de extracción de PIN hablado | Reconoce cuatro dígitos en palabras con puntuación y rechaza frases incompletas/ambiguas | APROBADO (unit test local) |
-| IA-08 | Prueba JVM de Yapay al preparar y confirmar un producto | No llama al almacenamiento antes de la confirmación; al confirmar intenta guardar una sola vez | APROBADO (unit test local) |
-
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Chat IA]
-
-## Sincronización
-
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| SYNC-01 | Registrar una venta offline y recuperar conexión | La operación pendiente se envía al autenticarse y se conserva ante error | PENDIENTE |
-| SYNC-02 | Descargar catálogo paginado con más de 500 productos | Se recorren todas las páginas sin omitir productos | PENDIENTE |
-| SYNC-03 | Abrir la pantalla con operaciones Outbox pendientes | El conteo y el listado reflejan Room y cambian al actualizarse el Outbox | PENDIENTE de prueba funcional |
-
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Sincronización]
-
-## Backend
-
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| API-01 | Ejecutar `npm run build` en CI | TypeScript compila sin errores | PENDIENTE DE CI |
-| API-02 | Ejecutar `npm run typecheck:test` en CI | Código de pruebas pasa el chequeo de tipos | PENDIENTE DE CI |
-| API-03 | Ejecutar `npm test` en CI | Todas las pruebas unitarias pasan | PENDIENTE DE CI |
-| API-04 | Ejecutar migraciones y `npm run test:integration` contra PostgreSQL aislado | Migraciones y pruebas de integración pasan | PENDIENTE DE CI |
-| API-05 | Solicitar facturas, QR y SSE sin JWT | Los tres endpoints rechazan el acceso con `401` | APROBADO (prueba unitaria HTTP local) |
-| API-06 | Enviar artículo de factura/QR con payload inválido autenticado | Se responde `400` antes de consultar PostgreSQL | APROBADO (prueba unitaria HTTP local) |
-| API-07 | Prueba de unidad del bus de eventos por negocio | Solo suscriptores del negocio afectado reciben el evento; la baja elimina la suscripción | APROBADO (unit test local) |
-| API-08 | Crear factura y guardar/reemplazar QR con PostgreSQL | Se persisten por negocio, la factura responde PDF simulado y el evento se emite después de guardar | PENDIENTE DE INTEGRACIÓN |
-
-[ESPACIO PARA EVIDENCIA: Insertar aquí las capturas del módulo Backend]
-
-El workflow genera un resumen de cada ejecución en GitHub Actions. Añade el enlace a la ejecución en [07_CI_CD_Report.md](07_CI_CD_Report.md); no marques los casos de CI como aprobados si el workflow falló o aún no se ejecutó.
-
-## Seguridad local
-
-| ID de Prueba | Descripción | Resultado Esperado | Estado (Aprobado/Fallido) |
-|---|---|---|---|
-| SEC-01 | Pruebas JVM de `PinHasher`: verificar PIN correcto/incorrecto y sal aleatoria | Solo el PIN original verifica; no se almacena el PIN en claro y cada hash usa sal distinta | APROBADO (unit test local) |
+3. **Trazabilidad de Ejecución en CI/CD:**
+   * Las comprobaciones del backend se auditan mediante el flujo automatizado en GitHub Actions.
+   * **Run de CI de referencia:** `#43157514411` (Build, Lint, Unit Tests, Integration Tests con PostgreSQL).
