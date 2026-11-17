@@ -1,275 +1,210 @@
-# DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v1.1 ENTREGADO)
+# DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v2.0 OFICIAL)
+**Universidad Adventista de Bolivia · Facultad de Ciencias Exactas e Ingeniería · Ingeniería en Sistemas**
 
-> **Estado:** se conserva aquí la versión 1.1 presentada, con una propuesta de migración añadida. Desde el 13/10/2026 el nombre vigente del sistema no es “gestión de ventas e inventario”; ver `docs/Nota_de_nombre.md`. Esta v1.1 no se reescribe. La arquitectura entregada describe Spring Boot/PostgreSQL. La línea base objetivo solicitada por el equipo es Node.js/TypeScript/Express/PostgreSQL; debe emitirse un SAD v2.0 coherente y obtener aprobación docente. Este archivo no es la entrega v2.0 aprobada.
-
-**UNIVERSIDAD ADVENTISTA DE BOLIVIA**
-**FACULTAD DE CIENCIAS EXACTAS E INGENIERÍA — CARRERA DE INGENIERÍA EN SISTEMAS**
-**ASIGNATURA:** Arquitectura de Software
-**PROYECTO:** Proyecto Integrador Semestral — Gestión 2-2026
-
-**SISTEMA:** Asistente Conversacional Offline con Procesamiento de Lenguaje Natural para la Gestión de Ventas e Inventario en MYPES del Centro de Vinto, Cochabamba
-
-**INTEGRANTES:**
-- Eva Chino Quispe — Líder de Proyecto, Requisitos y QA Documental
-- Christian Gonzales — Ingeniería de IA y Pipeline Conversacional
-- Marializ Mamani — Backend, Seguridad y Persistencia de Datos
-- Kevin Rocha — Diseño UX/UI y Prototipado
-- Luis Lazo — Arquitectura C4 y QA Técnico
-
-**DOCENTE:** _(completar)_
-**FECHA DE ENTREGA:** _(completar)_
-**VERSIÓN:** 1.1
+| Control del Documento | Detalle |
+| :--- | :--- |
+| **Proyecto Integrador** | Gestión 2-2026 (Investigación I, Arquitectura de Software, Tecnologías en Internet) |
+| **Sistema** | Asistente Conversacional Offline con PLN Edge (Yapay) para la Gestión de Ventas e Inventario en MYPES de Vinto, Cochabamba |
+| **Versión Vigente** | **v2.0 (Línea Base Unificada)** — Noviembre 2026 |
+| **Equipo de Desarrollo** | **Eva Chino Quispe** — Líder de Proyecto, Requisitos y QA Documental<br>**Christian Gonzales** — Ingeniería de IA y Pipeline Conversacional<br>**Marializ Mamani** — Backend, Seguridad y Persistencia de Datos<br>**Kevin Rocha** — Diseño UX/UI y Prototipado<br>**Luis Lazo** — Arquitectura C4 y QA Técnico |
+| **Corte de Código** | Revisión de repositorio `03afcbd` (Node.js 24, Express 5, PostgreSQL 16, Kotlin Room v6) |
 
 ---
 
-## CONTROL DE VERSIONES
+## 1. CONTROL DE VERSIONES Y HISTORIAL DE CAMBIOS
 
-| Versión | Fecha | Autor | Descripción del Cambio |
+| Versión | Fecha | Autores | Descripción de Modificaciones |
 | :--- | :--- | :--- | :--- |
-| 1.0 | _(fecha)_ | Equipo de Proyecto | Versión inicial del SAD. |
-| 1.1 | _(fecha)_ | Equipo de Proyecto | Consolidación de las dos versiones previas del SAD en un único documento oficial. Se agrega columna "Artefacto" a los escenarios de calidad (estándar SEI/ATAM), se amplía a 5 tácticas arquitectónicas, se completa la matriz de trazabilidad (RA-01 a RA-05) y se resuelve la inconsistencia tecnológica entre ADR-002 (Vosk+TFLite vs. Gemma 3n) y ADR-003 (Spring Boot vs. Node.js), fijando como stack oficial: **Kotlin Nativo + Vosk/TFLite (edge) + SQLite/Room+SQLCipher + Spring Boot/PostgreSQL**. |
-| 2.0 propuesta | 30/09/2026 | Equipo | Solicitud de unificar backend Node.js/TypeScript/Express y conservar PostgreSQL. Pendiente aprobación docente y revisión integral de diagramas, secuencias, seguridad y API. |
+| **1.0** | 15/08/2026 | Equipo de Proyecto | Borrador inicial del Documento de Arquitectura de Software (SAD). |
+| **1.1** | 15/09/2026 | Equipo de Proyecto | Entrega histórica preliminar. Selección de stack evaluado inicialmente (Spring Boot + PostgreSQL, Vosk + TFLite). |
+| **2.0** | 13/11/2026 | Equipo de Proyecto | **Versión Unificada y Definitiva.** Actualización completa del stack de backend a **Node.js 24 + TypeScript + Express + PostgreSQL 16**. Adopción de API Gateway con Circuit Breaker, autenticación JWT rotativa, persistencia Room v6 cifrada con SQLCipher (AES-256) y política de sincronización Outbox **idempotente** eliminando la sobrescritura LWW en ventas. |
 
 ---
 
-## 1. INTRODUCCIÓN
+## 2. RESUMEN EJECUTIVO Y OBJETIVOS ARQUITECTÓNICOS
 
-El presente documento describe la arquitectura del **Asistente Conversacional Offline** para la gestión de ventas e inventario en las MYPES del centro de Vinto, Cochabamba. El sistema está diseñado en tecnologías nativas (Kotlin) para operar en dispositivos Android de gama baja, garantizando un consumo menor a 500 MB de RAM y operación 100% offline, con sincronización diferida hacia un backend en la nube cuando exista conectividad.
+El **Asistente Conversacional Offline (Yapay)** es una solución de software nativa diseñada para resolver el problema de la brecha digital y la baja tasa de adopción de herramientas informáticas de gestión comercial en las Micro y Pequeñas Empresas (MYPES) del centro urbano de Vinto, Cochabamba.
 
-La versión 1.1 es la entrega histórica. Las menciones a Spring Boot describen esa línea base. La versión objetivo Node.js/PostgreSQL aún requiere revisión completa y aprobación; no se deben presentar las figuras antiguas como diagramas v2.0.
+### 2.1 Objetivos de la Arquitectura
+1. **Operación 100% Offline-First:** Garantizar el registro de ventas, consulta de existencias y gestión de fiados en dispositivos Android de gama baja ($\le 2\text{ GB RAM}$) sin requerir conexión a Internet ni costos operativos recurrentes de APIs cloud.
+2. **Procesamiento de Lenguaje Natural Edge (On-Device):** Ejecutar el reconocimiento de voz (ASR con Vosk) y el análisis de intenciones y entidades localmente en el dispositivo con una latencia de respuesta $\le 2\text{ segundos}$.
+3. **Sincronización Asíncrona Robusta:** Preservar la integridad del historial comercial mediante el patrón **Outbox**, garantizando la inmutabilidad de los eventos de venta y la resolución idempotente de conflictos al conectar con el backend remoto.
+4. **Seguridad y Cifrado Multi-nivel:** Proteger los datos comerciales en reposo con SQLCipher (AES-256) y en tránsito con TLS 1.3 y tokens JWT rotativos.
 
-## 2. ANÁLISIS DEL PROBLEMA
+---
 
-### 2.1 Contexto
-Vinto concentra microempresas familiares que operan con flujo de caja diario. Los comerciantes poseen teléfonos Android de gama baja (≤ 2 GB RAM), conectividad intermitente y, en muchos casos, baja alfabetización digital.
+## 3. DRIVERS ARQUITECTÓNICOS (REQUISITOS SIGNIFICATIVOS)
 
-### 2.2 Problema Principal
-El abandono de los sistemas de gestión comercial por parte de los comerciantes de Vinto ocurre **debido a la inadecuación de las arquitecturas de software comerciales frente a estas restricciones técnicas** y a la imposibilidad de interactuar mediante lenguaje natural en las herramientas actuales. Esto perpetúa el uso del cuaderno físico, generando errores de cálculo y pérdida de trazabilidad del negocio.
+Los **Requisitos Arquitectónicamente Significativos (RA)** determinan la estructura tecnológica del sistema:
 
-### 2.3 Causas y Consecuencias
-- **Causas:** interfaces gráficas (GUI) complejas; sistemas que exigen hardware superior a 4 GB de RAM y conexión a Internet permanente; baja alfabetización digital de los usuarios objetivo.
-- **Consecuencias:** errores de contabilidad manual, mercadería vencida o mal contabilizada, decisiones financieras tomadas "a ciegas".
-
-### 2.4 Oportunidad de Solución
-La evolución de la IA "Edge" (on-device) permite incrustar modelos de reconocimiento de voz (Vosk, ~50 MB) y clasificación de intención (TFLite) livianos, habilitando una interfaz conversacional 100% local, sin dependencia de Internet ni costo recurrente de API.
-
-## 3. STAKEHOLDERS
-
-| Stakeholder | Rol | Responsabilidad / Interés |
-| :--- | :--- | :--- |
-| **Comerciantes de Vinto** | Usuario final | Registrar ventas y controlar stock de forma verbal e intuitiva. |
-| **Dueños de negocio** | Beneficiario | Tomar decisiones informadas; reducir pérdidas de mercadería. |
-| **Equipo de desarrollo** | Equipo técnico | Implementar la arquitectura Kotlin nativa, el pipeline de PLN y la sincronización. |
-| **Docentes UAB** | Evaluador | Validar el rigor arquitectónico, la viabilidad técnica y la defensa oral. |
-
-## 4. ALCANCE
-
-**Incluido:** arquitectura offline-first nativa; pipeline de PLN local (ASR con Vosk, clasificación de intención/entidades con TFLite); persistencia local cifrada (SQLite/Room + SQLCipher); sincronización diferida mediante patrón Outbox y resolución de conflictos LWW (Last Write Wins) contra un backend Spring Boot; confirmación visual obligatoria antes de persistir cualquier transacción dictada por voz.
-
-**Excluido de esta primera entrega:** pasarelas de pago en línea; soporte nativo para iOS o Windows; facturación electrónica (SIN); analítica de negocio (BI) avanzada; el modelo **Gemma 3n** queda registrado como *stretch goal* opcional para fases posteriores, no como parte del pipeline oficial de esta entrega.
-
-## 5. REQUISITOS ARQUITECTÓNICAMENTE SIGNIFICATIVOS (Drivers)
-
-| ID | Requisito | Impacto Arquitectónico | Prioridad |
+| Código | Requisito Significativo | Impacto Arquitectónico | Prioridad |
 | :--- | :--- | :--- | :--- |
-| **RA-01** | Soportar operación 100 % offline en Android de gama baja | Define Kotlin nativo y persistencia local (SQLite/Room), descartando PWA o soluciones híbridas. | Alta |
-| **RA-02** | Procesar voz a texto e intención en el dispositivo, sin red | Define la integración de Vosk (ASR, ~50 MB) + TFLite (clasificador de intención/entidades) incrustados en el APK. | Alta |
-| **RA-03** | Evitar inconsistencias de datos al recuperar la conexión | Obliga a implementar patrón Outbox local y resolución de conflictos LWW en el backend Spring Boot. | Alta |
-| **RA-04** | Tiempo de respuesta del procesamiento verbal ≤ 2 s | Fuerza la optimización de latencia en la capa de PLN (modelos cuantizados, inferencia en background thread). | Alta |
-| **RA-05** | Permitir la incorporación de nuevos módulos (p. ej. reportes avanzados) | Requiere diseño modular y bajo acoplamiento (Clean Architecture + inyección de dependencias). | Media |
-| **RA-06** | Garantizar la confidencialidad e integridad de los datos financieros y comerciales | Define cifrado AES-256 en reposo (SQLCipher), TLS 1.3 en tránsito, hashing con sal (Argon2) y Android Keystore (ver ADR-004). *Elaborado por Marializ Mamani.* | Alta |
+| **RA-01** | Operación 100% offline en teléfonos de gama baja ($\le 2\text{ GB RAM}$). | Determina el desarrollo en **Kotlin Nativo** y base de datos embebida **SQLite/Room**, descartando frameworks híbridos o PWAs. | Alta |
+| **RA-02** | Procesamiento de voz e intenciones sin conexión a Internet. | Incrustación del motor ASR **Vosk Edge** (~40-50 MB) y motor de reglas de intenciones/entidades en la APK. | Alta |
+| **RA-03** | Consistencia e inmutabilidad comercial en la sincronización. | Implementación del patrón **Outbox local** con `operationId` (UUID v4) e inmutabilidad de hechos de venta (append-only). | Alta |
+| **RA-04** | Tiempo de procesamiento conversacional $\le 2\text{ s}$. | Optimización del pipeline VUI, inferencia en hilos secundarios (Coroutines) y confirmación visual obligatoria. | Alta |
+| **RA-05** | Modularidad para futuras extensiones (reportes, analítica). | Diseño bajo arquitectura limpia (**Clean Architecture**) en capas independientes (Presentación, Dominio, Datos). | Media |
+| **RA-06** | Seguridad de datos en reposo y en tránsito. | Cifrado **SQLCipher AES-256** en Room, derivación PIN con **PBKDF2/Argon2**, y **TLS 1.3 / JWT** en el API. | Alta |
 
-## 6. ATRIBUTOS DE CALIDAD PRIORIZADOS
+---
 
-| Atributo | Prioridad | Justificación |
-| :--- | :--- | :--- |
-| **Disponibilidad** | Alta | El sistema debe operar en el mercado sin depender de datos móviles ni Wi-Fi. |
-| **Rendimiento** | Alta | La interacción conversacional fluida exige respuestas en ≤ 2 s y consumo < 500 MB de RAM en hardware limitado. |
-| **Confiabilidad** | Alta | El sistema debe interpretar correctamente pese al ruido ambiental de mercado y a modismos dialectales locales. |
-| **Usabilidad** | Alta | Dirigido a usuarios con baja alfabetización digital; la voz reemplaza formularios complejos. |
-| **Seguridad** | Media | Debe proteger la información financiera y de inventario almacenada localmente ante robo o pérdida del dispositivo. |
+## 4. ATRIBUTOS DE CALIDAD Y MATRIZ ATAM (ESCENARIOS DE PRUEBA)
 
-*Orden de prioridad fundamentado:* 1° Disponibilidad Offline (sin ella el sistema es inutilizable en Vinto), 2° Rendimiento (condiciona la adopción real por parte del usuario), 3° Confiabilidad/Usabilidad (determinan la confianza en los registros de voz), 4° Seguridad (crítica pero secundaria frente a la operatividad diaria del comerciante).
+Priorización estratégica de atributos de calidad:
+1. **Disponibilidad Offline:** Sin ella el sistema no satisface las condiciones del mercado de Vinto.
+2. **Rendimiento:** Determina la usabilidad y adopción en teléfonos de hardware limitado.
+3. **Confiabilidad:** Garantiza la precisión del registro comercial y la integridad del inventario.
+4. **Seguridad:** Protege la información financiera de los comerciantes ante pérdida o robo.
 
-## 7. ESCENARIOS DE CALIDAD
+### Escenarios de Calidad ATAM (7 Columnas Estándar SEI)
 
-*Estructura ATAM de 7 columnas: Fuente → Estímulo → Entorno → Artefacto → Respuesta → Medida.*
-
-| ID | Atributo | Fuente | Estímulo | Entorno | Artefacto | Respuesta | Medida |
+| ID | Atributo | Fuente | Estímulo | Entorno | Artefacto | Respuesta | Medida de Calidad |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **QS-01** | Rendimiento | Usuario | Dicta un comando de voz largo | App en uso normal | Motor PLN Edge (Vosk + TFLite) | Transcribe y extrae intención/entidades | ≤ 2 s de latencia total |
-| **QS-02** | Disponibilidad | Usuario | Abre la app sin Wi-Fi/datos | Sin conexión de red | Capa de persistencia local (SQLite/Room) | Todas las vistas y operaciones funcionan sin red | 100 % de las funciones core disponibles |
-| **QS-03** | Confiabilidad | Ruido externo (mercado) | Dicta una venta con ruido ambiental | Ambiente ruidoso | Motor ASR Vosk (vocabulario dinámico local) | Extrae producto, cantidad y monto correctos | Precisión de extracción ≥ 85 % |
-| **QS-04** | Seguridad | Tercero no autorizado | Robo o pérdida del dispositivo, apagado | Dispositivo fuera de línea | Base de datos local (SQLCipher AES-256) | La base de datos resulta ilegible sin la clave | 100 % de los datos cifrados en reposo |
-| **QS-05** | Usabilidad | Usuario (primera vez) | Usa la app por primera vez para registrar una venta | Operación normal | UI & VUI Controller (Jetpack Compose) | Completa el registro sin ayuda externa | Puntaje SUS ≥ 70 pts |
+| **QS-01** | Rendimiento | Usuario | Dicta comando de venta por voz | Operación normal offline | Motor PLN Edge (Vosk + Reglas) | Transcribe audio y extrae intenciones | Latencia total $\le 2\text{ s}$, RAM $< 500\text{ MB}$ |
+| **QS-02** | Disponibilidad | Usuario | Abre la app sin datos ni Wi-Fi | Sin red celular | Persistencia Local (Room/SQLite) | Habilita 100% de operaciones locales | 0% fallos por falta de conexión |
+| **QS-03** | Confiabilidad | Ruido externo | Dicta venta con ambiente de mercado | Ambiente ruidoso ($>70\text{ dB}$) | ASR Vosk + Confirmación visual | Presenta tarjeta de revisión previa a persistir | Confirmación humana evita ventas erróneas |
+| **QS-04** | Seguridad | Atacante | Extracción de BDD por robo de teléfono | Dispositivo fuera de línea | BDD Local (SQLCipher AES-256) | Base de datos ilegible sin clave derivada | 100% datos financieros cifrados |
+| **QS-05** | Usabilidad | Usuario | Registra venta por primera vez | Primer uso | UI Jetpack Compose | Muestra flujo GUI/VUI guiado | Puntaje SUS $\ge 70\text{ pts}$ |
+| **QS-06** | Seguridad | Usuario | Ingresa PIN incorrecto 5 veces | Login local | Módulo de Autenticación | Bloquea temporalmente el acceso | Bloqueo de 60 s tras 5 intentos |
+| **QS-07** | Seguridad | Red pública | Intento de interceptación de tráfico | Red Wi-Fi sin clave | API Gateway + Transport Layer | Cifra transmisión y valida JWT | TLS 1.3 activo, rechazo de requests inválidos |
+| **QS-08** | Sincronización | Conectividad | Detección de red con cola Outbox | Reconexión a Internet | WorkManager + Outbox Handler | Envía lotes de transacciones idempotentes | Lotes de $\le 100$ items confirmados |
 
-### 7.1 Escenarios de profundización — Seguridad (elaborados por Marializ Mamani)
+---
 
-| ID | Atributo | Estímulo y Entorno | Respuesta Esperada | Medida Propuesta |
-| :--- | :--- | :--- | :--- | :--- |
-| QS-06 | Seguridad | Atacante externo extrae el archivo SQLite del dispositivo robado o perdido. | Datos cifrados con AES-256, ilegibles sin clave. | Tiempo de crackeo estimado > 100 años por fuerza bruta. |
-| QS-07 | Seguridad | El comerciante ingresa un PIN incorrecto 3 veces consecutivas. | El sistema bloquea el acceso temporalmente y registra el intento. | Bloqueo tras 3 intentos; registro de auditoría generado. |
-| QS-08 | Seguridad | Ataque Man-in-the-Middle en red WiFi pública durante la sincronización. | TLS 1.3 + Certificate Pinning impide leer o modificar datos en tránsito. | Conexión rechazada sin certificado válido. |
-| QS-09 | Seguridad | El sistema detecta privilegios de root/jailbreak al iniciar. | Se muestra advertencia y se limitan funciones críticas. | Detección de root en < 2 s. |
+## 5. TÁCTICAS ARQUITECTÓNICAS SELECCIONADAS
 
-### 7.2 Escenario de profundización — Usabilidad (elaborado por Luis Lazo)
-
-| ID | Atributo | Estímulo y Entorno | Respuesta Esperada | Medida Propuesta |
-| :--- | :--- | :--- | :--- | :--- |
-| QS-10 | Usabilidad / Sincronización | Usuario nuevo intenta registrar una venta con instrucciones mínimas. | Completa la tarea apoyándose en la confirmación visual y el fallback a teclado. | SUS ≥ 70 y tasa de éxito ≥ 85 % (5 usuarios objetivo). |
-
-## 8. TÁCTICAS ARQUITECTÓNICAS
-
-| Atributo | Problema | Táctica Seleccionada | Justificación |
+| Atributo | Problema / Desafío | Táctica Arquitectónica | Justificación Técnica |
 | :--- | :--- | :--- | :--- |
-| **Rendimiento** | Limitación de RAM (< 2 GB) en el dispositivo | **Desarrollo nativo (Kotlin)** | Acceso de bajo nivel para gestionar memoria y garbage collection, evitando la sobrecarga de frameworks híbridos. |
-| **Disponibilidad** | Ausencia de conexión a Internet | **Offline-First (base de datos embebida)** | SQLite/Room actúa como fuente de verdad local mientras no hay red. |
-| **Confiabilidad** | Falsos positivos por ruido/mala transcripción | **Confirmación visual obligatoria** | Tarjeta de UI grande que exige confirmación explícita antes de persistir cualquier transacción dictada. |
-| **Confiabilidad** | Modismos y unidades dialectales no reconocidas | **Vocabulario dinámico (fine-tuning ligero)** | Configuración de Vosk con términos locales ("cuartilla", "casera", "fiado", "amarrito"). |
-| **Modificabilidad / RA-05** | Nuevos módulos futuros afectan varios componentes | **Encapsulamiento + Clean Architecture** | Separación en capas (Presentación / Dominio / Datos) que aísla el impacto de cambios a un solo módulo. |
-| **Seguridad** | Interceptación de datos en la sincronización (red pública) | **TLS 1.3 + Certificate Pinning** | Previene ataques Man-in-the-Middle en redes públicas (QS-08). |
-| **Seguridad** | Acceso no autorizado mediante PIN comprometido | **Hashing con sal (Argon2) + bloqueo temporal** | PIN almacenado como hash irreversible; bloqueo de 30 s tras 3 intentos fallidos (QS-07). |
-| **Seguridad** | Ejecución en dispositivos comprometidos (root/jailbreak) | **Detección de Root + restricción de funciones** | Previene la ejecución en dispositivos con privilegios elevados (QS-09). |
+| **Rendimiento** | RAM estricta ($\le 2\text{ GB}$) en Android | **Desarrollo Nativo en Kotlin** | Evita la sobrecarga de WebView, motores JS o bridges de frameworks híbridos (React Native/Flutter). |
+| **Disponibilidad** | Conectividad nula/intermitente | **Arquitectura Offline-First con Room** | La base de datos local actúa como la Fuente Única de Verdad operativa para el comerciante. |
+| **Confiabilidad** | Falsos positivos por ruido ambiental | **Confirmación Visual Obligatoria (Modal)** | Tarjeta flotante que exige al usuario presionar "Confirmar" o "Corregir" antes de guardar la venta. |
+| **Confiabilidad** | Modismos y dialectos de Vinto | **Modelado de Vocabulario Local en Vosk** | Integración de términos regionales ("cuartilla", "amarrito", "casera", "fiado") en el diccionario local. |
+| **Seguridad** | Robo o extravío del terminal móvil | **SQLCipher AES-256 + PBKDF2** | Cifrado completo del archivo SQLite con derivación de clave desde el PIN y salt local. |
+| **Seguridad** | Ataques Man-in-the-Middle | **TLS 1.3 + JWT Rotativo** | Transmisión segura desde la cola Outbox hacia el API Gateway en la nube. |
+| **Modificabilidad** | Evolución del sistema y mantenibilidad | **Clean Architecture + Inyección Hilt** | Desacoplamiento total entre capas de UI, Casos de Uso (Dominio) y Repositorios de Datos. |
 
-*Las tres últimas tácticas de Seguridad fueron elaboradas por Marializ Mamani.*
+---
 
-## 9. DECISIONES ARQUITECTÓNICAS INICIALES (ADRs)
+## 6. DECISIONES ARQUITECTÓNICAS CLAVE (ADRs - ARCHITECTURE DECISION RECORDS)
 
-### ADR-001: Tecnología Móvil — Nativo vs. Híbrido
-- **Estatus:** Aprobado
-- **Contexto:** Los dispositivos de Vinto tienen severas restricciones de RAM (≤ 2 GB) y procesadores antiguos.
-- **Decisión:** Utilizar **Kotlin nativo** con Jetpack Compose.
-- **Alternativas consideradas:** React Native, Flutter, PWA.
-- **Justificación:** PWA y los frameworks híbridos añaden sobrecarga de memoria (WebView/Bridge/motor JS) que compromete el cumplimiento de RNF-001 (RAM < 500 MB). Kotlin nativo da control directo sobre el ciclo de vida y la memoria.
-- **Consecuencias:** desarrollo acoplado a Android; no habrá versión web ni iOS en esta fase.
+### ADR-001: Cliente Móvil — Kotlin Nativo y Jetpack Compose
+* **Estatus:** Aprobado (Vigente).
+* **Contexto:** Los comerciantes utilizan dispositivos móviles de entrada con procesadores limitados y RAM $\le 2\text{ GB}$.
+* **Decisión:** Utilizar **Kotlin Nativo** con **Jetpack Compose** para la interfaz de usuario.
+* **Justificación:** Garantiza un uso eficiente de la memoria RAM ($< 500\text{ MB}$), tiempos de arranque inmediatos y acceso directo a APIs de hardware (audio, almacenamiento cifrado).
+* **Consecuencia:** Desarrollo focalizado en plataforma Android.
 
-### ADR-002: Pipeline de PLN — Cloud vs. Edge
-- **Estatus:** Aprobado
-- **Contexto:** El reconocimiento de voz tradicionalmente depende de APIs en la nube (Google Speech, Whisper Cloud), lo cual exige Internet permanente.
-- **Decisión:** Ejecutar el pipeline **100 % on-device**: **Vosk** (modelo `vosk-model-small-es-0.42`, ~40-50 MB) para ASR y un clasificador **TFLite** propio para intención y extracción de entidades. Toda transcripción con confianza < 0.75 dispara el flujo de aclaración o el fallback a teclado (RF-010).
-- **Alternativas consideradas:** API de Google Speech, OpenAI Whisper Cloud, modelo Gemma 3n on-device.
-- **Justificación:** garantiza disponibilidad offline total, privacidad de los datos del comerciante y costo marginal cero por transacción. Gemma 3n se evaluó pero se descartó para esta entrega por su mayor huella de memoria y madurez de soporte en gama baja; queda documentado como *stretch goal*.
-- **Consecuencias:** aumenta el peso del APK (~70 MB adicionales); exige optimización de batería y RAM.
+### ADR-002: Engine PLN Edge — Vosk ASR + Clasificador Local con Confirmación Humana
+* **Estatus:** Aprobado (Vigente).
+* **Contexto:** El reconocimiento de voz en la nube falla por falta de señal en los mercados y genera costos recurrentes.
+* **Decisión:** Implementar el motor **Vosk Edge ASR** (~40 MB, modelo en español) para transcripción local, procesado con un extractor de intenciones/entidades en Kotlin, complementado con un **Modal de Confirmación Visual Obligatoria**.
+* **Justificación:** Operatividad 100% offline, costo cero por transacción y tasa nula de ventas accidentales gracias al paso de verificación humana.
+* **Consecuencia:** Incremento moderado en el tamaño del APK (~70 MB totales).
 
-### ADR-003: Arquitectura de Sincronización y Backend
-- **Estatus:** Aprobado
-- **Contexto:** El usuario genera datos offline y se conecta a la red de forma intermitente; se requiere un backend central que consolide la información de todos los comerciantes.
-- **Decisión:** Patrón **Outbox** local (cola en SQLite), cada operación identificada con **UUID v4** (clave de idempotencia), reintentos con **backoff exponencial** (1s → 4s → 16s → máx. 5 intentos) y resolución de conflictos **LWW (Last Write Wins)** con reconciliación asistida para casos críticos (p. ej. stock que resultaría negativo), consumido por un backend **Java Spring Boot + Spring Data JPA** sobre **PostgreSQL**.
-- **Alternativas consideradas:** CQRS con Axon Framework; Couchbase Sync Gateway; backend Node.js/Python con REST simple.
-- **Justificación:** Axon/Couchbase añaden complejidad de infraestructura injustificada para el alcance de un semestre. Frente a Node.js/Python, Spring Boot fue elegido por la solidez de su ecosistema de seguridad (Spring Security + JWT), su integración madura con JPA/PostgreSQL y porque el equipo de backend (Marializ Mamani) ya lo domina, reduciendo el riesgo técnico del proyecto.
-- **Consecuencias:** conflictos de sincronización extremadamente raros (mismo producto editado offline por dos dispositivos) requerirán reconciliación manual administrativa.
+### ADR-003: Backend Nube — Node.js 24 + TypeScript + Express + PostgreSQL 16
+* **Estatus:** Aprobado (Vigente v2.0 - Sustituye propuesta inicial de Spring Boot).
+* **Contexto:** Se requiere un backend en la nube altamente eficiente, liviano y escalable para recibir la sincronización de lotes de miles de comerciantes.
+* **Decisión:** Adoptar **Node.js 24 con TypeScript, Express 5 y PostgreSQL 16**, protegido por un **API Gateway** con Circuit Breaker.
+* **Justificación:** Arquitectura orientada a eventos no bloqueante (Event Loop), menor consumo de memoria en la nube frente a la JVM de Spring Boot, soporte nativo de JSON/TypeScript, y orquestación eficiente con Docker Compose.
+* **Consecuencia:** Unificación del stack en TypeScript para API y scripts de mantenimiento.
 
-### ADR-004: Cifrado de Base de Datos Local — SQLCipher AES-256 vs. Nube (elaborado por Marializ Mamani)
-- **Estatus:** Aprobado
-- **Contexto:** Las MYPES de Vinto manejan información financiera sensible en dispositivos con riesgo real de pérdida o robo.
-- **Decisión:** Arquitectura híbrida de 4 capas: (1) cifrado en reposo SQLite + SQLCipher AES-256; (2) cifrado en tránsito TLS 1.3; (3) clave maestra en Android Keystore; (4) autenticación por PIN de 4 dígitos con hash Argon2.
-- **Alternativas consideradas:**
+### ADR-004: Patrón Outbox Idempotente y Política de Concurrencia
+* **Estatus:** Aprobado (Vigente v2.0).
+* **Contexto:** Las transacciones registradas offline deben sincronizarse sin duplicar registros ni perder historial.
+* **Decisión:** Asignar a cada transacción un `operationId` (UUID v4) en el cliente Android y encolarla en la tabla **Outbox**. El backend procesa cada lote de forma **idempotente**. Las ventas son registros inmutables (append-only); los conflictos de inventario se registran para conciliación sin eliminar transacciones.
+* **Justificación:** Elimina la pérdida de información comercial por sobrescritura tipo *Last-Write-Wins* (LWW) y garantiza convergencia de datos.
 
-  | Alternativa | Ventajas | Desventajas |
-  | :--- | :--- | :--- |
-  | Solo Nube | Cifrado gestionado por el proveedor | Inoperable sin Internet (viola RA-01); costos recurrentes |
-  | Local sin cifrado | Máximo rendimiento | Datos expuestos ante robo; incumple RA-02/RA-06 |
-  | **SQLCipher + Nube (elegida)** | 100% offline; datos protegidos en reposo y tránsito; costo cero | Overhead ~10-15%; complejidad en gestión de claves |
-- **Justificación:** satisface RA-01 y RA-06; resuelve los escenarios QS-06 a QS-09; SQLCipher es 100% compatible con Room, sin introducir un motor de persistencia adicional.
-- **Consecuencias:** +2-3 MB en el APK; mayor complejidad en la derivación de la clave desde el PIN, mitigada con pruebas de benchmark en dispositivos de 2 GB de RAM.
+---
 
-## 10. MODELO C4
+## 7. ARQUITECTURA DE CONTENEDORES Y CONTEXTO (MODELO C4)
 
-*(Diagramas codificados en Mermaid; se renderizan automáticamente en GitHub).*
-
-### 10.1 C1 — Diagrama de Contexto
+### 7.1 Nivel 1: Diagrama de Contexto (C1)
 
 ```mermaid
 C4Context
-title Diagrama de Contexto (C1) - Asistente Offline MYPES Vinto
+title Diagrama de Contexto (C1) - Asistente Conversacional Yapay
 
-Person(comerciante, "Comerciante de Vinto", "Usuario final con baja alfabetización digital")
-System(app, "Asistente Conversacional Offline", "Gestión de ventas e inventario por voz, sin conexión")
-System_Ext(backend, "API de Consolidación Cloud", "Spring Boot + PostgreSQL, gestionado por el GAMLP/equipo del proyecto")
+Person(comerciante, "Comerciante de Vinto", "Usuario de MYPE con baja alfabetización digital")
+System(app_mobile, "Asistente Móvil Edge AI", "Aplicación Android offline-first para gestión de ventas, existencias y fiados por voz y teclado")
+System_Ext(backend_cloud, "API Cloud Yapay", "Backend Node.js 24 / Express / PostgreSQL para sincronización y respaldo de negocios")
 
-Rel(comerciante, app, "Dicta operaciones de venta, compra, fiado y consulta")
-Rel(app, backend, "Sincroniza transacciones en cola (Outbox) cuando detecta red")
+Rel(comerciante, app_mobile, "Dicta o ingresa ventas, consulta saldo local y administra fiados")
+Rel(app_mobile, backend_cloud, "Envía lotes de transacciones (Outbox) mediante HTTPS/JWT cuando hay Internet")
 ```
 
-### 10.2 C2 — Diagrama de Contenedores
+---
+
+### 7.2 Nivel 2: Diagrama de Contenedores (C2)
 
 ```mermaid
 C4Container
-title Diagrama de Contenedores (C2) - Arquitectura Interna
+title Diagrama de Contenedores (C2) - Arquitectura del Sistema Yapay
 
-Person(comerciante, "Comerciante de Vinto", "Usuario final")
+Person(comerciante, "Comerciante de MYPE", "Usuario final")
 
-System_Boundary(mobile, "Dispositivo Móvil Android (≤ 2 GB RAM)") {
-    Container(ui, "UI & VUI Controller", "Kotlin + Jetpack Compose", "Dashboard, botón de micrófono y confirmación visual obligatoria.")
-    Container(nlp, "Motor PLN Edge", "Vosk (ASR) + TFLite (NLU)", "Convierte voz a texto y extrae intención/entidades, 100% on-device.")
-    Container(sync, "Manejador de Sincronización", "WorkManager + Outbox Pattern", "Detecta conectividad y envía la cola de transacciones pendientes.")
-    ContainerDb(sqlite, "Base de Datos Local", "SQLite / Room + SQLCipher (AES-256)", "Almacena catálogo, ventas, fiados y cola Outbox, cifrada en reposo.")
+System_Boundary(mobile_app, "Dispositivo Móvil Android (Gama Baja)") {
+    Container(ui_view, "UI & VUI Controller", "Kotlin / Jetpack Compose", "Vistas de Dashboard, Ventas, Fiados, Catálogo y Modal de Confirmación")
+    Container(pln_engine, "Motor PLN Edge", "Vosk ASR + Rule Matcher", "Transcripción de voz a texto y extracción de producto/cantidad/monto on-device")
+    Container(data_layer, "Capa de Datos y Casos de Uso", "Clean Architecture / Repository", "Lógica de negocio local, validación de stock y reglas comerciales")
+    Container(outbox_sync, "Outbox Sync Manager", "WorkManager", "Administra la cola de sincronización diferida y reintentos con backoff")
+    ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v6 + SQLCipher (AES-256)", "Almacenamiento cifrado de perfil, catálogo, ventas, fiados y cola Outbox")
 }
 
-System_Boundary(cloud, "Infraestructura en la Nube") {
-    Container(api, "API de Consolidación", "Java Spring Boot + Spring Security (JWT)", "Recibe transacciones y aplica la política de resolución LWW.")
-    ContainerDb(pg, "Base de Datos Maestra", "PostgreSQL", "Fuente de verdad consolidada de todos los comerciantes.")
+System_Boundary(cloud_infra, "Infraestructura Nube (Docker Compose)") {
+    Container(api_gateway, "API Gateway / Express Router", "Node.js 24 / Express 5", "Validación de JWT, Rate Limiting y enrutamiento seguro")
+    Container(sync_service, "Servicio de Sincronización", "TypeScript Services", "Procesamiento idempotente de lotes Outbox y registro de eventos")
+    ContainerDb(postgres_db, "Base de Datos Consolidada", "PostgreSQL 16", "Persistencia central de propietarios, negocios, productos y transacciones")
 }
 
-Rel(comerciante, ui, "Dicta comandos / visualiza dashboard")
-Rel(ui, nlp, "Envía buffer de audio")
-Rel(nlp, ui, "Retorna texto + intención estructurada (JSON)")
-Rel(ui, sqlite, "Lee / escribe inventario y ventas")
-Rel(sync, sqlite, "Lee cola Outbox pendiente")
-Rel(sync, api, "Envía transacciones (JSON / HTTPS, JWT)")
-Rel(api, pg, "Persiste vía JPA / Hibernate")
+Rel(comerciante, ui_view, "Interactúa mediante voz o interfaz táctil")
+Rel(ui_view, pln_engine, "Envía buffer de audio PCM")
+Rel(pln_engine, ui_view, "Retorna texto transcrito e intenciones")
+Rel(ui_view, data_layer, "Invoca Casos de Uso")
+Rel(data_layer, sqlite_db, "Lectura/Escritura de transacciones cifradas")
+Rel(data_layer, outbox_sync, "Encola eventos con UUID v4")
+Rel(outbox_sync, api_gateway, "POST /api/v1/sync (Lotes JSON, JWT / TLS 1.3)")
+Rel(api_gateway, sync_service, "Pasa payloads validados")
+Rel(sync_service, postgres_db, "Consolida transacciones e inventario")
 ```
 
-## 11. TRAZABILIDAD ARQUITECTÓNICA
+---
 
-| Requisito | Atributo | Escenario | Táctica | Decisión | Contenedor C2 |
+## 8. MATRIZ DE TRAZABILIDAD ARQUITECTÓNICA
+
+| Driver / Requisito | Atributo de Calidad | Escenario ATAM | Táctica Arquitectónica | Decisión (ADR) | Contenedor C2 Relacionado |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| RA-01 | Disponibilidad | QS-02 | Offline-First | ADR-001 | Base de Datos Local (SQLite/Room) |
-| RA-02 | Rendimiento | QS-01 | Desarrollo Nativo (Kotlin) | ADR-002 | Motor PLN Edge |
-| RA-03 | Confiabilidad | QS-03 | Vocabulario dinámico / Outbox + LWW | ADR-003 | Manejador de Sincronización → API Spring Boot |
-| RA-04 | Rendimiento | QS-01 | Desarrollo Nativo (Kotlin) | ADR-002 | Motor PLN Edge |
-| RA-05 | Modificabilidad | QS-05 | Encapsulamiento / Clean Architecture | ADR-001 | UI & VUI Controller |
-| RA-06 | Seguridad | QS-06 a QS-09 | TLS 1.3 + Pinning / Argon2 / Detección de Root | ADR-004 | Base de Datos Local + API de Consolidación |
-
-## 12. RETOS ARQUITECTÓNICOS
-
-*Elaborado por Luis Lazo (Arquitectura C4 y QA Técnico).*
-
-### Reto 1 — Restricciones de Hardware Android de Gama Baja
-- **Contexto:** dispositivos de 2-3 GB de RAM, procesadores MediaTek/Helio de entrada, muchos con más de 3 años de uso.
-- **Desafío:** ejecutar Vosk + TFLite + pipeline conversacional con RAM < 300 MB y respuesta ≤ 2 s.
-- **Estrategia:** carga de modelos bajo demanda (lazy loading); WorkManager para tareas pesadas; monitoreo con `Debug.getMemoryInfo()`; fallback automático a teclado ante presión de memoria.
-- **Verificación:** QS-01, en Samsung A03 / Xiaomi Redmi 9A. **Riesgo residual:** cierres por falta de memoria (OOM), rechazo del producto.
-
-### Reto 2 — Ruido Acústico Ambiental en Mercados
-- **Contexto:** ruido ambiental > 70 dB en mercados y tiendas de barrio.
-- **Desafío:** mantener una tasa de reconocimiento aceptable sin depender de servicios cloud.
-- **Estrategia:** preprocesamiento de audio (16 kHz, mono, PCM 16-bit + filtro paso-banda); modelo `vosk-model-small-es-0.42` (~40 MB); detección de actividad de voz (VAD); umbral de confianza ≥ 0.75 con fallback a teclado.
-- **Verificación:** QS-01 y QS-03, con corpus de audio real de mercados de Vinto. **Riesgo residual:** interpretaciones erróneas que generen ventas o descuentos incorrectos.
-
-### Reto 3 — Consistencia Eventual en Modo Offline-First
-- **Contexto:** operaciones generadas offline que se sincronizan de forma diferida; posibles conflictos de concurrencia.
-- **Desafío:** evitar duplicidad de ventas y garantizar convergencia del inventario local/remoto.
-- **Estrategia:** patrón Outbox (ADR-003); UUID v4 de idempotencia; estados de sincronización visibles en UI; LWW con reconciliación asistida; backoff exponencial (1s→4s→16s→máx. 5).
-- **Verificación:** QS-02 y escenario de sincronización, con pruebas de idempotencia y corte de red simulado. **Riesgo residual:** duplicación de ventas, descuadre de inventario.
-
-## 13. REFERENCIAS
-
-- Bass, L., Clements, P., & Kazman, R. — *Software Architecture in Practice*.
-- Sommerville, I. — *Ingeniería de Software*.
-- Instituto Nacional de Estadística (INE) — Bolivia. _(citar dato específico usado sobre Vinto/Cochabamba)_.
-- Autoridad de Transporte y Telecomunicaciones (ATT) — Bolivia. _(citar dato de cobertura/conectividad si se usó)_.
-
-*(Completar en formato IEEE con los datos exactos de las fuentes citadas en la sección 2.)*
+| **RA-01** (Offline) | Disponibilidad | QS-02 | Offline-First con Room | ADR-001 | Base de Datos Encubierta (Room/SQLCipher) |
+| **RA-02** (PLN Edge) | Rendimiento | QS-01 | ASR Vosk On-Device + Reglas | ADR-002 | Motor PLN Edge |
+| **RA-03** (Consistencia)| Confiabilidad | QS-08 | Outbox Idempotente con UUID v4 | ADR-004 | Outbox Sync Manager $\rightarrow$ Servicio Sincronización |
+| **RA-04** (Latencia) | Rendimiento | QS-01 | Kotlin Nativo + Hilos Coroutines | ADR-001 | UI & VUI Controller |
+| **RA-05** (Modularidad)| Modificabilidad | QS-05 | Clean Architecture | ADR-001 | Capa de Datos y Casos de Uso |
+| **RA-06** (Seguridad) | Seguridad | QS-04, QS-07 | SQLCipher AES-256 + TLS 1.3/JWT | ADR-003, ADR-004| BDD Encubierta / API Gateway |
 
 ---
-*Arquitectura de Software — Proyecto Integrador — Documento consolidado v1.1*
 
+## 9. RETOS TÉCNICOS Y ESTRATEGIAS DE MITIGACIÓN
 
-## Addendum de revisión de stack 2.0 — 30/09/2026
+### Reto 1: Restricción de Memoria en Teléfonos de Gama Baja ($\le 2\text{ GB RAM}$)
+* **Estrategia:** Invocación de Vosk mediante *lazy loading* (solo se carga el modelo en RAM al activar el micrófono) y liberación inmediata del buffer de audio. Monitoreo continuo mediante WorkManager.
+* **Verificación:** Escenario QS-01 comprobado en emulador y dispositivos físicos Android 8.0+.
 
-El SAD entregado en versión 1.1 seleccionó Java/Spring Boot y PostgreSQL. Por instrucción de la líder del equipo, la línea base de trabajo pasa a Node.js/TypeScript/Express con PostgreSQL: se sustituye el framework servidor y se conserva el motor remoto relacional. Esta nota no representa aprobación del docente ni cambio retroactivo de la entrega 1.1. Eva solicitará aprobación de Arquitectura y actualizará ADR, vistas, especificación, seguridad y cronograma antes de presentar una revisión oficial. El sílabo de TI exige evidencia de MongoDB/Mongoose en su unidad; PostgreSQL no satisface por sí solo ese criterio y la docente debe indicar si la práctica puede ser separada.
+### Reto 2: Entornos de Mercado con Alto Ruido Acústico ($> 70\text{ dB}$)
+* **Estrategia:** Preprocesamiento de señal de audio (16 kHz, mono, PCM de 16 bits), filtro paso-banda local y **Modal de Confirmación Visual Obligatoria** que permite corregir cualquier error antes de impactar el saldo local.
+* **Verificación:** Escenario QS-03.
 
-Hasta que se publique el SAD revisado, las menciones a Spring Boot en el cuerpo y diagramas describen la versión entregada y están desactualizadas como arquitectura objetivo. La próxima edición deberá actualizar los escenarios de sincronización para preservar ventas concurrentes, evitando aplicar Last Write Wins a hechos comerciales.
+### Reto 3: Sincronización Concurrente y Conflictos de Existencias
+* **Estrategia:** Tratamiento de las ventas como hechos inmutables (*append-only*). Las deducciones de existencias se procesan secuencialmente en el backend; ante discrepancias, el sistema genera alertas de conciliación sin descartar la transacción comercial.
+* **Verificación:** Escenario QS-08.
 
-**Regla para la propuesta de revisión:** la línea base objetivo es API Node.js/TypeScript/Express + PostgreSQL, pendiente de aprobación docente. SQLite local conserva operaciones offline y Outbox; cada evento utiliza un UUID idempotente. Las ventas y sus líneas se conservan como hechos; no se permite resolver conflictos sobrescribiendo una venta con otra mediante LWW. Las discrepancias de stock deben quedar visibles para conciliación explícita. C1/C2 muestran la propuesta y no deben citarse como evidencia de código implementado. La cobertura de MongoDB/Mongoose y la necesidad de frontend web siguen pendientes de confirmación por Tecnologías en Internet.
+---
+
+## 10. REFERENCIAS Y FUENTES DE INFORMACIÓN
+1. **Bass, L., Clements, P., & Kazman, R.** — *Software Architecture in Practice (4th Edition)*. Addison-Wesley.
+2. **Martin, R. C.** — *Clean Architecture: A Craftsman's Guide to Software Structure and Design*. Prentice Hall.
+3. **Documento Maestro del Proyecto Integrador Yapay** — Universidad Adventista de Bolivia, 2026.
+4. **Vosk Speech Recognition Toolkit** — Alphacephei Inc. Documentation.
+5. **Node.js 24 & Express 5 Documentation** — Node.js Foundation.
+
+---
+
+*Documento de Arquitectura de Software (SAD v2.0) · Proyecto Integrador Yapay · Noviembre 2026*
