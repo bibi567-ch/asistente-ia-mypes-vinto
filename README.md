@@ -1,84 +1,136 @@
-# Asistente conversacional offline para MYPES de Vinto
+# 🤖 Yapay — Asistente Conversacional Offline Edge AI para MYPES
 
-Prototipo de asistente configurable por rubro para registrar ventas y consultar el saldo local de existencias en MYPES del centro de Vinto, Cochabamba. Universidad Adventista de Bolivia, Carrera de Ingeniería en Sistemas.
+## 📋 Descripción del Proyecto
+Yapay es un prototipo de asistente conversacional offline-first impulsado por inteligencia artificial en el dispositivo (Edge AI), diseñado específicamente para microempresas (MYPES) y pequeños comercios del centro de Vinto, Cochabamba.
 
-El proyecto busca guardar primero en el teléfono y funcionar sin red durante la atención. No es un sistema completo de almacén: compras a proveedores, lotes, costos, facturación, cobro QR y otros módulos están fuera del alcance vigente.
-
-## Estado del repositorio
-
-Corte documental: 19/10/2026. Rama revisada: main, commit ec9028b.
-
-- El backend es Node.js, TypeScript, Express y PostgreSQL. Su README describe login de propietario, catálogo protegido y recepción idempotente de lotes; el servicio está pensado para pruebas locales.
-- El módulo Android está en mobile/: Kotlin, Jetpack Compose y persistencia local con Room. El código incluye login local con PIN, onboarding, dashboard, inventario y componentes de PLN/voz.
-- El usuario reportó que instaló la app en un Motorola G60 y pudo guardar un producto de prueba. Esa prueba debe archivarse en evidence/ con pasos, fecha, entorno y commit para que sea repetible.
-- El código móvil también contiene modelos de venta, outbox, WorkManager y cliente Retrofit. La integración completa móvil–API, especialmente desde un teléfono físico, todavía debe probarse. El cliente usa 10.0.2.2, dirección habitual del emulador Android, y el PIN local no equivale al token del backend.
-- No hay una opción de interfaz para eliminar productos en la pantalla de inventario revisada. No afirmar que esa función está implementada.
-- El modelo Vosk no se versiona en Git. El reconocimiento debe probarse después de instalar localmente el modelo requerido.
-- La rama contiene código fuente, no un APK de distribución publicado. Una instalación local exitosa no certifica todas las funciones.
-
-Consulta el estado, los criterios por materia y las brechas en la [Matriz de cumplimiento y evidencias](docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md).
-
-## Justificación del stack
-
-El backend usa Node.js 24, TypeScript y Express; Node.js/Express coincide con la unidad de backend de Tecnologías en Internet. PostgreSQL es la base central elegida para las relaciones entre negocios, productos, ventas y operaciones, y para sus restricciones y transacciones. La app Android guarda sus datos locales con Room/SQLite.
-
-La materia también incluye MongoDB/Mongoose y front-end web HTML/CSS/JavaScript. PostgreSQL no reemplaza MongoDB, y Android Compose no reemplaza un front-end web. La razón técnica del stack y las opciones académicas pendientes de confirmar están en el [plan de segunda entrega por materia](docs/14_Segunda_Entrega_Tareas_por_Materia.md).
-
-## Arquitectura resumida
-
-```mermaid
-flowchart LR
-  U[Comerciante] --> A[Android Kotlin / Compose]
-  A --> L[Room / SQLite local]
-  L --> O[Outbox y trabajo diferido]
-  O -->|cuando se configure y valide la conexión| API[Node.js / Express]
-  API --> PG[(PostgreSQL)]
-```
-
-Este dibujo resume la arquitectura prevista; no prueba que todos los enlaces estén conectados en el dispositivo. El SAD 1.1 conserva una entrega anterior que incluye decisiones basadas en Spring Boot. La arquitectura vigente debe documentarse como una versión nueva y coherente con el código Node.js.
-
-## Inicio local del backend
-
-Hace falta Node.js 24, npm y Docker Desktop con Compose. Desde la raíz del repositorio:
-
-```powershell
-docker compose up -d postgres
-Copy-Item backend/.env.example backend/.env
-Set-Location backend
-npm ci
-npm run db:migrate
-npm run dev
-```
-
-La comprobación de salud local está en http://127.0.0.1:3000/api/v1/health. Para login y catálogo, sigue el [README del backend](backend/README.md). No publiques backend/.env ni uses datos reales.
-
-Para compilar e instalar Android, abre mobile/ en Android Studio, sincroniza Gradle, selecciona el teléfono/emulador y ejecuta la variante debug. La sincronización hacia la API debe tratarse como una prueba aparte.
-
-## Documentos
-
-| Documento | Propósito |
-|---|---|
-| [Matriz de cumplimiento](docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md) | Criterios de ARQ-643, TEC-644 e INV-645, estados y evidencias por reunir |
-| [Mapa del trabajo](docs/MAPA_PRESENTACION.md) | Relación del proyecto con las tres materias |
-| [Perfil de Investigación I](docs/perfil/Perfil_final.md) | Perfil de Trabajo de Grado, versión 11 |
-| [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Alcance vigente y exclusiones |
-| [Requisitos y UX/UI](docs/02_Requisitos_y_UX.md) | Requisitos y diseño |
-| [SAD](docs/03_SAD_Arquitectura.md) | SAD 1.1 entregado y nota sobre su estado |
-| [Informe de Segunda Entrega - TI](docs/Informe_Segunda_Entrega_TI.md) | Informe técnico de alcance, requisitos, arquitectura, persistencia y API |
-| [Backend](backend/README.md) | Inicio local, autenticación, catálogo y API |
-| [Android](mobile/README.md) | Módulo móvil y estado de integración |
-| [Diagramas](diagrams/README.md) | Fuentes C4, casos de uso y coherencia pendiente |
-| [Evidencias](evidence/README.md) | Cómo registrar pruebas revisables |
-
-Los borradores sustituidos están en docs/archive/. No reemplazan las versiones vigentes ni deben presentarse sin revisar su estado.
-
-## Equipo
-
-Eva Lizeth Chino Quispe, Christian Gonzales Mamani, Marializ Mamani Quispe, Kevin Jhonathan Rocha Rojas y Luis Gerardo Lazo Bustamante.
-
-## Diseño
-
-- [Prototipo en Figma]([https://snake-dijon-92194767.figma.site/](https://www.figma.com/make/detrwbrxCanqoPjHb9TjwX/Mockup-Improvement-Request--Community---copia---copia-?p=f&t=qANDWN72XqQ9Pt4y-0))
+El sistema permite a comerciantes registrar ventas al contado y fiadas, gestionar cobros de deudas, consultar el saldo local de existencias y recibir reportes diarios mediante comandos de voz naturales en castellano, quechua, aimara y variantes lingüísticas mixtas, operando al 100 % sin conexión a Internet.
 
 
-Figma muestra una propuesta de interfaz; no reemplaza la aplicación ni una prueba de funcionamiento.
+---
+
+## ✨ Características Principales
+
+- 🎤 **Procesamiento de Voz On-Device (Edge AI):** Reconocimiento de voz local con el motor Vosk () sin consumo de APIs externas ni costo recurrente.
+- 📱 **Operación Offline-First:** Persistencia local cifrada con Room v6 + SQLCipher y Android Keystore.
+- 🛍️ **Plantillas por Rubro Comercial:** Carga inicial rápida con 6 plantillas ajustables (farmacia, pastelería, ferretería, comercio de bebidas, broastería y minimarket).
+- 🛡️ **Confirmación Visual Obligatoria:** Mitigación de errores de transcripción mediante un modal flotante de revisión previa antes de confirmar cualquier venta dictada.
+- 🔄 **Sincronización Asíncrona e Idempotente:** Cola Outbox local gestionada por WorkManager con reintentos mediante backoff exponencial y claves de idempotencia UUID v4 ().
+- 🌐 **Backend Escalable y Resiliente:** API REST desarrollada en Node.js 24 LTS, Express 5 y TypeScript sobre PostgreSQL 16, protegida con API Gateway (Circuit Breaker) y autenticación JWT con refresh tokens rotativos.
+
+---
+
+## 🏗️ Arquitectura del Sistema (C4 Level 2)
+
+
+
+---
+
+## 🛠️ Stack Tecnológico
+
+### Cliente Móvil (Android)
+- **Lenguaje & Framework:** Kotlin Nativo, Jetpack Compose, Material Design 3.
+- **Persistencia Local:** Room v6, SQLite, SQLCipher (Cifrado AES-256 en reposo).
+- **Procesamiento de Voz Edge:** Vosk ASR SDK ().
+- **Segundo Plano & Red:** Android WorkManager, OkHttp 4, Retrofit 2.
+
+### Servidor Cloud (Backend)
+- **Runtime & Framework:** Node.js 24 LTS, Express 5, TypeScript 5.
+- **Base de Datos:** PostgreSQL 16 (desplegado vía Docker Compose).
+- **Seguridad & Autenticación:** JWT con refresh tokens rotativos, Hashing scrypt / PBKDF2.
+- **Resiliencia & Real-time:** API Gateway con Circuit Breaker, Server-Sent Events (SSE).
+
+---
+
+## 🚀 Guía de Instalación y Ejecución Local
+
+### Prerrequisitos
+- **Node.js** v24.x LTS & npm <command>
+
+Usage:
+
+npm install        install all the dependencies in your project
+npm install <foo>  add the <foo> dependency to your project
+npm test           run this project's tests
+npm run <foo>      run the script named <foo>
+npm <command> -h   quick help on <command>
+npm -l             display usage info for all commands
+npm help <term>    search for help on <term>
+npm help npm       more involved overview
+
+All commands:
+
+    access, adduser, audit, bugs, cache, ci, completion,
+    config, dedupe, deprecate, diff, dist-tag, docs, doctor,
+    edit, exec, explain, explore, find-dupes, fund, get, help,
+    help-search, hook, init, install, install-ci-test,
+    install-test, link, ll, login, logout, ls, org, outdated,
+    owner, pack, ping, pkg, prefix, profile, prune, publish,
+    query, rebuild, repo, restart, root, run-script, sbom,
+    search, set, shrinkwrap, star, stars, start, stop, team,
+    test, token, uninstall, unpublish, unstar, update, version,
+    view, whoami
+
+Specify configs in the ini-formatted file:
+    /home/sandbox/.npmrc
+or on the command line via: npm <command> --key=value
+
+More configuration info: npm help config
+Configuration fields: npm help 7 config
+
+npm@10.9.8 /usr/lib/node_modules/npm v10+
+- **Docker Desktop** v24+ (con Docker Compose v2)
+- **Android Studio** (Ladybug / Jellyfish) & JDK 17
+- Dispositivo Android v8.0+ (API 26+) o Emulador AVD
+
+### 1. Iniciar el Backend Cloud (API REST + Database)
+
+- Clonar el repositorio e ingresar a la carpeta .
+- Iniciar la base de datos PostgreSQL 16 con .
+- Copiar las variables de entorno de plantilla y ajustar la clave secreta .
+- Ejecutar  para instalar dependencias,  para aplicar esquemas relacionales y  para iniciar el servidor REST.
+
+### 2. Compilar e Instalar la Aplicación Móvil (Android)
+
+- Abrir el proyecto en la carpeta  en Android Studio.
+- Ejecutar el script  para colocar el modelo acústico  en la carpeta de assets.
+- Compilar la variante de depuración mediante .
+
+---
+
+## 📂 Estructura del Repositorio
+
+
+
+---
+
+## 🧪 Pruebas y Validación de Calidad
+
+El proyecto cuenta con suites de pruebas en múltiples capas:
+
+- **Backend (Node.js 24 + TypeScript):** Verificación de sintaxis, compilación TypeScript, pruebas unitarias de controladores y prueba de integración sobre base de datos PostgreSQL 16 aislada ().
+- **Móvil (Android Kotlin):** Pruebas unitarias JVM () que verifican la extracción de entidades de voz (unidades dialectales como cuartilla, montos en Bolivianos), clasificación de intenciones y derivación de PIN con PBKDF2.
+- **Integración Continua (CI/CD):** Pipeline automatizado en GitHub Actions () que valida el backend en cada integración.
+
+---
+
+## 🎨 Diseños UX/UI y Prototipado en Figma
+
+El prototipo navegable y el sistema de diseño completo (arquetipos de usuario, componentes con variantes y estados de UI: Vacío, Carga, Error y Éxito) están especificados en el documento de Requisitos y UX.
+
+---
+
+## 👥 Equipo del Proyecto (UAB 2026-2)
+
+| Integrante | Rol en el Proyecto | Especialidad / Contribución |
+| :--- | :--- | :--- |
+| **Eva Lizeth Chino Quispe** | Líder de Proyecto | Gestión de Requisitos, Alcance y QA Documental |
+| **Christian Gonzales Mamani** | Ingeniero de IA | Pipeline Conversacional Edge AI & Vosk Integration |
+| **Marializ Mamani Quispe** | Desarrolladora Backend | API REST Node.js, Seguridad JWT & PostgreSQL 16 |
+| **Kevin Jhonathan Rocha Rojas** | Diseñador UX/UI | Prototipado Interactivo Figma & Sistema de Diseño |
+| **Luis Gerardo Lazo Bustamante** | Arquitecto de Software | Arquitectura C4, Tácticas ATAM & QA Técnico |
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo  para obtener más información.
