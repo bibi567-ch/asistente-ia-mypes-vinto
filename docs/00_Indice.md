@@ -1,6 +1,6 @@
 # 00_Indice.md — Índice General de la Documentación del Sistema (Versión Actualizada)
 
-> **Estado del documento:** Índice consolidado alineado con el **Documento Maestro del Proyecto Integrador** y la estructura unificada de las tres asignaturas del plan de estudios (Gestión 2-2026 / 2026-2027).  
+ 
 > **Sistema:** Asistente Conversacional Multilingüe Offline-First **Yapay** para MYPES de Vinto.
 
 ---
