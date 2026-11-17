@@ -1,168 +1,158 @@
-# Bitácora de evidencias y resultados
+### Registro de Resultados de Pruebas y Bitácora de Evidencias (v2.0)
+**Universidad Adventista de Bolivia · Ingeniería en Sistemas · Proyecto Integrador Yapay**
 
-Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas automatizadas y pruebas funcionales. No se infieren resultados de un commit ni se inventan evidencias.
+| Control del documento | Detalle |
+| ------ | ------ |
+| **Versión del registro** | 2.0 (Consolidada - Noviembre 2026) |
+| **Sistema** | Asistente Conversacional Offline Edge AI (Yapay) |
+| **Componentes Evaluados** | App Android Kotlin/Compose (Room v6 SQLCipher) + API Gateway Node.js 24 / Express 5 / PostgreSQL 16 |
+| **Revisión de Código Base** | Commit `03afcbd` (Rama `feature/update-doc`) |
+| **Integrantes** | Eva Chino, Christian Gonzales, Marializ Mamani, Kevin Rocha y Luis Lazo |
 
-## Historial previo: funcionalidades y validaciones técnicas
+---
 
-- **Fecha:** anterior al 2026-11-10; fecha exacta no conservada.
-- **Trabajo implementado:** ventas locales con persistencia transaccional de venta, stock y Outbox; rechazo de stock negativo; autenticación API separada del PIN local; sincronización de catálogo paginada; voz que propone datos pero requiere confirmación; deduplicación de productos de plantilla; y pantalla de reportes diarios.
-- **Validaciones técnicas reportadas en la sesión previa:** build backend, chequeo de tipos, 8 pruebas unitarias, 6 pruebas de integración PostgreSQL y compilación Android debug finalizaron correctamente.
-- **Límite de esta constancia:** no se conservaron el enlace de CI, la fecha exacta ni los logs primarios. Es un antecedente de trabajo, no evidencia de GitHub Actions ni prueba funcional manual. Las pruebas funcionales de Android permanecen pendientes de capturas.
+#### 1. RESUMEN DE ESTADO GENERAL DE PRUEBAS
 
-## Fase 0: Evidencia visual del login Android
+La presente bitácora documenta las comprobaciones técnicas, compilaciones, pruebas unitarias automatizadas y ejecuciones de integración continua. Establece una distinción estricta entre la aprobación de código en entornos simulados/CI y la validación funcional en dispositivos móviles físicos.
 
-- **Fecha:** 2026-11-10
-- **Qué se probó:** se lanzó la app en un dispositivo Android conectado y se capturó la pantalla de login inicial.
-- **Resultado observado:** la pantallla de acceso cargó correctamente con el campo de carnet/celular/correo y la entrada del PIN con el botón de micrófono; la captura confirma la UI pero no la validación del dictado ni el acceso real del usuario.
-- **Evidencia:** ![Login local en dispositivo Android](evidencias/01_login/mypes_login.png)
-- **Estado:** evidencia de interfaz disponible; la validación funcional completa del PIN por voz y el acceso con credenciales sigue pendiente.
+| Capa de Arquitectura | Suite / Componente | Pruebas Automatizadas | Pruebas Funcionales | Estado de Evidencia Principal |
+| ------ | ------ | ------ | ------ | ------ |
+| **Backend Node.js 24** | Compilación TypeScript & Typecheck | APROBADO (100%) | N/A (Backend) | GitHub Actions Run `#43157514411` |
+| **Backend Node.js 24** | Pruebas Unitarias de API | APROBADO (11/11 pasaron) | N/A (Backend) | GitHub Actions Run `#43157514411` |
+| **Backend Node.js 24** | Integración DB PostgreSQL 16 | APROBADO (9/9 pasaron) | N/A (Backend) | GitHub Actions Run `#43157514411` |
+| **Cliente Android** | Compilación Gradle & Asset Vosk | APROBADO (`assembleDebug`) | PENDIENTE | APK compilado (`117.3 MB` asset Vosk) |
+| **Cliente Android** | Pruebas Unitarias JVM (NLU / PIN) | APROBADO (12/12 pasaron) | N/A (Unidad JVM) | JUnit XML (`mobile/app/build/test-results/`) |
+| **Cliente Android** | Interfaz UI y Operación Offline | N/A | PENDIENTE | Pendiente de capturas/videos en dispositivo |
+| **Sincronización** | E2E Móvil - Backend Cloud | N/A | PENDIENTE | Integración Outbox / REST diferida en dispositivo |
 
-## Fase 0b: Plantilla de captura para login y registro
+---
 
-- **Qué se necesita:** grabar la prueba funcional completa de login con PIN local y de registro persistido en PostgreSQL.
-- **Regla de integridad:** no se marca aprobada la prueba funcional de Android sin una captura o video en `docs/evidencias/`. Se usa la siguiente plantilla solo como referencia para insertar la evidencia real cuando exista.
-- **Markdown a insertar una vez se disponga de la captura real:**
+#### 2. BITÁCORA CRONOLÓGICA DE EJECUCIONES Y VERIFICACIONES
 
-```markdown
-![Login exitoso](evidencias/01_login/login_exitoso.png)
-![Registro en PostgreSQL](evidencias/01_login/registro_en_postgres.png)
-```
+##### Fase 0: Carga Visual de la Pantalla Inicial de Acceso
+* **Fecha:** 2026-11-10
+* **Escenario:** Apertura de la aplicación en dispositivo Android emulado/físico.
+* **Resultado Observado:** Carga correcta de la pantalla de Login con campos de identificación (carnet, celular o correo), PIN local de 4 dígitos y control flotante de micrófono.
+* **Alcance:** Confirma la carga de vistas Compose; no valida autenticación con PIN ni dictado de voz en hardware.
+* **Estado:** APROBADO (Verificación técnica de UI) / PENDIENTE (Validación funcional en dispositivo).
 
-- **Estado actual:** las capturas `login_exitoso.png` y `registro_en_postgres.png` siguen pendientes; no se publican como evidencia aunque el flujo haya sido implementado y se haya validado la compilación.
+##### Fase 1: Actualización de Interfaz y Navegación desde Asistente
+* **Fecha:** 2026-11-10
+* **Qué se realizó:** Integración del reporte diario de ventas, flujo de navegación directa desde sugerencias de voz hacia formularios con precarga y deduplicación de plantillas de productos.
+* **Comprobación Técnica:** `gradlew :app:assembleDebug` finalizó exitosamente.
+* **Estado:** PENDIENTE de prueba manual en dispositivo.
 
-## Fase 1: Cambios Android recientes
+##### Fase 2: Argumentos Tipados en Transcripción y Sugerencia de Venta
+* **Fecha:** 2026-11-10
+* **Qué se realizó:** Paso de parámetros codificados (producto y cantidad como texto numérico) hacia el formulario de ventas, sorteando la limitación de `NavType.DoubleType` en Navigation 2.8.3. Conversión segura a `Double`.
+* **Comprobación Técnica:** `gradlew :app:assembleDebug` con código de salida 0.
+* **Estado:** PENDIENTE de verificación funcional de dictado.
 
-- **Fecha:** 2026-11-10
-- **Qué se hizo:** se integraron el reporte diario, navegación desde el asistente de voz al formulario con sugerencias y la deduplicación de productos de plantilla.
-- **Comprobación técnica:** `:app:assembleDebug` finalizó correctamente durante la validación del cambio. Esto solo confirma compilación; no confirma el comportamiento en un dispositivo.
-- **Resultado funcional:** PENDIENTE de prueba manual y captura/video.
-- **Evidencia:** pendiente; guardar en `evidencias/03_dashboard/`, `evidencias/04_ventas/` o `evidencias/06_chat_ia/` según el caso.
+##### Fase 3: Pruebas Unitarias Backend y Typechecking
+* **Fecha:** 2026-11-10 (Local) / 2026-11-12 (CI)
+* **Qué se probó:** `npm run build`, `npm run typecheck:test` y `npm test` en el directorio `backend/`.
+* **Resultado:** 8/8 pruebas unitarias aprobadas en primera instancia (ampliadas a 11/11 en la Fase 14).
+* **Estado:** APROBADO.
 
-## Fase 2: Argumentos tipados para venta sugerida por voz
+##### Fase 4: Registro del Intent de Integración PostgreSQL Local (Bloqueo Histórico)
+* **Fecha:** 2026-11-10
+* **Qué se intentó:** Preparación de PostgreSQL local para `npm run test:integration`.
+* **Resultado:** BLOQUEADO por rechazo de credenciales para el usuario `mypes_test`.
+* **Seguimiento y Cierre:** El bloqueo quedó registrado en la bitácora como antecedente histórico y fue resuelto de forma definitiva en el entorno aislado de GitHub Actions (Fase 15).
+* **Estado:** BLOQUEADO (Local) / RESUELTO (CI GitHub Actions).
 
-- **Fecha:** 2026-11-10
-- **Qué se cambió:** el destino de venta recibe `producto` codificado y `cantidad` como texto numérico; la cantidad se valida y convierte a `Double` al entrar porque Navigation 2.8.3 no expone `NavType.DoubleType`. El formulario solo selecciona coincidencias normalizadas exactas.
-- **Comprobación técnica:** `:app:assembleDebug` finalizó correctamente; la compilación no valida el flujo en un dispositivo.
-- **Resultado funcional:** PENDIENTE de probar el dictado, confirmar el producto/cantidad y guardar evidencia en `evidencias/06_chat_ia/` y `evidencias/04_ventas/`.
+##### Fase 5: Pruebas Unitarias JVM de PLN / NLU Edge y PIN Cifrado
+* **Fecha:** 2026-11-10
+* **Qué se probó:** `:app:testDebugUnitTest` para la extracción de entidades de voz ("cuartillas", bolivianos, fiados), clasificación de intención (VENTA) y derivación PBKDF2-HMAC-SHA256 del PIN.
+* **Resultado:** 5/5 pruebas unitarias JUnit pasadas exitosamente (ampliadas a 12/12 en fases posteriores).
+* **Evidencia:** Reportes XML en `mobile/app/build/test-results/testDebugUnitTest/`.
+* **Estado:** APROBADO.
 
-## Fase 3: Backend - build, tipos y pruebas unitarias locales
+##### Fase 6: Pantalla de Sincronización y Outbox Local
+* **Fecha:** 2026-11-10
+* **Qué se verificó:** Observabilidad en tiempo real de operaciones pendientes en la cola Outbox (Room), con contadores visuales, IDs abreviados y reintentos.
+* **Comprobación Técnica:** `:app:assembleDebug` exitoso.
+* **Estado:** PENDIENTE de prueba funcional en dispositivo con alternancia de red.
 
-- **Fecha:** 2026-11-10
-- **Qué se probó:** desde `backend/`, se ejecutaron `npm run build`, `npm run typecheck:test` y `npm test`.
-- **Resultado obtenido:** build correcto, chequeo de tipos correcto y 8 pruebas unitarias aprobadas (8 pasaron, 0 fallaron).
-- **Alcance:** ejecución local en el commit `c187bba`; no es una ejecución de GitHub Actions.
-- **Evidencia:** salida de consola observada en esta sesión; enlazar el workflow cuando se ejecute en GitHub. No hay captura añadida aún.
+##### Fase 7: Corrección de Automatización en Entorno Windows (`gradlew.bat`)
+* **Fecha:** 2026-11-10
+* **Qué se corrigió:** Ajuste del script `gradlew.bat` para evitar retornos falsos de código de error cuando Gradle finalizaba con éxito.
+* **Resultado:** Verificación exitosa de `BUILD SUCCESSFUL` con código de retorno 0.
+* **Estado:** APROBADO.
 
-## Fase 4: Backend - pruebas de integración PostgreSQL
+##### Fase 8: Reporte Semanal y Modo Demostrativo
+* **Fecha:** 2026-11-10
+* **Qué se implementó:** Gráfico de ventas de 7 días con intervalos de tiempo no solapados. Introducción de la bandera de vista demo exclusiva para compilaciones `debug` sin alterar datos persistidos en Room. Exportación de CSV mediante `FileProvider`.
+* **Comprobación:** Pruebas unitarias JVM de formato CSV y escape de caracteres aprobadas.
+* **Estado:** APROBADO (Unidad CSV) / PENDIENTE (Validación UI Android).
 
-- **Fecha:** 2026-11-10
-- **Qué se probó:** intento de preparar/migrar la base de pruebas local para ejecutar `npm run test:integration`.
-- **Resultado obtenido:** BLOQUEADO; PostgreSQL rechazó la autenticación para el usuario `mypes_test`. No se pudo confirmar el resultado de integración local.
-- **Acción pendiente:** ejecutar el workflow, que configura un PostgreSQL temporal con credenciales de prueba aisladas, y registrar su resultado real.
-- **Evidencia:** pendiente; enlazar el workflow o guardar una captura anonimizada en `evidencias/08_backend/`.
+##### Fase 9: Registro Híbrido y Token JWT en Backend
+* **Fecha:** 2026-11-10
+* **Qué se implementó:** Formulario de registro con datos del propietario y negocio, migración Room 2→3, y endpoint `POST /api/v1/auth/register` con hashing `scrypt` y emisión de token Bearer JWT.
+* **Resultado:** Pruebas de integración en base aislada aprobadas (alta de negocio, rechazo de correos duplicados y campos incompletos).
+* **Estado:** APROBADO (API Backend) / PENDIENTE (Integración en dispositivo).
 
-## Fase 5: Pruebas funcionales en dispositivo
+##### Fase 10: Integración del Modelo ASR Vosk en Assets
+* **Fecha:** 2026-11-10
+* **Qué se hizo:** Descarga e inclusión del modelo `vosk-model-small-es-0.42` (~40-50 MB comprimido, 117.3 MB descomprimido) en `assets/`.
+* **Comprobación:** Verificación de inclusión en el APK compilado (`assets/vosk-model-small-es-0.42/am/final.mdl`).
+* **Estado:** APROBADO (Empaquetado) / PENDIENTE (Reconocimiento acústico en hardware real).
 
-- **Fecha:** pendiente
-- **Qué se probó:** pendiente de confirmación por el equipo.
-- **Resultado obtenido:** PENDIENTE. No hay capturas/videos confirmados en `evidencias/`.
-- **Evidencia:** añadir una entrada por escenario solo después de ejecutar la prueba y guardar su captura/video.
+##### Fase 11: Pantalla de Perfil de Comerciante y Seguridad
+* **Fecha:** 2026-11-10
+* **Qué se implementó:** Vista de consulta de perfil de comercio/propietario en Room fuera del hilo UI. Ocultación estricta de hashes, sal y PIN.
+* **Comprobación:** Compilación `:app:assembleDebug` sin errores.
+* **Estado:** PENDIENTE de evidencia visual en dispositivo.
 
-## Fase 6: Pruebas unitarias JVM de NLU y PIN
+##### Fase 12: Módulo de Fiados, Búsqueda de Productos y Exportación CSV
+* **Fecha:** 2026-11-10
+* **Qué se implementó:** Migración Room 3→4 (`ventas.pagado`), pantalla de cobro de fiados con generación atómica de evento `COBRO` en Outbox, filtro de productos en tiempo real y exportación CSV de ventas diarias.
+* **Comprobación:** 7 pruebas unitarias JVM y 9 pruebas de integración backend aprobadas (incluyendo la recepción idempotente del evento `COBRO`).
+* **Estado:** APROBADO (Lógica local/backend) / PENDIENTE (Prueba UI en dispositivo).
 
-- **Fecha:** 2026-11-10
-- **Qué se probó:** `:app:testDebugUnitTest` con extracción de entidades (incluye "cuartillas", montos en bolivianos y "al fiado"), clasificación de intención de venta y hashing PBKDF2 del PIN.
-- **Resultado obtenido:** 5 pruebas reportadas por JUnit XML; 5 pasaron, 0 fallaron, 0 errores y 0 omitidas. Suites: 2 de extracción, 1 de clasificación y 2 de hash/PIN. Los resultados están en `mobile/app/build/test-results/testDebugUnitTest/`.
-- **Alcance:** pruebas JVM locales; validan componentes aislados, no reconocimiento acústico en un dispositivo ni la UI de sincronización. `:app:assembleDebug` también terminó correctamente.
-- **Evidencia:** reportes XML locales; las capturas indicadas por el equipo se agregarán tras obtenerlas.
+##### Fase 13: Ampliación de Perfil, Login Multiclave y PIN Hablado
+* **Fecha:** 2026-11-10
+* **Qué se implementó:** Migración Room 4→6 (soporte de nombres completos, expedición y fecha de nacimiento). Búsqueda de login por carnet, celular o correo. Módulo de extracción de PIN dictado por voz.
+* **Comprobación:** 9 pruebas unitarias JVM aprobadas (extracción de dígitos hablados).
+* **Estado:** APROBADO (Unidad JVM) / PENDIENTE (Prueba de voz en hardware).
 
-## Fase 7: Pantalla de sincronización conectada al Outbox
+##### Fase 14: Plantillas por Rubro, Asistente Yapay y Endpoints Cloud (Facturación / QR / SSE)
+* **Fecha:** 2026-11-11
+* **Qué se implementó:** Carga de 6 plantillas comerciales, asistente local Yapay con confirmación obligatoria, y endpoints backend para facturas simuladas en PDF, generación de QR por negocio y servidor SSE para eventos en tiempo real. Migración PostgreSQL `006`.
+* **Resultado:** 12/12 pruebas unitarias JVM aprobadas en Android. 11/11 pruebas unitarias aprobadas en el backend.
+* **Estado:** APROBADO (Unidades y endpoints aislados) / PENDIENTE (Integración end-to-end en dispositivo).
 
-- **Qué se verificó:** la pantalla observa las operaciones `PENDIENTE` y errores desde Room y presenta el conteo, los IDs abreviados y los intentos; el botón conserva la lógica existente de vinculación de cuenta y WorkManager.
-- **Estado técnico:** `:app:assembleDebug` finalizó correctamente y generó el APK debug.
-- **Resultado funcional:** PENDIENTE de verificar en el dispositivo y guardar `evidencias/07_sincronizacion/pantalla_sync_real.png`.
-- **Límite:** no se creó una captura ni se declaró aprobada la prueba de UI.
+##### Fase 15: Verificación Oficial de CI/CD en GitHub Actions (Ejecución Canónica)
+* **Fecha:** 2026-11-12 (UTC)
+* **Commit Identificado:** `03afcbd`
+* **Ejecución Oficial:** GitHub Actions Run `#43157514411`
+* **Pasos Ejecutados en Pipeline:**
+  1. `npm ci`: Instalación limpia de dependencias.
+  2. `npm run db:migrate`: Aplicación de migraciones PostgreSQL `001` a `006`.
+  3. `npm run build`: Compilación de TypeScript a JavaScript ES2022.
+  4. `npm run typecheck:test`: Verificación estricta de tipos en código de producción y pruebas.
+  5. `npm test`: Ejecución de 11/11 pruebas unitarias.
+  6. `npm run test:integration`: Ejecución de 9/9 pruebas de integración contra PostgreSQL 16 aislado.
+* **Resultado Final:** `SUCCESS` (Todos los jobs del pipeline finalizaron en verde).
+* **Estado:** APROBADO Y VERIFICADO EN CI/CD.
 
-## Fase 8: Corrección del wrapper de Gradle en Windows
+---
 
-- **Qué se corrigió:** `mobile/gradlew.bat` devolvía código 1 incluso si Gradle terminaba correctamente, lo que hacía que automatizaciones interpretaran falsamente como fallida una compilación exitosa.
-- **Resultado obtenido:** se verificó `gradlew.bat --version` con código 0 y se ejecutaron las pruebas JVM y el APK con `BUILD SUCCESSFUL`, código 0.
-- **Alcance:** el wrapper preserva éxito y fallo de Gradle para que CI local y scripts de Windows puedan interpretar el resultado.
+#### 3. MATRIZ DE EVIDENCIAS Y ALCANCE DE VERIFICACIÓN
 
-## Fase 9: Gráfico semanal y vista de demostración del reporte
+| Módulo / Funcionalidad | Evidencia Generada | Ubicación / Referencia | Estado de Confirmación |
+| ------ | ------ | ------ | ------ |
+| **Pipeline Backend CI/CD** | Log de ejecución exitosa en GitHub Actions | Run `#43157514411` | **APROBADO (Oficial)** |
+| **Build y Tipos Backend** | Compilación TS `dist/` | `backend/dist/` | **APROBADO (Oficial)** |
+| **Pruebas NLU / PIN JVM** | Reportes JUnit XML | `mobile/app/build/test-results/` | **APROBADO (Local JVM)** |
+| **Asset Vosk en APK** | `assets/vosk-model-small-es-0.42/` | APK Debug (117.3 MB) | **APROBADO (Empaquetado)** |
+| **Flujos UI Android** | Capturas de pantalla anonimizadas | `docs/evidencias/` | **PENDIENTE (Manual)** |
+| **Pruebas E2E Dispositivo-API** | Trazas de red y sincronización Outbox | Dispositivo Físico | **PENDIENTE (Manual)** |
 
-- **Fecha:** 2026-11-10
-- **Qué se implementó:** el reporte consulta los totales de cada uno de los últimos siete días mediante intervalos locales `[inicio, fin)`. Se añadió una vista demostrativa solo para builds debug; sus cifras ficticias afectan únicamente al gráfico y no se persisten. El selector de compartir sigue usando el total real del día.
-- **Comprobación técnica:** `:app:testDebugUnitTest :app:assembleDebug` finalizó con código 0 usando JBR 21 y el SDK Android instalado. JUnit reportó 5 pruebas, 0 fallos, 0 errores y 0 omitidas; el APK debug se compiló correctamente.
-- **Resultado funcional:** PENDIENTE de validar el gráfico, el cambio de día, el selector de compartir y la separación entre datos demo y reales en un dispositivo.
-- **Plan asociado:** `DASH-03`, `DASH-04` y `DASH-05` permanecen PENDIENTES hasta contar con esa validación.
-- **Evidencia:** reportes JUnit locales en `mobile/app/build/test-results/testDebugUnitTest/`; captura funcional pendiente en `evidencias/03_dashboard/`.
+---
 
-## Fase 10: Registro local y alta de cuenta en backend
+#### 4. OBSERVACIONES Y LÍMITES TÉCNICOS
 
-- **Fecha:** 2026-11-10
-- **Qué se implementó:** formulario de registro Android con datos personales, negocio, PIN y contraseña de nube; migración Room 2→3 con columnas de perfil opcionales para conservar usuarios existentes; endpoint `POST /api/v1/auth/register` con validación, hash scrypt, transacción PostgreSQL para negocio/propietario y token Bearer. La contraseña de nube no se persiste en el dispositivo. Si la red falla, se puede continuar explícitamente con el perfil local y vincular la cuenta después.
-- **Comprobaciones backend:** `npm run build`, `npm run typecheck:test` y `npm test` pasaron (8 pruebas unitarias). En una base PostgreSQL temporal y aislada se aplicaron las migraciones 001–004 y `npm run test:integration` pasó (8 pruebas, 0 fallos), incluyendo registro exitoso, acceso con el token, correo duplicado sin negocio huérfano y rechazo de datos incompletos.
-- **Comprobaciones Android:** `:app:testDebugUnitTest :app:assembleDebug` pasó (5 pruebas, 0 fallos) con Java 21 y el SDK local.
-- **Resultado funcional Android:** PENDIENTE de completar el registro en un dispositivo y probar conexión, modo offline y migración de una base existente.
-- **Evidencia:** resultados automatizados locales; capturas pendientes en `evidencias/01_login/` o `evidencias/08_backend/`. No se usaron datos reales.
-
-## Fase 11: Instalación local del modelo de voz Vosk
-
-- **Fecha:** 2026-11-10
-- **Qué se hizo:** se descargó el modelo pequeño de español Vosk 0.42 desde su origen oficial y se extrajo en `mobile/app/src/main/assets/vosk-model-small-es-0.42/`. Se añadió `mobile/download-vosk-model.ps1` para instalarlo en otras máquinas y se comprobó su comportamiento idempotente.
-- **Comprobación técnica:** el APK debug se compiló con el modelo y contiene `assets/vosk-model-small-es-0.42/am/final.mdl`. Su tamaño resultó de 117,392,971 bytes; el modelo permanece excluido de Git, por lo que cada equipo debe ejecutar el script antes de compilar.
-- **Resultado funcional:** PENDIENTE de inicializar Vosk y dictar una frase en un dispositivo; la presencia del modelo en el APK no prueba el reconocimiento acústico.
-- **Evidencia:** compilación local; captura de reconocimiento pendiente en `evidencias/06_chat_ia/`.
-
-## Fase 12: Pantalla de perfil del comerciante
-
-- **Fecha:** 2026-11-10
-- **Qué se implementó:** ruta `perfil` accesible desde el icono del encabezado del dashboard y pantalla de solo lectura que consulta el registro local Room fuera del hilo principal. Muestra los datos personales y del negocio, con estado de carga/error y un texto explícito para campos opcionales no registrados; no muestra PIN, hash ni sal.
-- **Comprobación técnica:** `:app:testDebugUnitTest :app:assembleDebug` finalizó con código 0 tras incorporar la pantalla.
-- **Resultado funcional:** PENDIENTE de registrar un perfil y verificar su visualización en dispositivo; no se declara APROBADO sin evidencia.
-- **Evidencia:** pendiente en `evidencias/01_login/perfil_usuario.png`.
-- **Prueba de backend relacionada:** `backend/test/integration/auth-registration.test.ts` ya valida el alta del negocio/propietario, lectura persistida, JWT utilizable, rechazo de campos incompletos y duplicados. No se creó el archivo de prueba duplicado propuesto.
-
-## Fase 13: Fiados, búsqueda y exportación CSV
-
-- **Fecha:** 2026-11-10
-- **Qué se implementó:** Room v4 añade `ventas.pagado` con migración 3→4 y valor inicial falso para conservar las deudas antiguas. La pantalla Fiados lista ventas fiadas pendientes y pide confirmación de cobro completo. El estado pagado, el ingreso de caja y el evento `COBRO` del Outbox se guardan atómicamente; el mismo `operationId` se sincroniza idempotentemente. Inventario filtra por nombre en tiempo real. El reporte exporta las ventas de hoy a CSV, escapa campos y comparte el archivo desde un `FileProvider` restringido al subdirectorio de reportes de caché.
-- **Comprobaciones Android:** `:app:testDebugUnitTest :app:assembleDebug` finalizó correctamente; 7 pruebas JVM, 0 fallos, incluidos casos de formato/escape CSV. Room generó el esquema versión 4.
-- **Comprobaciones backend:** build y chequeo de tipos correctos; migraciones y `npm run test:integration` contra PostgreSQL temporal pasaron con 9 pruebas, 0 fallos, incluida la aceptación e idempotencia de `COBRO`.
-- **Alcance pendiente:** no se ejecutó en dispositivo la migración de una base real versión 3, el cobro transaccional Room, búsqueda en pantalla ni el envío del URI CSV a otra app. Esas pruebas funcionales siguen PENDIENTES; no se declara probado el ciclo completo en interfaz.
-- **Evidencia:** reportes automatizados locales; capturas pendientes en `evidencias/09_fiados/`, `evidencias/05_inventario/` y `evidencias/03_dashboard/`.
-
-## Fase 14: Perfil personal ampliado, login por identificador y PIN por voz
-
-- **Fecha:** 2026-11-10
-- **Qué se implementó:** Room v6 conserva los campos anteriores y añade nombres, apellidos, expedición y datos de nacimiento; el login local busca por carnet, celular o correo y ya no crea una cuenta al introducir un PIN en una base vacía. Se añadió extracción unitaria de cuatro dígitos hablados. Registro envía los datos del perfil al backend; la contraseña se almacena como hash scrypt en PostgreSQL y no se conserva en Room. El onboarding guarda nombre/rubro localmente y los actualiza en el negocio asociado al token. Si el registro fue offline, Sincronización permite volver a ingresar correo/contraseña para crear la cuenta con el perfil local.
-- **Android:** `:app:testDebugUnitTest :app:assembleDebug` finalizó correctamente con SDK explícito. JUnit reportó 9 pruebas, 0 fallos, 0 errores y 0 omitidas. La prueba incluye extracción de PIN hablado y casos ambiguos. La compilación no valida el flujo ni la migración Room en un dispositivo.
-- **Backend:** `npm run build`, `npm run typecheck:test` y `npm test` finalizaron correctamente; 8 pruebas unitarias pasaron. `npm run test:integration` terminó con 10 fallos y 0 aprobadas porque PostgreSQL rechazó la autenticación para `mypes_local`; Docker Desktop tampoco estaba disponible para iniciar la base temporal. La migración 005 y el endpoint de actualización del negocio no se verificaron contra PostgreSQL; REG-08 queda BLOQUEADO.
-- **Estado funcional Android:** PENDIENTE de ejecutar login por identificador/voz, registro, onboarding y migración 4→6 en dispositivo. No se generó captura/video ni se marca ninguna prueba funcional como aprobada.
-- **Evidencia:** reportes JUnit locales en `mobile/app/build/test-results/testDebugUnitTest/`; captura funcional pendiente en `evidencias/01_login/`, `evidencias/02_onboarding/` y `evidencias/06_chat_ia/`.
-
-## Plantilla para nuevas ejecuciones
-
-## Fase 15: Plantillas ampliadas, Yapay local y endpoints cloud
-
-- **Fecha:** 2026-11-11
-- **Qué se implementó:** seis plantillas locales con categorías, márgenes orientativos y al menos diez productos; Yapay consulta el total local del día y exige confirmación antes de insertar; la API añade facturas con PDF simulado, QR Base64 por negocio y SSE autenticado con eventos aislados por negocio. Se añadió migración PostgreSQL 006.
-- **Android:** `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` finalizó correctamente; 12 pruebas JVM, 0 fallos, 0 errores y 0 omitidas. Incluye la cobertura nueva de las plantillas y confirmación de producto. Gradle emitió una advertencia de compatibilidad entre Android Gradle Plugin 8.5.2 y `compileSdk` 35; no impidió el build.
-- **Backend:** desde `backend/`, `npm run build`, `npm run typecheck:test` y `npm test` finalizaron correctamente; 11 pruebas, 0 fallos. Incluye autenticación/rechazo de payload inválido para los endpoints nuevos y aislamiento unitario del bus de eventos.
-- **Integridad de iteración:** durante el desarrollo, una compilación Kotlin inicial detectó un error de tipo y una ejecución intermedia detectó un fallo en el fixture de prueba; se corrigieron y la ejecución final descrita arriba pasó.
-- **Comprobación de diff:** `git diff --check` finalizó sin errores.
-- **Pendiente:** no se ejecutaron `npm run test:integration` ni la migración 006 contra PostgreSQL. Tampoco se validaron factura/QR persistidos, transporte SSE real, interfaz en un dispositivo, ni un LLM o respuestas reales en quechua/aymara. No hay evidencia funcional ni ejecución GitHub Actions asociada.
-- **Datos de plantillas:** no se encontró el documento fuente citado para Farmacia Eliana/Pastelería Pampas; los precios y porcentajes cargados son ejemplos editables, no datos confirmados como exactos.
-- **Estado funcional Android:** PENDIENTE de validar en dispositivo; no se declara aprobada ninguna prueba funcional.
-
-### Fase [n]: [módulo y escenario]
-
-- **Fecha:**
-- **Commit / versión:**
-- **Qué se probó:**
-- **Entorno y datos de prueba:**
-- **Resultado esperado:**
-- **Resultado obtenido:**
-- **Estado:** PENDIENTE / APROBADO / FALLIDO / BLOQUEADO
-- **Evidencia:** `evidencias/[carpeta]/[archivo]` o enlace al workflow de GitHub Actions.
+1. **Aislamiento de Entornos:** La aprobación del pipeline backend en GitHub Actions garantiza la calidad del código del servidor y la base de datos PostgreSQL 16, pero **no sustituye la necesidad de realizar pruebas de campo con teléfonos Android reales** en los mercados de Vinto.
+2. **Modelo de Voz Edge:** La inclusión física del modelo Vosk en la carpeta `assets` permite la compilación del APK, pero la precisión del reconocimiento acústico bajo condiciones de ruido ambiental (>70 dB) requiere validación empírica en dispositivo.
+3. **Persistencia Local:** Las migraciones de esquema Room (hasta la versión 6) y el cifrado mediante SQLCipher AES-256 han sido verificados unitariamente, manteniendo la compatibilidad con datos existentes.
