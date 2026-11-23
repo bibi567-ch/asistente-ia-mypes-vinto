@@ -31,9 +31,9 @@ Sintaxis formal obligatoria:  *«El sistema debe [acción] + [entidad/objeto] + 
 | RF-002 | Autenticación | El sistema debe permitir el inicio de sesión offline mediante un PIN local de 4 dígitos. | Alta |
 | RF-003 | Perfil | El sistema debe permitir configurar el nombre de la tienda y el rubro comercial. | Media |
 | RF-004 | PLN Edge | El sistema debe transcribir el audio a texto localmente sin usar Internet (motor Vosk). | Alta |
-| RF-005 | PLN Edge | El sistema debe clasificar la intención del comando de voz (Venta, Compra, Fiado, Cobro, Consulta, Gasto). | Alta |
-| RF-006 | PLN Edge | El sistema debe extraer las entidades clave del comando (producto, cantidad, unidad, monto, cliente). | Alta |
-| RF-007 | Mitigación de errores | El sistema debe mostrar una confirmación visual obligatoria antes de persistir cualquier venta dictada por voz. | Alta |
+| RF-005 | PLN Edge | El sistema debe clasificar el comando de voz en una de las once intenciones del asistente: LLAMAR_CONTACTO, ENVIAR_MENSAJE, LEER_TEXTO, CREAR_ALARMA, ABRIR_APP, CONSULTAR_HORA, LINTERNA, AJUSTES_RED, GUIA_TELEFONO, CONSULTA_COGNITIVA o AYUDA. | Alta |
+| RF-006 | PLN Edge | El sistema debe extraer los parámetros necesarios para la intención reconocida (número, hora, aplicación, texto u otros) y pedir los que falten. | Alta |
+| RF-007 | Mitigación de errores | El sistema debe mostrar una confirmación visual y permitir cancelar antes de ejecutar una acción externa del teléfono. | Alta |
 | RF-008 | Navegación | El sistema debe cancelar cualquier flujo activo si el usuario dice "cancelar" o "me equivoqué". | Alta |
 | RF-009 | Ventas | El sistema debe registrar una venta asignando fecha, hora, producto(s) y monto total. | Alta |
 | RF-010 | Ventas | El sistema debe permitir registrar una venta manualmente (teclado) cuando el entorno sea muy ruidoso. | Media |
@@ -47,8 +47,10 @@ Sintaxis formal obligatoria:  *«El sistema debe [acción] + [entidad/objeto] + 
 | RF-018 | Sincronización | El sistema debe encolar (Outbox) todas las transacciones locales cuando no haya conexión a Internet. | Alta |
 | RF-019 | Sincronización | El sistema debe detectar la red disponible y enviar las transacciones encoladas automáticamente en formato JSON. | Alta |
 | RF-020 | Sincronización | El sistema debe identificar operaciones concurrentes sobre existencias y conservar el historial de ventas, evitando descartar transacciones mediante sobrescritura automática. | Alta |
-| RF-021 | Panel principal | El sistema debe desplegar un dashboard con el resumen de ventas del día al iniciar sesión. | Alta |
+| RF-021 | Panel principal | El sistema debe mostrar el asistente conversacional como pantalla principal tras iniciar sesión y conservar acceso a los módulos de negocio. | Alta |
 | RF-022 | Reportes | El sistema debe generar un reporte visual de los productos más vendidos del mes. | Baja |
+| RF-023 | Privacidad | El sistema debe guardar las correcciones de transcripción localmente y transmitirlas para aprendizaje solo con autorización explícita del comerciante. | Alta |
+| RF-024 | Servicio cloud | El sistema debe identificar el ASR y la guía de negocio como simulaciones mientras no exista un proveedor real conectado, sin presentar resultados simulados como transcripciones reales. | Alta |
 
 #### 3. REQUISITOS NO FUNCIONALES (RNF)
 | Código | Categoría | Descripción del Requisito | Métrica |

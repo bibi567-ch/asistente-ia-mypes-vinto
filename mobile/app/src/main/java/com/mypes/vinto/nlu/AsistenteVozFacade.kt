@@ -9,6 +9,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import com.mypes.vinto.BuildConfig
+import com.mypes.vinto.sync.AuthSession
 import retrofit2.HttpException
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -26,7 +28,9 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
         val intencion: IntentClassifier.Intencion,
         val entidades: EntityExtractor.Entidades,
         val textoOriginal: String,
-        val confianzaVosk: Float
+        val confianzaVosk: Float,
+        val transcripcionNube: Boolean = false,
+        val asrSimulado: Boolean = false
     )
 
     fun inicializar(): Boolean = asr.inicializar()
@@ -52,15 +56,18 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                 }
 
                 val baseUrl = cloudPreferences.getString("api_base_url", null)?.trim()
-                val accessToken = cloudPreferences.getString("access_token", null)?.trim()
-                if (baseUrl.isNullOrEmpty() || accessToken.isNullOrEmpty()) {
+                    ?.takeIf(String::isNotEmpty) ?: BuildConfig.API_BASE_URL
+                val accessToken = AuthSession.token(applicationContext)
+                    ?: cloudPreferences.getString("access_token", null)?.trim()
+                if (accessToken.isNullOrEmpty()) {
                     onResultado(procesar(texto, confianza))
                     return
                 }
 
                 scope.launch {
                     var cloudFailure: String? = null
-                    val cloudText = try {
+                    var cloudSimulated = false
+                    val cloudResponse = try {
                         CloudAsrService(baseUrl, accessToken).transcribeIfNeeded(
                             applicationContext,
                             audioPcm.toWaveRequestBody(),
@@ -76,8 +83,20 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                         cloudFailure = error.message ?: "La configuración cloud no es válida."
                         null
                     }
+                    val cloudText = cloudResponse?.takeUnless { it.simulada }?.texto
+                        ?.takeIf(String::isNotBlank)
+                    if (cloudResponse?.simulada == true) {
+                        cloudSimulated = true
+                        cloudFailure = cloudResponse.mensaje
+                            ?: "El reconocimiento cloud está en modo demostración y no transcribió el audio."
+                    }
                     withContext(Dispatchers.Main) {
-                        onResultado(procesar(cloudText?.takeIf(String::isNotBlank) ?: texto, confianza))
+                        onResultado(
+                            procesar(cloudText ?: texto, confianza).copy(
+                                transcripcionNube = cloudText != null,
+                                asrSimulado = cloudSimulated
+                            )
+                        )
                         cloudFailure?.let(onError)
                     }
                 }
@@ -92,7 +111,7 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
     ) {
         asr.escuchar(object : AsrEngine.Resultado {
             override fun onTextoParcial(texto: String) = Unit
-            override fun onTextoFinal(texto: String) {
+            override fun onTextoFinal(texto: String, confianza: Float, audioPcm: ByteArray) {
                 val pin = extractor.extraerPin(texto)
                     ?: texto.lowercase()
                         .replace("cero", "0")
@@ -150,7 +169,7 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
         writeShort(16)
         header.write("data".toByteArray(Charsets.US_ASCII))
         writeInt(size)
-        header.write(toByteArray())
+        header.write(this)
         return header.toByteArray()
     }
 }

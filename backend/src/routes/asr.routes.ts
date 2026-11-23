@@ -7,9 +7,9 @@ asrRouter.use(requireAuth);
 
 asrRouter.post('/transcribe', async (request, response) => {
   const provider = env.asrProvider;
-  if (provider !== 'google' && provider !== 'whisper') {
+  if (provider !== 'google' && provider !== 'whisper' && provider !== 'simulated') {
     response.status(503).json({
-      error: { code: 'asr_not_configured', message: 'ASR_PROVIDER must be configured as google or whisper.' }
+      error: { code: 'asr_not_configured', message: 'Configure ASR_PROVIDER as google, whisper, or simulated.' }
     });
     return;
   }
@@ -38,10 +38,19 @@ asrRouter.post('/transcribe', async (request, response) => {
       return;
     }
 
+    if (provider === 'simulated') {
+      response.status(200).json({
+        texto: '',
+        simulada: true,
+        mensaje: 'ASR en modo demostración: no se transcribió el audio.'
+      });
+      return;
+    }
+
     const texto = provider === 'google'
       ? await transcribeGoogle(audio)
       : await transcribeWhisper(audio);
-    response.status(200).json({ texto });
+    response.status(200).json({ texto, simulada: false });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Cloud ASR request failed.';
     response.status(500).json({

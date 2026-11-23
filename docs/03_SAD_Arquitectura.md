@@ -1,13 +1,13 @@
-# DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v2.0 OFICIAL)
+# DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v2.1 OFICIAL)
 **Universidad Adventista de Bolivia · Facultad de Ciencias Exactas e Ingeniería · Ingeniería en Sistemas**
 
 | Control del Documento | Detalle |
 | :--- | :--- |
 | **Proyecto Integrador** | Gestión 2-2026 (Investigación I, Arquitectura de Software, Tecnologías en Internet) |
 | **Sistema** | Asistente Conversacional Offline con PLN Edge (Yapay) para la Gestión de Ventas e Inventario en MYPES de Vinto, Cochabamba |
-| **Versión Vigente** | **v2.0 (Línea Base Unificada)** — Noviembre 2026 |
+| **Versión Vigente** | **v2.1 (Asistente conversacional compatible)** — Noviembre 2026 |
 | **Equipo de Desarrollo** | **Eva Chino Quispe** — Líder de Proyecto, Requisitos y QA Documental<br>**Christian Gonzales** — Ingeniería de IA y Pipeline Conversacional<br>**Marializ Mamani** — Backend, Seguridad y Persistencia de Datos<br>**Kevin Rocha** — Diseño UX/UI y Prototipado<br>**Luis Lazo** — Arquitectura C4 y QA Técnico |
-| **Corte de Código** | Revisión de repositorio `03afcbd` (Node.js 24, Express 5, PostgreSQL 16, Kotlin Room v6) |
+| **Corte de Código** | Revisión de la implementación del asistente híbrido (Node.js 24, Express 5, PostgreSQL 16, Kotlin Room v7) |
 
 ---
 
@@ -18,6 +18,7 @@
 | **1.0** | 15/08/2026 | Equipo de Proyecto | Borrador inicial del Documento de Arquitectura de Software (SAD). |
 | **1.1** | 15/09/2026 | Equipo de Proyecto | Entrega histórica preliminar. Selección de stack evaluado inicialmente (Spring Boot + PostgreSQL, Vosk + TFLite). |
 | **2.0** | 13/11/2026 | Equipo de Proyecto | **Versión Unificada y Definitiva.** Actualización completa del stack de backend a **Node.js 24 + TypeScript + Express + PostgreSQL 16**. Adopción de API Gateway con Circuit Breaker, autenticación JWT rotativa, persistencia Room v6 cifrada con SQLCipher (AES-256) y política de sincronización Outbox **idempotente** eliminando la sobrescritura LWW en ventas. |
+| **2.1** | 23/11/2026 | Equipo de Proyecto | El Dashboard pasa a ser el asistente conversacional Yapay. Se conserva la gestión comercial existente y se añade Room v7 con `VoiceLog`, clasificación de once intenciones, acciones del teléfono con confirmación, consulta cloud demostrativa y feedback de voz con autorización explícita. |
 
 ---
 
@@ -102,14 +103,14 @@ Priorización estratégica de atributos de calidad:
 * **Consecuencia:** Incremento moderado en el tamaño del APK (~70 MB totales).
 
 ### ADR-003: Backend Nube — Node.js 24 + TypeScript + Express + PostgreSQL 16
-* **Estatus:** Aprobado (Vigente v2.0 - Sustituye propuesta inicial de Spring Boot).
+* **Estatus:** Aprobado (Vigente v2.1 - Sustituye propuesta inicial de Spring Boot).
 * **Contexto:** Se requiere un backend en la nube altamente eficiente, liviano y escalable para recibir la sincronización de lotes de miles de comerciantes.
 * **Decisión:** Adoptar **Node.js 24 con TypeScript, Express 5 y PostgreSQL 16**, protegido por un **API Gateway** con Circuit Breaker.
 * **Justificación:** Arquitectura orientada a eventos no bloqueante (Event Loop), menor consumo de memoria en la nube frente a la JVM de Spring Boot, soporte nativo de JSON/TypeScript, y orquestación eficiente con Docker Compose.
 * **Consecuencia:** Unificación del stack en TypeScript para API y scripts de mantenimiento.
 
 ### ADR-004: Patrón Outbox Idempotente y Política de Concurrencia
-* **Estatus:** Aprobado (Vigente v2.0).
+* **Estatus:** Aprobado (Vigente v2.1).
 * **Contexto:** Las transacciones registradas offline deben sincronizarse sin duplicar registros ni perder historial.
 * **Decisión:** Asignar a cada transacción un `operationId` (UUID v4) en el cliente Android y encolarla en la tabla **Outbox**. El backend procesa cada lote de forma **idempotente**. Las ventas son registros inmutables (append-only); los conflictos de inventario se registran para conciliación sin eliminar transacciones.
 * **Justificación:** Elimina la pérdida de información comercial por sobrescritura tipo *Last-Write-Wins* (LWW) y garantiza convergencia de datos.
@@ -147,7 +148,7 @@ System_Boundary(mobile_app, "Dispositivo Móvil Android (Gama Baja)") {
     Container(pln_engine, "Motor PLN Edge", "Vosk ASR + Rule Matcher", "Transcripción de voz a texto y extracción de producto/cantidad/monto on-device")
     Container(data_layer, "Capa de Datos y Casos de Uso", "Clean Architecture / Repository", "Lógica de negocio local, validación de stock y reglas comerciales")
     Container(outbox_sync, "Outbox Sync Manager", "WorkManager", "Administra la cola de sincronización diferida y reintentos con backoff")
-    ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v6 + SQLCipher (AES-256)", "Almacenamiento cifrado de perfil, catálogo, ventas, fiados y cola Outbox")
+    ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v7 + SQLCipher (AES-256)", "Almacenamiento cifrado compartido por login, perfil, catálogo, ventas, fiados, VoiceLog y cola Outbox")
 }
 
 System_Boundary(cloud_infra, "Infraestructura Nube (Docker Compose)") {
@@ -155,6 +156,8 @@ System_Boundary(cloud_infra, "Infraestructura Nube (Docker Compose)") {
     Container(sync_service, "Servicio de Sincronización", "TypeScript Services", "Procesamiento idempotente de lotes Outbox y registro de eventos")
     ContainerDb(postgres_db, "Base de Datos Consolidada", "PostgreSQL 16", "Persistencia central de propietarios, negocios, productos y transacciones")
 }
+
+System_Ext(phone_actions, "APIs del teléfono", "Llamadas, mensajes, alarmas, aplicaciones, linterna y ajustes de red")
 
 Rel(comerciante, ui_view, "Interactúa mediante voz o interfaz táctil")
 Rel(ui_view, pln_engine, "Envía buffer de audio PCM")
@@ -165,6 +168,9 @@ Rel(data_layer, outbox_sync, "Encola eventos con UUID v4")
 Rel(outbox_sync, api_gateway, "POST /api/v1/sync (Lotes JSON, JWT / TLS 1.3)")
 Rel(api_gateway, sync_service, "Pasa payloads validados")
 Rel(sync_service, postgres_db, "Consolida transacciones e inventario")
+Rel(ui_view, phone_actions, "Ejecuta acciones solo después de confirmación")
+Rel(ui_view, api_gateway, "Consulta /assistant/query y envía feedback autorizado")
+Rel(pln_engine, api_gateway, "Usa /asr/transcribe solo como fallback cloud configurado")
 ```
 
 ---

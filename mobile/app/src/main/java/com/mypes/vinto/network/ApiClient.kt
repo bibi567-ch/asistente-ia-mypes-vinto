@@ -48,4 +48,22 @@ object ApiClient {
             .build()
             .create(RegistroApi::class.java)
     }
+
+    val assistantApi: AssistantApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttp)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(AssistantApi::class.java)
+    }
+
+    val learningApi: LearningApi by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttp)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(LearningApi::class.java)
+    }
 }

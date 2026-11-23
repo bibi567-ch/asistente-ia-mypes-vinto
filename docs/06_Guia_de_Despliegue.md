@@ -7,7 +7,7 @@
 | **Sistema** | Asistente Conversacional Offline Edge AI (Yapay) |
 | **Entorno de Despliegue** | Desarrollo Local / Entorno Experimental (No Producción) |
 | **Stack Backend** | Node.js 24.x, TypeScript, Express 5, PostgreSQL 16 (Docker Compose) |
-| **Stack Móvil** | Kotlin Nativo, Jetpack Compose, Room v6 + SQLCipher, Vosk ASR Edge |
+| **Stack Móvil** | Kotlin Nativo, Jetpack Compose, Room v7 + SQLCipher, Vosk ASR Edge |
 | **Integrantes** | Eva Chino, Christian Gonzales, Marializ Mamani, Kevin Rocha y Luis Lazo |
 
 ---

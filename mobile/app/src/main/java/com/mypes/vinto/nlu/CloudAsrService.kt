@@ -12,7 +12,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Header
 
-data class CloudAsrResponse(val texto: String)
+data class CloudAsrResponse(
+    val texto: String,
+    val simulada: Boolean = false,
+    val mensaje: String? = null
+)
 
 interface CloudAsrApi {
     @Multipart
@@ -30,18 +34,18 @@ class CloudAsrService(private val baseUrl: String, private val accessToken: Stri
         .build()
         .create(CloudAsrApi::class.java)
 
-    suspend fun transcribe(audio: RequestBody, filename: String = "voice.wav"): String =
+    suspend fun transcribe(audio: RequestBody, filename: String = "voice.wav"): CloudAsrResponse =
         api.transcribe(
             "Bearer $accessToken",
             MultipartBody.Part.createFormData("audio", filename, audio)
-        ).texto
+        )
 
     suspend fun transcribeIfNeeded(
         context: Context,
         audio: RequestBody,
         voskConfidence: Float,
         filename: String = "voice.wav"
-    ): String? {
+    ): CloudAsrResponse? {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return null

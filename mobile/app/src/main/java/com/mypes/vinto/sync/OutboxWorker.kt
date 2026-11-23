@@ -6,6 +6,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.mypes.vinto.data.MypesDatabase
 import com.mypes.vinto.data.Producto
+import com.mypes.vinto.network.LearningFeedbackRequest
+import com.mypes.vinto.network.VoiceCorrection
 import com.mypes.vinto.network.ApiClient
 import com.mypes.vinto.network.dto.SyncBatchRequest
 import com.mypes.vinto.network.dto.TransaccionEntrante
@@ -23,7 +25,9 @@ class OutboxWorker(context: Context, params: WorkerParameters) :
         val db = MypesDatabase.obtener(applicationContext)
         val ventasResultado = sincronizarVentas(authorization, db)
         if (ventasResultado != null) return ventasResultado
-        return sincronizarCatalogo(authorization, db)
+        val catalogoResultado = sincronizarCatalogo(authorization, db)
+        if (catalogoResultado != null) return catalogoResultado
+        return sincronizarCorrecciones(authorization, db)
     }
 
     private suspend fun sincronizarVentas(
@@ -111,7 +115,7 @@ class OutboxWorker(context: Context, params: WorkerParameters) :
     private suspend fun sincronizarCatalogo(
         authorization: String,
         database: MypesDatabase
-    ): Result {
+    ): Result? {
         val desde = AuthSession.lastCatalogSync(applicationContext)
         var cursorActualizadoEn: Long? = null
         var cursorId: String? = null
@@ -171,7 +175,7 @@ class OutboxWorker(context: Context, params: WorkerParameters) :
                 applicationContext,
                 maxOf(desde, timestampInicial ?: desde)
             )
-            Result.success()
+            null
         } catch (error: HttpException) {
             if (error.code() == 401) {
                 AuthSession.clear(applicationContext)
@@ -186,6 +190,51 @@ class OutboxWorker(context: Context, params: WorkerParameters) :
             Result.retry()
         } catch (error: Exception) {
             Log.e("OutboxWorker", "Error inesperado al sincronizar el catálogo.", error)
+            Result.retry()
+        }
+    }
+
+    private suspend fun sincronizarCorrecciones(
+        authorization: String,
+        database: MypesDatabase
+    ): Result {
+        val pendientes = database.voiceLogDao().pendientes()
+        if (pendientes.isEmpty()) return Result.success()
+
+        return try {
+            val response = ApiClient.learningApi.enviarCorrecciones(
+                authorization,
+                LearningFeedbackRequest(
+                    pendientes.map {
+                        VoiceCorrection(
+                            eventId = it.eventId,
+                            textoOriginal = it.textoOriginal,
+                            textoCorregido = it.textoCorregido,
+                            intencion = it.intencion,
+                            fecha = it.fecha
+                        )
+                    }
+                )
+            )
+            if (response.accepted != pendientes.size) {
+                throw IllegalStateException("La API no confirmó todas las correcciones enviadas.")
+            }
+            database.voiceLogDao().eliminarPorEventIds(pendientes.map { it.eventId })
+            Result.success()
+        } catch (error: HttpException) {
+            if (error.code() == 401) {
+                AuthSession.clear(applicationContext)
+                Log.w("OutboxWorker", "El token de aprendizaje expiró; vuelve a iniciar sesión.")
+                Result.failure()
+            } else {
+                Log.e("OutboxWorker", "La API rechazó las correcciones con HTTP ${error.code()}.", error)
+                Result.retry()
+            }
+        } catch (error: IOException) {
+            Log.w("OutboxWorker", "No se pudieron enviar las correcciones; se reintentará.", error)
+            Result.retry()
+        } catch (error: Exception) {
+            Log.e("OutboxWorker", "Error inesperado al sincronizar las correcciones.", error)
             Result.retry()
         }
     }

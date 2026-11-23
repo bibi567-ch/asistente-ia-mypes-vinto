@@ -10,7 +10,14 @@ class EntityExtractor {
         val unidad: String? = null,
         val monto: Double? = null,
         val cliente: String? = null,
-        val formaPago: String? = null
+        val formaPago: String? = null,
+        val numeroTelefono: String? = null,
+        val hora: Int? = null,
+        val minutos: Int? = null,
+        val nombreApp: String? = null,
+        val textoALeer: String? = null,
+        val mensaje: String? = null,
+        val linternaEncendida: Boolean = true
     )
 
     private val unidades = listOf(
@@ -65,7 +72,20 @@ class EntityExtractor {
             unidad = unidades.firstOrNull(normalizado::contains),
             monto = extraerMonto(normalizado),
             cliente = extraerCliente(texto),
-            formaPago = extraerFormaPago(normalizado)
+            formaPago = extraerFormaPago(normalizado),
+            numeroTelefono = Regex("""(?:\+?\d[\d\s-]{6,}\d)""")
+                .find(texto)?.value?.filter { it.isDigit() },
+            hora = Regex("""\b(?:a las|las)\s+(\d{1,2})\b""", RegexOption.IGNORE_CASE)
+                .find(texto)?.groupValues?.get(1)?.toIntOrNull(),
+            minutos = Regex("""\b(?:a las|las)\s+\d{1,2}:(\d{2})\b""", RegexOption.IGNORE_CASE)
+                .find(texto)?.groupValues?.get(1)?.toIntOrNull(),
+            nombreApp = Regex("""\b(?:abre|abrir)\s+([\p{L}\d]+)""", RegexOption.IGNORE_CASE)
+                .find(texto)?.groupValues?.get(1),
+            textoALeer = Regex("""\b(?:lee|leer)\s+(?:en voz alta\s+)?(.+)""", RegexOption.IGNORE_CASE)
+                .find(texto)?.groupValues?.get(1)?.trim(),
+            mensaje = Regex("""\b(?:diciendo|mensaje)\s+(.+)""", RegexOption.IGNORE_CASE)
+                .find(texto)?.groupValues?.get(1)?.trim(),
+            linternaEncendida = !normalizado.contains("apaga")
         )
     }
 

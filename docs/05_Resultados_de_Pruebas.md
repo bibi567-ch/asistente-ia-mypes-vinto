@@ -5,7 +5,7 @@
 | ------ | ------ |
 | **Versión del registro** | 2.0 (Consolidada - Noviembre 2026) |
 | **Sistema** | Asistente Conversacional Offline Edge AI (Yapay) |
-| **Componentes Evaluados** | App Android Kotlin/Compose (Room v6 SQLCipher) + API Gateway Node.js 24 / Express 5 / PostgreSQL 16 |
+| **Componentes Evaluados** | App Android Kotlin/Compose (Room v7 SQLCipher) + API Gateway Node.js 24 / Express 5 / PostgreSQL 16 |
 | **Revisión de Código Base** | Commit `03afcbd` (Rama `feature/update-doc`) |
 | **Integrantes** | Eva Chino, Christian Gonzales, Marializ Mamani, Kevin Rocha y Luis Lazo |
 
@@ -135,6 +135,21 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
   6. `npm run test:integration`: Ejecución de 9/9 pruebas de integración contra PostgreSQL 16 aislado.
 * **Resultado Final:** `SUCCESS` (Todos los jobs del pipeline finalizaron en verde).
 * **Estado:** APROBADO Y VERIFICADO EN CI/CD.
+
+##### Fase 16: Refactor compatible del asistente conversacional
+* **Fecha:** 2026-11-23
+* **Qué se implementó:** El Dashboard ahora es el asistente principal con chat, micrófono central y menú para conservar ventas, inventario, fiados, reportes y sincronización. Se mantuvieron las entidades comerciales y el Outbox existente. Room subió a v7 con `VoiceLog` y migración 6→7. El clasificador local usa once intenciones; las acciones de teléfono requieren confirmación. Se añadieron `/api/v1/assistant/query`, feedback autenticado en `/api/v1/learning/feedback`, ASR cloud configurado como demostrativo y migración PostgreSQL `007_voice_training_data.sql`.
+* **Privacidad:** Las correcciones se guardan localmente por defecto; solo se marcan para sincronización cuando el comerciante autoriza el envío. El endpoint de ASR simulado devuelve una indicación explícita y no presenta audio no transcrito como texto real.
+* **Android:** `:app:testDebugUnitTest :app:assembleDebug` finalizó con código 0. Se verificó la compilación de Room v7, la migración y el nuevo flujo del Dashboard; no se ejecutó todavía en un teléfono.
+* **Backend:** `npm run build`, `npm run typecheck:test` y `npm test` finalizaron con código 0; 22/22 pruebas aisladas pasaron. `npm run test:integration` fue intentado, pero quedó **BLOQUEADO** por autenticación PostgreSQL local rechazada (`28P01`) para el usuario configurado. No se declara integración PostgreSQL aprobada.
+* **Entorno:** Node.js 24.11.1 disponible; Docker no disponible porque el daemon no responde. La integración no se sustituyó silenciosamente por una prueba simulada.
+* **Pendiente:** Probar en dispositivo el micrófono, diálogos de confirmación, acciones del teléfono, migración de una base Room existente y sincronización autorizada de `VoiceLog`. Repetir la integración backend con credenciales válidas o PostgreSQL aislado.
+
+##### Fase 17: Corrección de apertura inconsistente de Room/SQLCipher
+* **Fecha:** 2026-11-23
+* **Problema identificado:** `LoginViewModel` abría el mismo archivo `mypes-local.db` mediante `VintoDatabase` sin SQLCipher, mientras el resto de la aplicación usaba `MypesDatabase` cifrada. Esta configuración podía producir `file is not a database`.
+* **Corrección:** El login local ahora utiliza `MypesDatabase`, manteniendo una única configuración cifrada, sus migraciones y el acceso offline por PIN.
+* **Validación:** `git diff --check` aprobado. La compilación Android debe repetirse después de esta corrección; la prueba en dispositivo y la conversión de una instalación antigua no se declaran aprobadas.
 
 ---
 

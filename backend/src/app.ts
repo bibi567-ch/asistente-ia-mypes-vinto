@@ -1,7 +1,11 @@
 import express from 'express';
 import { authRouter } from './routes/auth.routes.js';
+import { asrRouter } from './routes/asr.routes.js';
+import { assistantRouter } from './routes/assistant.routes.js';
 import { cloudRouter } from './routes/cloud.routes.js';
 import { healthRouter } from './routes/health.routes.js';
+import { learningRouter } from './routes/learning.routes.js';
+import { logsRouter } from './routes/logs.routes.js';
 import { productsRouter } from './routes/products.routes.js';
 import { transaccionesRouter } from './routes/transacciones.routes.js';
 
@@ -10,6 +14,10 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '100kb' }));
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/asr', asrRouter);
+app.use('/api/v1/assistant', assistantRouter);
+app.use('/api/v1/learning', learningRouter);
+app.use('/api/v1/logs', logsRouter);
 app.use('/api/v1', cloudRouter);
 app.use('/api/v1/products', productsRouter);
 app.use('/api/v1/transacciones', transaccionesRouter);

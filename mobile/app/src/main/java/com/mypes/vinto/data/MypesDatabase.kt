@@ -15,9 +15,10 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         Venta::class,
         DetalleVenta::class,
         MovimientoCaja::class,
-        OutboxEntry::class
+        OutboxEntry::class,
+        VoiceLog::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 abstract class MypesDatabase : RoomDatabase() {
@@ -25,6 +26,7 @@ abstract class MypesDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
     abstract fun ventaDao(): VentaDao
     abstract fun outboxDao(): OutboxDao
+    abstract fun voiceLogDao(): VoiceLogDao
 
     companion object {
         @Volatile
@@ -107,6 +109,23 @@ abstract class MypesDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS voice_logs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        eventId TEXT NOT NULL,
+                        textoOriginal TEXT NOT NULL,
+                        textoCorregido TEXT NOT NULL,
+                        intencion TEXT NOT NULL,
+                        fecha INTEGER NOT NULL,
+                        consentToUpload INTEGER NOT NULL DEFAULT 0
+                    )"""
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_voice_logs_eventId ON voice_logs(eventId)")
+            }
+        }
+
         fun obtener(context: Context): MypesDatabase =
             instancia ?: synchronized(this) {
                 instancia ?: run {
@@ -120,7 +139,13 @@ abstract class MypesDatabase : RoomDatabase() {
                         "mypes-local.db"
                     )
                         .openHelperFactory(factory)
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_6)
+                        .addMigrations(
+                            MIGRATION_1_2,
+                            MIGRATION_2_3,
+                            MIGRATION_3_4,
+                            MIGRATION_4_6,
+                            MIGRATION_6_7
+                        )
                         .build()
                         .also { instancia = it }
                 }

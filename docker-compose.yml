@@ -27,7 +27,7 @@ services:
       PORT: 3000
       DATABASE_URL: postgres://mypes_local:${POSTGRES_PASSWORD}@postgres:5432/mypes_vinto_dev
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
-      ASR_PROVIDER: ${ASR_PROVIDER:-}
+      ASR_PROVIDER: ${ASR_PROVIDER:-simulated}
       GOOGLE_ASR_API_KEY: ${GOOGLE_ASR_API_KEY:-}
       GOOGLE_ASR_LANGUAGE: ${GOOGLE_ASR_LANGUAGE:-es-ES}
       OPENAI_ASR_API_KEY: ${OPENAI_ASR_API_KEY:-}

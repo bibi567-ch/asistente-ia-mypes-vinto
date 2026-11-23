@@ -49,7 +49,7 @@ Para mantener la maxima transparencia academica e industrial, se delimita explic
 ##### Componentes Excluidos de CI (Requieren Pruebas Manuales / Hardware):
 * **Cliente Android:** Compilacion nativa y pruebas UI del cliente movil Android (Kotlin / Jetpack Compose).
 * **Motor ASR Edge:** Evaluacion acustica del motor ASR Vosk Edge en dispositivo movil con ruido ambiental.
-* **Cifrado Local:** Verificacion de la persistencia local Room v6 cifrada mediante SQLCipher AES-256 en smartphones.
+* **Cifrado Local:** Verificacion de la persistencia local Room v7 cifrada mediante SQLCipher AES-256 en smartphones.
 * **Conectividad Fisica:** Conexion fisica de red local (Wi-Fi/datos) entre el dispositivo Android y el servidor API Gateway.
 * **Servidor Productivo:** Despliegue en servidores productivos con certificados TLS/HTTPS y dominio publico.
 

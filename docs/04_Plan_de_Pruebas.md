@@ -33,7 +33,7 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **LOGIN-02** | Control de intentos e inhabilitación temporal | Ante 5 intentos fallidos consecutivos de PIN, el sistema bloquea el acceso por 60 segundos. | Android / UI | **PENDIENTE** (Prueba física) |
 | **LOGIN-03** | Búsqueda multicanal de perfil local | Permite identificar al comerciante por Carnet de Identidad, celular o correo (case-insensitive). | Android / DB | **APROBADO** (Prueba Unit/JVM) |
 | **LOGIN-04** | Ingreso de PIN mediante comando verbal | El motor Vosk traduce los dígitos hablados ("uno dos tres cuatro") a PIN "1234" sin ambigüedad. | Android / VUI | **PENDIENTE** (Acondicionamiento acústico) |
-| **SEC-01** | Cifrado de base de datos en reposo (SQLCipher) | La base de datos SQLite/Room v6 se cifra con AES-256. Un volcado raw resulta ilegible sin la clave master. | Android / DB | **APROBADO** (Prueba Unit/JVM) |
+| **SEC-01** | Cifrado de base de datos en reposo (SQLCipher) | La base de datos SQLite/Room v7 se cifra con AES-256. Un volcado raw resulta ilegible sin la clave master. | Android / DB | **APROBADO** (Prueba Unit/JVM) |
 
 #### 2.2 Módulo de Registro y Gestión de Cuenta (REG / PERF)
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
@@ -88,13 +88,24 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **API-03** | Protección de Endpoints mediante API Gateway y JWT | Solicitudes sin cabecera `Authorization: Bearer <token>` o con JWT expirado reciben HTTP 401 Unauthorized. | Backend / Gateway | **APROBADO** (CI Run #43157514411) |
 | **API-04** | Emisión de Eventos en Tiempo Real (SSE) | La API emite eventos SSE aislados por negocio para notificar cambios de catálogo o estado de sincronización. | Backend / SSE | **APROBADO** (CI Run #43157514411) |
 
+#### 2.8 Módulo de Asistente Conversacional Híbrido (ASIST / VOICE)
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **ASIST-01** | Dashboard conversacional principal | Después del login, el Dashboard muestra el chat, el micrófono central y conserva acceso a los módulos comerciales. | Android / Compose | **APROBADO** (Compilación local; UI física pendiente) |
+| **ASIST-02** | Clasificación local de once intenciones | El clasificador reconoce las once intenciones definidas y usa AYUDA cuando no hay coincidencia. | Android / JVM | **APROBADO** (Prueba local) |
+| **ASIST-03** | Confirmación de acciones del teléfono | Llamadas, mensajes, alarmas, aplicaciones, linterna y red requieren confirmación antes de ejecutarse. | Android / JVM/UI | **APROBADO** (Regla compilada; hardware pendiente) |
+| **ASIST-04** | Consulta cognitiva autenticada | La consulta se valida, requiere JWT y devuelve una respuesta identificada como demostrativa. | Backend / API | **APROBADO** (22 pruebas aisladas) |
+| **ASIST-05** | Corrección de transcripción con consentimiento | La corrección se guarda localmente y solo entra en la cola de aprendizaje cuando el comerciante autoriza el envío. | Android / Room v7 | **APROBADO** (Compilación; dispositivo pendiente) |
+| **ASIST-06** | ASR cloud demostrativo | El endpoint indica explícitamente que no transcribió audio real cuando `ASR_PROVIDER=simulated`. | Backend / API | **APROBADO** (Prueba aislada) |
+| **ASIST-07** | Persistencia de feedback autorizado | El backend conserva correcciones por negocio y deduplica por `eventId`. | PostgreSQL / Integración | **BLOQUEADO** (Credenciales locales rechazadas; `28P01`) |
+
 ---
 
 ### 3. AMBIENTES DE PRUEBA Y AUDITORÍA
 
 1. **Entorno Móvil (Android):**
    * **Dispositivo de Referencia:** Smartphone Android 8.0+ / RAM 2 GB (Gama Entrada).
-   * **Base de Datos:** SQLite / Room v6 cifrado mediante SQLCipher.
+   * **Base de Datos:** SQLite / Room v7 cifrado mediante SQLCipher.
    * **Reconocimiento de Voz:** Modelo `vosk-model-small-es-0.42` empacado localmente.
 
 2. **Entorno Backend (Servidor Cloud):**
