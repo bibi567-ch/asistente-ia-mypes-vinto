@@ -49,11 +49,11 @@ test('ASR transcription reports missing provider configuration safely', async (c
   assert.equal(body.error?.code, 'asr_not_configured');
 });
 
-test('retired sales routes are no longer registered', async (context) => {
+test('sales routes require authentication', async (context) => {
   const server = await startTestServer();
   context.after(server.close);
   for (const path of ['/api/v1/products', '/api/v1/transacciones/batch']) {
     const response = await fetch(`${server.baseUrl}${path}`);
-    assert.equal(response.status, 404);
+    assert.equal(response.status, 401);
   }
 });
