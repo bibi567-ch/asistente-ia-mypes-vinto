@@ -18,6 +18,7 @@ import com.mypes.vinto.network.ApiClient
 import com.mypes.vinto.network.BusinessProfileRequest
 import com.mypes.vinto.plantillas.PlantillasNegocio
 import com.mypes.vinto.presentation.theme.*
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import com.mypes.vinto.sync.AuthSession
 import kotlinx.coroutines.launch
 
@@ -51,8 +52,9 @@ fun OnboardingPlantillaScreen(nav: NavController) {
     }
 
     Column(Modifier.fillMaxSize().background(FondoOscuro).padding(24.dp)) {
-        Text("Configura tu negocio", color = TextoBlanco, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Text("Estos datos se guardarán en tu perfil y en la nube cuando haya conexión.", color = TextoGris)
+        YapayScreenHeader("Configura tu negocio", "ONBOARDING / PLANTILLA", onBack = { nav.popBackStack() })
+        Spacer(Modifier.height(12.dp))
+        Text("Datos locales y sincronización cloud", color = TextoGris)
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             value = nombreNegocio,

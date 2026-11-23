@@ -87,6 +87,7 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **API-02** | Pruebas Unitarias e Integración con PostgreSQL | Se ejecutan migraciones y suite completa de pruebas contra un contenedor PostgreSQL aislado en CI. | Backend / CI | **APROBADO** (CI Run #43157514411) |
 | **API-03** | Protección de Endpoints mediante API Gateway y JWT | Solicitudes sin cabecera `Authorization: Bearer <token>` o con JWT expirado reciben HTTP 401 Unauthorized. | Backend / Gateway | **APROBADO** (CI Run #43157514411) |
 | **API-04** | Emisión de Eventos en Tiempo Real (SSE) | La API emite eventos SSE aislados por negocio para notificar cambios de catálogo o estado de sincronización. | Backend / SSE | **APROBADO** (CI Run #43157514411) |
+| **API-05** | Distribución cloud de actualización Android | El cliente consulta `app-updates/latest`, compara `versionCode`, descarga el APK configurado, verifica SHA-256 y abre el instalador del sistema solo si existe una versión superior. | Android / API | **PENDIENTE** (Docker y dispositivo) |
 
 #### 2.8 Módulo de Asistente Conversacional Híbrido (ASIST / VOICE)
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |

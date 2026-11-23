@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.lifecycleScope
 import com.mypes.vinto.presentation.auth.ApiLoginScreen
 import com.mypes.vinto.presentation.auth.LoginScreen
 import com.mypes.vinto.presentation.auth.RegistroScreen
@@ -25,6 +26,8 @@ import com.mypes.vinto.presentation.perfil.PerfilScreen
 import com.mypes.vinto.presentation.reportes.ReportesScreen
 import com.mypes.vinto.presentation.sync.SincronizacionScreen
 import com.mypes.vinto.presentation.ventas.VentaManualScreen
+import com.mypes.vinto.update.AppUpdateManager
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val solicitarAudio = registerForActivityResult(
@@ -80,6 +83,9 @@ class MainActivity : ComponentActivity() {
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             solicitarAudio.launch(Manifest.permission.RECORD_AUDIO)
+        }
+        lifecycleScope.launch {
+            AppUpdateManager(applicationContext).checkAndInstall()
         }
     }
 }

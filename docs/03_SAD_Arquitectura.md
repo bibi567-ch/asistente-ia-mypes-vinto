@@ -17,8 +17,10 @@
 | :--- | :--- | :--- | :--- |
 | **1.0** | 15/08/2026 | Equipo de Proyecto | Borrador inicial del Documento de Arquitectura de Software (SAD). |
 | **1.1** | 15/09/2026 | Equipo de Proyecto | Entrega histórica preliminar. Selección de stack evaluado inicialmente (Spring Boot + PostgreSQL, Vosk + TFLite). |
-| **2.0** | 13/11/2026 | Equipo de Proyecto | **Versión Unificada y Definitiva.** Actualización completa del stack de backend a **Node.js 24 + TypeScript + Express + PostgreSQL 16**. Adopción de API Gateway con Circuit Breaker, autenticación JWT rotativa, persistencia Room v6 cifrada con SQLCipher (AES-256) y política de sincronización Outbox **idempotente** eliminando la sobrescritura LWW en ventas. |
+| **2.0** | 13/11/2026 | Equipo de Proyecto | **Versión Unificada y Definitiva.** Actualización completa del stack de backend a **Node.js 24 + TypeScript + Express + PostgreSQL 16**. Adopción de API Gateway con Circuit Breaker, autenticación JWT rotativa, persistencia Room v7 cifrada con SQLCipher (AES-256) y política de sincronización Outbox **idempotente** eliminando la sobrescritura LWW en ventas. |
 | **2.1** | 23/11/2026 | Equipo de Proyecto | El Dashboard pasa a ser el asistente conversacional Yapay. Se conserva la gestión comercial existente y se añade Room v7 con `VoiceLog`, clasificación de once intenciones, acciones del teléfono con confirmación, consulta cloud demostrativa y feedback de voz con autorización explícita. |
+| **2.2** | 23/11/2026 | Equipo de Proyecto | Se añade distribución cloud controlada de APK: endpoint público de metadatos, descarga configurada en backend, comparación por `versionCode`, verificación SHA-256 y apertura del instalador Android. No se realizan instalaciones silenciosas. |
+| **2.3** | 23/11/2026 | Equipo de Proyecto | Se integra el diseño visual Yapay Ambient Voice: fondo negro zinc, esmeralda, login cloud, registro bilingüe y dashboard con resumen operativo, chat, voz y navegación inferior. |
 
 ---
 
@@ -148,7 +150,7 @@ System_Boundary(mobile_app, "Dispositivo Móvil Android (Gama Baja)") {
     Container(pln_engine, "Motor PLN Edge", "Vosk ASR + Rule Matcher", "Transcripción de voz a texto y extracción de producto/cantidad/monto on-device")
     Container(data_layer, "Capa de Datos y Casos de Uso", "Clean Architecture / Repository", "Lógica de negocio local, validación de stock y reglas comerciales")
     Container(outbox_sync, "Outbox Sync Manager", "WorkManager", "Administra la cola de sincronización diferida y reintentos con backoff")
-    ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v7 + SQLCipher (AES-256)", "Almacenamiento cifrado compartido por login, perfil, catálogo, ventas, fiados, VoiceLog y cola Outbox")
+    ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v7 + SQLCipher (AES-256)", "Almacenamiento cifrado compartido por login, perfil, catálogo, ventas, fiados, VoiceLog y cola Outbox; una sola instancia de Room")
 }
 
 System_Boundary(cloud_infra, "Infraestructura Nube (Docker Compose)") {

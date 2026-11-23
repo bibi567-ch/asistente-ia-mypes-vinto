@@ -40,6 +40,7 @@ import com.mypes.vinto.presentation.theme.SuperficieOscura
 import com.mypes.vinto.presentation.theme.TextoBlanco
 import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -67,8 +68,8 @@ fun PerfilScreen(nav: NavController) {
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
     ) {
-        Text("Mi perfil", color = TextoBlanco, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(24.dp))
+        YapayScreenHeader("Mi perfil", "IDENTIDAD / COMERCIANTE", onBack = { nav.popBackStack() })
+        Spacer(Modifier.height(16.dp))
 
         Box(
             Modifier.size(100.dp)

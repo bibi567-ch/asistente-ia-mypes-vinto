@@ -39,6 +39,7 @@ import com.mypes.vinto.presentation.theme.SuperficieOscura
 import com.mypes.vinto.presentation.theme.TextoBlanco
 import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import com.mypes.vinto.viewmodel.FiadosViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -56,7 +57,7 @@ fun FiadosScreen(nav: NavController, vm: FiadosViewModel = viewModel()) {
     Column(
         Modifier.fillMaxSize().background(FondoOscuro).padding(16.dp)
     ) {
-        Text("Fiados pendientes", color = TextoBlanco, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        YapayScreenHeader("Fiados pendientes", "CUENTAS POR COBRAR", onBack = { nav.popBackStack() })
         Text(
             "${fiados.size} deudas · ${String.format(Locale.getDefault(), "%.2f", totalPendiente)} Bs",
             color = NaranjaAlerta,

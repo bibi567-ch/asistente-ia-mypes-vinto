@@ -23,7 +23,10 @@ import java.util.UUID
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -34,6 +37,8 @@ data class MensajeAsistente(
     val esUsuario: Boolean,
     val corregible: Boolean = false
 )
+
+typealias ChatMessage = MensajeAsistente
 
 sealed interface EstadoAccion {
     data object Inactivo : EstadoAccion
@@ -68,6 +73,12 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     private var ttsReady = false
     private val _estado = MutableStateFlow(DashboardEstado())
     val estado: StateFlow<DashboardEstado> = _estado
+    val historial: StateFlow<List<ChatMessage>> = _estado
+        .map { it.mensajes }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, _estado.value.mensajes)
+    val escuchando: StateFlow<Boolean> = _estado
+        .map { it.escuchando }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
         _estado.value = _estado.value.copy(modeloDisponible = asistente.inicializar())
@@ -105,6 +116,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                         textoParcial = ""
                     )
                     agregarMensaje(mensaje, esUsuario = false)
+                }
+
+                fun onBotonMicrofonoPresionado() {
+                    if (_estado.value.escuchando) detenerEscucha() else iniciarEscucha()
                 }
             }
         )

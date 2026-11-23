@@ -39,6 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.mypes.vinto.data.Producto
 import com.mypes.vinto.presentation.theme.*
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import com.mypes.vinto.viewmodel.InventarioViewModel
 
 @Composable
@@ -53,8 +54,10 @@ fun InventarioScreen(nav: NavController, vm: InventarioViewModel = viewModel()) 
     }
 
     Column(Modifier.fillMaxSize().background(FondoOscuro).padding(16.dp)) {
+        YapayScreenHeader("Inventario", "CATÁLOGO / STOCK", onBack = { nav.popBackStack() })
+        Spacer(Modifier.height(10.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Inventario", color = TextoBlanco, fontSize = 24.sp)
+            Text("${productosFiltrados.size} productos", color = TextoGris, fontSize = 13.sp)
             IconButton(onClick = { dialogoCrear = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Agregar producto", tint = VerdeNeon)
             }

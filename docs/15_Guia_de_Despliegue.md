@@ -10,7 +10,7 @@
 - Node.js 24 y npm, si se ejecuta el backend fuera de Docker.
 - Android Studio, Android SDK 35 y JDK 17.
 - Emulador o dispositivo Android 8.0 (API 26) o posterior, con micrófono.
-- Modelo Vosk español en `mobile/app/src/main/assets/vosk-model-small-es-0.42`. El script `download-vosk-model.ps1` no existe en el repositorio; obtén el modelo desde una distribución autorizada y verifica su integridad antes de incorporarlo al build. El modelo está excluido por `.gitignore`.
+- Modelo Vosk español en `mobile/app/src/main/assets/vosk-model-small-es-0.42`. El script `mobile/download-vosk-model.ps1` descarga el modelo desde una distribución autorizada y verifica su integridad antes de incorporarlo al build. El modelo está excluido por `.gitignore`.
 
 ## 2. Backend con Docker Compose
 

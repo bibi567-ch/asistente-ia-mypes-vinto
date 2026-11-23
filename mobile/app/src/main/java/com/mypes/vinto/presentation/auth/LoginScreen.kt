@@ -1,167 +1,271 @@
 package com.mypes.vinto.presentation.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.mypes.vinto.nlu.AsistenteVozFacade
-import com.mypes.vinto.nlu.EntityExtractor
 import com.mypes.vinto.presentation.theme.*
-import com.mypes.vinto.viewmodel.LoginEstado
-import com.mypes.vinto.viewmodel.LoginViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.mypes.vinto.viewmodel.ApiLoginEstado
+import com.mypes.vinto.viewmodel.ApiLoginViewModel
 
 @Composable
-fun LoginScreen(nav: NavController, vm: LoginViewModel = viewModel()) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val asistente = remember { AsistenteVozFacade(context) }
-    val extractor = remember { EntityExtractor() }
-    var identificador by remember { mutableStateOf("") }
-    var pin by remember { mutableStateOf("") }
-    var escuchandoPin by remember { mutableStateOf(false) }
-    var vozLista by remember { mutableStateOf(false) }
-    var estadoVoz by remember { mutableStateOf<String?>(null) }
+fun LoginScreen(
+    nav: NavController,
+    vm: ApiLoginViewModel = viewModel()
+) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     val estado by vm.estado.collectAsState()
 
-    LaunchedEffect(asistente) {
-        vozLista = withContext(Dispatchers.IO) { asistente.inicializar() }
-        if (!vozLista) estadoVoz = "No se pudo cargar el reconocimiento de voz."
-    }
-
-    DisposableEffect(asistente) {
-        onDispose { asistente.close() }
-    }
-
     LaunchedEffect(estado) {
-        when (estado) {
-            is LoginEstado.Exito ->
-                nav.navigate("dashboard") { popUpTo("login") { inclusive = true } }
-            LoginEstado.RequiereRegistro -> nav.navigate("registro")
-            else -> Unit
+        if (estado is ApiLoginEstado.Exito) {
+            nav.navigate("dashboard") { popUpTo("login") { inclusive = true } }
         }
     }
 
     Column(
-        Modifier.fillMaxSize().background(FondoOscuro).padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(FondoOscuro)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp)
+            .padding(top = 28.dp, bottom = 18.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("🎤", fontSize = 42.sp)
-        Text("Ingresa a tu cuenta", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = TextoBlanco)
-        Text("Usa tu carnet, celular o correo y tu PIN", color = TextoGris)
-        Spacer(Modifier.size(20.dp))
-
-        OutlinedTextField(
-            value = identificador,
-            onValueChange = { identificador = it; vm.reiniciar() },
-            label = { Text("Carnet, celular o correo") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.size(20.dp))
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Surface(
+            modifier = Modifier.size(72.dp),
+            shape = CircleShape,
+            color = SuperficieOscura,
+            border = androidx.compose.foundation.BorderStroke(1.dp, VerdeNeon.copy(alpha = 0.25f))
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                repeat(4) { index ->
+            Box(contentAlignment = Alignment.Center) {
+                Surface(
+                    modifier = Modifier.size(52.dp),
+                    shape = CircleShape,
+                    color = VerdeNeon,
+                    shadowElevation = 12.dp
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Mic, null, tint = FondoOscuro, modifier = Modifier.size(28.dp))
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Yapay", color = TextoBlanco, fontSize = 30.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(8.dp))
+            Surface(shape = RoundedCornerShape(6.dp), color = SuperficieOscura) {
+                Text(
+                    "V2.4-EDGE",
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = VerdeNeon,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        Text("Copiloto inteligente de cobro y finanzas", color = TextoGris, fontSize = 14.sp)
+
+        Spacer(Modifier.height(18.dp))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            color = SuperficieOscura,
+            border = androidx.compose.foundation.BorderStroke(1.dp, VerdeNeon.copy(alpha = 0.12f))
+        ) {
+            Row(Modifier.padding(14.dp), verticalAlignment = Alignment.Top) {
+                Surface(modifier = Modifier.size(38.dp), shape = CircleShape, color = VerdeNeon) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Mic, null, tint = FondoOscuro, modifier = Modifier.size(20.dp))
+                    }
+                }
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text("YAPAY AGENT // ASISTENTE ACTIVO", color = VerdeNeon, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                    Spacer(Modifier.height(6.dp))
                     Text(
-                        if (index < pin.length) "•" else "○",
-                        color = if (index < pin.length) VerdeNeon else TextoGris,
-                        fontSize = 32.sp
+                        "¡Imaynalla kashanki! Si olvidaste tu contraseña, presiona el micrófono o crea una cuenta nueva.",
+                        color = TextoBlanco,
+                        fontSize = 14.sp,
+                        lineHeight = 21.sp
                     )
                 }
             }
-            Button(
-                enabled = vozLista && estado !is LoginEstado.Verificando,
-                onClick = {
-                    if (escuchandoPin) {
-                        asistente.detener()
-                        escuchandoPin = false
-                    } else {
-                        estadoVoz = null
-                        escuchandoPin = true
-                        asistente.procesarPinDictado(
-                            onPinDetectado = { pinDetectado, _ ->
-                                escuchandoPin = false
-                                pin = pinDetectado
-                                vm.verificarPin(pinDetectado, identificador)
-                            },
-                            onError = { mensaje ->
-                                escuchandoPin = false
-                                estadoVoz = mensaje
-                            }
-                        )
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (escuchandoPin) RojoCancelar else AzulElectrico
-                )
-            ) {
-                Text(if (escuchandoPin) "Detener" else "🎙 PIN", color = Color.White)
+        }
+
+        Spacer(Modifier.height(18.dp))
+        Text("CORREO O TELÉFONO DEL PUESTO", modifier = Modifier.fillMaxWidth(), color = TextoGris, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+        Spacer(Modifier.height(6.dp))
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it; vm.reiniciarError() },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            placeholder = { Text("puesto72@mercado.bo", color = TextoGris) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            colors = loginFieldColors()
+        )
+
+        Spacer(Modifier.height(12.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("CONTRASEÑA OPERATIVA", color = TextoGris, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            Text("¿Olvidaste tu contraseña?", color = VerdeNeon, fontSize = 11.sp)
+        }
+        Spacer(Modifier.height(6.dp))
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it; vm.reiniciarError() },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
+            placeholder = { Text("••••••••••••", color = TextoGris) },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility, null, tint = TextoGris)
+                }
+            },
+            colors = loginFieldColors()
+        )
+
+        Spacer(Modifier.height(10.dp))
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Shield, null, tint = VerdeNeon, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Column {
+                Text("Recordar sesión en este teléfono", color = TextoBlanco, fontSize = 13.sp)
+                Text("CIFRADO LOCAL AES-256", color = TextoGris, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
             }
         }
-        if (escuchandoPin) {
-            Text("Di los cuatro números, por ejemplo: uno, dos, tres, cuatro", color = AzulElectrico, fontSize = 12.sp)
-        }
-        estadoVoz?.let { Text(it, color = NaranjaAlerta, fontSize = 12.sp) }
 
-        Spacer(Modifier.size(16.dp))
+        Spacer(Modifier.height(12.dp))
         when (val actual = estado) {
-            is LoginEstado.Error -> Text(actual.mensaje, color = RojoCancelar)
-            is LoginEstado.Bloqueado -> Text("Bloqueado por ${actual.segundosRestantes}s", color = NaranjaAlerta)
-            is LoginEstado.Verificando -> Text("Verificando...", color = VerdeNeon)
+            is ApiLoginEstado.Error -> Text(actual.mensaje, color = RojoCancelar, fontSize = 13.sp)
+            ApiLoginEstado.Iniciando -> Text("Conectando con el servidor...", color = VerdeNeon, fontSize = 13.sp)
             else -> Unit
         }
-        Spacer(Modifier.size(12.dp))
-        val teclas = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "⌫", "0", "C")
-        teclas.chunked(3).forEach { fila ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                fila.forEach { tecla ->
-                    Button(
-                        onClick = {
-                            when (tecla) {
-                                "⌫" -> { pin = pin.dropLast(1); vm.reiniciar() }
-                                "C" -> { pin = ""; vm.reiniciar() }
-                                else -> if (pin.length < 4) {
-                                    pin += tecla
-                                    if (pin.length == 4) vm.verificarPin(pin, identificador)
-                                }
-                            }
-                        },
-                        modifier = Modifier.size(72.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SuperficieOscura)
-                    ) { Text(tecla, color = Color.White, fontSize = 20.sp) }
-                }
-            }
-            Spacer(Modifier.size(8.dp))
+
+        Spacer(Modifier.height(10.dp))
+        Button(
+            onClick = { vm.iniciarSesion(email, password) },
+            enabled = estado !is ApiLoginEstado.Iniciando && email.isNotBlank() && password.isNotBlank(),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = VerdeNeon, contentColor = FondoOscuro)
+        ) {
+            Text("Iniciar sesión", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(8.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, null)
         }
-        TextButton(onClick = { nav.navigate("registro") }) {
-            Text("Crear cuenta nueva", color = VerdeNeon)
+
+        Spacer(Modifier.height(12.dp))
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f).height(1.dp).background(SuperficieOscura))
+            Text("  AUTENTICACIÓN VOZ / IA  ", color = TextoGris, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Box(Modifier.weight(1f).height(1.dp).background(SuperficieOscura))
+        }
+
+        Spacer(Modifier.height(10.dp))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = SuperficieOscura,
+            onClick = { nav.navigate("registro") }
+        ) {
+            Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.PersonAdd, null, tint = VerdeNeon)
+                Spacer(Modifier.width(10.dp))
+                Text("Crear cuenta nueva para comerciante", color = TextoBlanco, fontWeight = FontWeight.Medium)
+            }
+        }
+
+        Spacer(Modifier.height(10.dp))
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = FondoOscuro,
+            border = androidx.compose.foundation.BorderStroke(1.dp, SuperficieOscura)
+        ) {
+            Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.WifiOff, null, tint = VerdeNeon)
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("MODO OFFLINE UAB", color = VerdeNeon, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                    Text("Sin conexión a internet", color = TextoGris, fontSize = 12.sp)
+                }
+                TextButton(onClick = { nav.navigate("dashboard") }) { Text("Entrar demo", color = TextoBlanco) }
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("● GATEWAY: NODE.JS 24", color = TextoGris, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+            Text("EDGE: VOSK", color = VerdeNeon, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
         }
     }
 }
+
+@Composable
+private fun loginFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = VerdeNeon,
+    unfocusedBorderColor = SuperficieOscura,
+    focusedContainerColor = SuperficieOscura,
+    unfocusedContainerColor = SuperficieOscura,
+    focusedTextColor = TextoBlanco,
+    unfocusedTextColor = TextoBlanco,
+    cursorColor = VerdeNeon
+)

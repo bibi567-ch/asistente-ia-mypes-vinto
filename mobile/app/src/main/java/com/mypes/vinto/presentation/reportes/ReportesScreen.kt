@@ -48,6 +48,7 @@ import com.mypes.vinto.presentation.theme.SuperficieOscura
 import com.mypes.vinto.presentation.theme.TextoBlanco
 import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.CancellationException
@@ -108,7 +109,7 @@ fun ReportesScreen(nav: NavController) {
     Column(
         Modifier.fillMaxSize().background(FondoOscuro).padding(24.dp)
     ) {
-        Text("Reporte del día", color = TextoBlanco, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        YapayScreenHeader("Reporte del día", "CIERRE / ARQUEO", onBack = { nav.popBackStack() })
         Text("Resumen de tus ventas de hoy", color = TextoGris, fontSize = 14.sp)
         Spacer(Modifier.height(20.dp))
 

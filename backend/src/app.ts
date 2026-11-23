@@ -1,6 +1,7 @@
 import express from 'express';
 import { authRouter } from './routes/auth.routes.js';
 import { asrRouter } from './routes/asr.routes.js';
+import { appUpdatesRouter } from './routes/app-updates.routes.js';
 import { assistantRouter } from './routes/assistant.routes.js';
 import { cloudRouter } from './routes/cloud.routes.js';
 import { healthRouter } from './routes/health.routes.js';
@@ -15,6 +16,7 @@ app.use(express.json({ limit: '100kb' }));
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/asr', asrRouter);
+app.use('/api/v1/app-updates', appUpdatesRouter);
 app.use('/api/v1/assistant', assistantRouter);
 app.use('/api/v1/learning', learningRouter);
 app.use('/api/v1/logs', logsRouter);

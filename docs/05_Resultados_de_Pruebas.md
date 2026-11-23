@@ -149,7 +149,29 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
 * **Fecha:** 2026-11-23
 * **Problema identificado:** `LoginViewModel` abría el mismo archivo `mypes-local.db` mediante `VintoDatabase` sin SQLCipher, mientras el resto de la aplicación usaba `MypesDatabase` cifrada. Esta configuración podía producir `file is not a database`.
 * **Corrección:** El login local ahora utiliza `MypesDatabase`, manteniendo una única configuración cifrada, sus migraciones y el acceso offline por PIN.
-* **Validación:** `git diff --check` aprobado. La compilación Android debe repetirse después de esta corrección; la prueba en dispositivo y la conversión de una instalación antigua no se declaran aprobadas.
+* **Limpieza:** Se eliminó la implementación no utilizada de `VintoDatabase`, que apuntaba al mismo archivo con Room sin SQLCipher.
+* **Validación:** La compilación Android y las pruebas JVM se repitieron después de esta corrección y finalizaron correctamente. La prueba en dispositivo y la conversión de una instalación antigua no se declaran aprobadas.
+
+##### Fase 18: Validación consolidada posterior a la reorganización
+* **Fecha:** 2026-11-23
+* **Android:** `mobile\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` finalizó con código 0. Resultado observado: `BUILD SUCCESSFUL`; 46 tareas ejecutadas o verificadas. Esto confirma compilación y pruebas JVM, no funcionamiento físico.
+* **Backend:** Desde `backend/`, `npm run build`, `npm run typecheck:test` y `npm test` finalizaron con código 0. Resultado observado: 22 pruebas aprobadas, 0 fallidas.
+* **Docker:** `docker compose config --quiet` pasó usando variables temporales del proceso. `docker version` no pudo conectar con `dockerDesktopLinuxEngine`; los contenedores no fueron iniciados. No se declara Docker funcional.
+* **Integración PostgreSQL:** `npm run test:integration` ejecutó 11 casos y obtuvo 0 aprobados y 11 fallidos/bloqueados por autenticación PostgreSQL `28P01` para `mypes_local`. El primer `500` de registro es consecuencia del mismo bloqueo de base; no se atribuye al contrato HTTP sin una base accesible.
+* **Reorganización:** Se centralizó la documentación operativa en `docs/`, se separó `defensa_tecnica/` como material personal y se movieron prototipos no activos a `legacy/`. `git diff --check` pasó.
+* **Siguiente acción verificable:** iniciar Docker Desktop o corregir la contraseña local sin exponerla, aplicar migraciones y repetir las 11 pruebas de integración. Después ejecutar los flujos Android en un dispositivo y guardar evidencia.
+
+##### Fase 19: Compatibilidad de actualización cloud del APK
+* **Fecha:** 2026-11-23
+* **Implementación:** El backend expone `/api/v1/app-updates/latest` y `/api/v1/app-updates/apk` cuando se configuran `ANDROID_UPDATE_VERSION_CODE`, `ANDROID_UPDATE_VERSION_NAME`, `ANDROID_UPDATE_APK_PATH` y `ANDROID_UPDATE_BASE_URL`.
+* **Android:** `AppUpdateManager` compara `versionCode`, descarga el APK configurado, verifica su SHA-256 y abre el instalador mediante `FileProvider`.
+* **Validación:** La compilación Android y el build backend pasan. El endpoint cloud no se pudo probar en runtime porque Docker Desktop/PostgreSQL no estaban disponibles; queda pendiente la ejecución contra un backend accesible.
+
+##### Fase 20: Diseño Stitch aplicado al APK
+* **Fecha:** 23/11/2026
+* **Diseño integrado:** login cloud con identidad Yapay, registro estructurado bilingüe, dashboard oscuro con métricas, voz, chat y navegación inferior.
+* **Compilación:** `:app:testDebugUnitTest :app:assembleDebug` finalizó con `BUILD SUCCESSFUL`.
+* **APK:** `mobile/app/build/outputs/apk/debug/app-debug.apk`, `applicationId com.mypes.vinto`, versión `2.3.0`, `versionCode 5`.
 
 ---
 
@@ -170,4 +192,4 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
 
 1. **Aislamiento de Entornos:** La aprobación del pipeline backend en GitHub Actions garantiza la calidad del código del servidor y la base de datos PostgreSQL 16, pero **no sustituye la necesidad de realizar pruebas de campo con teléfonos Android reales** en los mercados de Vinto.
 2. **Modelo de Voz Edge:** La inclusión física del modelo Vosk en la carpeta `assets` permite la compilación del APK, pero la precisión del reconocimiento acústico bajo condiciones de ruido ambiental (>70 dB) requiere validación empírica en dispositivo.
-3. **Persistencia Local:** Las migraciones de esquema Room (hasta la versión 6) y el cifrado mediante SQLCipher AES-256 han sido verificados unitariamente, manteniendo la compatibilidad con datos existentes.
+3. **Persistencia Local:** Las migraciones de esquema Room hasta la versión 7 y el cifrado mediante SQLCipher AES-256 se verificaron durante la compilación/pruebas JVM. La compatibilidad con una instalación antigua debe confirmarse en un dispositivo; una base sin cifrado no se convierte automáticamente.

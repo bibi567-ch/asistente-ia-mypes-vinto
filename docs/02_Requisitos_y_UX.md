@@ -165,14 +165,14 @@ La descripción anterior establece objetivos del diseño, no certifica que esté
 
 *Tecnologías en Internet — Proyecto Integrador — Documento consolidado v1.1*
 #### Antecedente de cambio de stack — 30/09/2026
-Esta nota conserva el contexto de la actualización del 30/09/2026: se pasó de la referencia inicial a Spring Boot a la línea Node.js/TypeScript/Express y PostgreSQL que aparece en el repositorio actual. La descripción vigente está en [Arquitectura actual](02_Arquitectura_SAD.md); las menciones anteriores a Spring se interpretan como antecedentes, no como componentes actuales. El requisito curricular de MongoDB/Mongoose se mantiene separado y pendiente de confirmación; PostgreSQL no lo sustituye.
+Esta nota conserva el contexto de la actualización del 30/09/2026: se pasó de la referencia inicial a Spring Boot a la línea Node.js/TypeScript/Express y PostgreSQL que aparece en el repositorio actual. La descripción vigente está en [Arquitectura actual](03_SAD_Arquitectura.md); las menciones anteriores a Spring se interpretan como antecedentes, no como componentes actuales. El requisito curricular de MongoDB/Mongoose se mantiene separado y pendiente de confirmación; PostgreSQL no lo sustituye.
 #### Estado de implementación observado — 13/11/2026
 La tabla de requisitos anterior expresa la línea base académica. Esta tabla resume el estado del código de la revisión 03afcbd;  **implementado en código**  no significa  **validado funcionalmente** .
 | Área | Estado observado en el repositorio | Límite / validación pendiente |
 | ------ | ------ | ------ |
 | Registro y acceso local | Formulario de perfil, PIN local y acceso por carnet, celular o correo; PIN derivado con PBKDF2-HMAC-SHA256. | No hay verificación SMS/OTP. Probar registro, login y política de bloqueo en dispositivo. |
 | Cuenta remota | API de registro/login con contraseña scrypt y JWT, separada del PIN local; el registro puede continuar con perfil local si la nube falla. | Probar en dispositivo y comprobar la sincronización con el backend configurado. |
-| Persistencia móvil | Room/SQLite con SQLCipher; esquema Room versión 6 y migraciones definidas hasta esa versión. | La migración de bases existentes requiere una prueba con datos de prueba y evidencia; no se afirma como validada en todos los dispositivos. |
+| Persistencia móvil | Room/SQLite con SQLCipher; esquema Room versión 7 y migraciones definidas hasta esa versión, incluida `VoiceLog` y consentimiento de envío. | La migración de bases existentes requiere una prueba con datos de prueba y evidencia; no se afirma como validada en todos los dispositivos. |
 | Voz / PLN | Vosk puede transcribir localmente si se dispone del modelo; extracción de entidades y clasificación están implementadas con reglas Kotlin. | No se encontró un clasificador TFLite activo. Falta medir latencia, precisión y reconocimiento acústico en dispositivo. |
 | Ventas / fiados | Flujo manual de ventas, persistencia local, Outbox y consulta/cobro local de fiados presentes en el código. | Pruebas UI y de operación offline en dispositivo pendientes según el plan. |
 | Asistente Yapay | Consulta el total vendido del día y propone productos con confirmación; es lógica local basada en reglas. | No es un LLM, no ofrece respuestas reales en quechua/aimara y no reemplaza el registro manual de ventas. |

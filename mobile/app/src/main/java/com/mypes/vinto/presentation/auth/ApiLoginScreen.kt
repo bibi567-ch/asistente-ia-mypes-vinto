@@ -36,6 +36,7 @@ import com.mypes.vinto.presentation.theme.RojoCancelar
 import com.mypes.vinto.presentation.theme.TextoBlanco
 import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import com.mypes.vinto.viewmodel.ApiLoginEstado
 import com.mypes.vinto.viewmodel.ApiLoginViewModel
 
@@ -56,7 +57,7 @@ fun ApiLoginScreen(
         Modifier.fillMaxSize().background(FondoOscuro).verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Vincular cuenta", color = TextoBlanco, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+        YapayScreenHeader("Vincular cuenta", "ACCESO / SERVIDOR", onBack = { nav.popBackStack() })
         Spacer(Modifier.height(8.dp))
         Text(
             "Este acceso es independiente del PIN local y se usa para sincronizar con el servidor.",

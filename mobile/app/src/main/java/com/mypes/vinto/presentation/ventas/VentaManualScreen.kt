@@ -49,6 +49,7 @@ import com.mypes.vinto.presentation.theme.SuperficieOscura
 import com.mypes.vinto.presentation.theme.TextoBlanco
 import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import com.mypes.vinto.viewmodel.InventarioViewModel
 import com.mypes.vinto.viewmodel.VentaFormulario
 import com.mypes.vinto.viewmodel.VentaViewModel
@@ -121,8 +122,9 @@ fun VentaManualScreen(
     Column(
         Modifier.fillMaxSize().background(FondoOscuro).verticalScroll(rememberScrollState()).padding(24.dp)
     ) {
-        Text("Registrar venta", color = TextoBlanco, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Text("Confirma el producto y la cantidad", color = TextoGris, fontSize = 14.sp)
+        YapayScreenHeader("Registrar venta", "VENTA ASISTIDA", onBack = { nav.popBackStack() })
+        Spacer(Modifier.height(12.dp))
+        Text("Confirma producto, cantidad y forma de pago", color = TextoGris, fontSize = 14.sp)
         sugerenciaNoEncontrada?.let {
             Spacer(Modifier.height(8.dp))
             Text(

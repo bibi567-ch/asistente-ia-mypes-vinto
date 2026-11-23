@@ -40,6 +40,7 @@ import com.mypes.vinto.presentation.theme.SuperficieOscura
 import com.mypes.vinto.presentation.theme.TextoBlanco
 import com.mypes.vinto.presentation.theme.TextoGris
 import com.mypes.vinto.presentation.theme.VerdeNeon
+import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import com.mypes.vinto.sync.AuthSession
 import com.mypes.vinto.viewmodel.SincronizacionViewModel
 
@@ -72,7 +73,7 @@ fun SincronizacionScreen(
     }
 
     Column(Modifier.fillMaxSize().background(FondoOscuro).padding(24.dp)) {
-        Text("Sincronización", color = TextoBlanco, fontSize = 28.sp)
+        YapayScreenHeader("Sincronización", "EDGE / CLOUD", onBack = { nav.popBackStack() })
         Spacer(Modifier.height(8.dp))
         Text(
             "Las ventas se guardan primero en el dispositivo y se envían cuando hay conexión.",

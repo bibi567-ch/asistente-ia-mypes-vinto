@@ -8,7 +8,7 @@
 
 El repositorio contiene una base técnica para un asistente Android con reconocimiento local Vosk, clasificación por reglas, confirmación, acciones Android, TTS, Outbox y backend Node.js/TypeScript con PostgreSQL. La viabilidad es **condicional**: las pruebas automatizadas del backend y la compilación TypeScript pasaron en el entorno de desarrollo, pero no se verificaron el build Android, la ejecución real de Docker, la transcripción con proveedor cloud ni las métricas de campo.
 
-La integración de sesión móvil sigue pendiente: el login local por PIN no aprovisiona el JWT requerido por los endpoints cloud. No se debe presentar la solución como lista para producción o como evaluada con comerciantes hasta completar las validaciones documentadas en los documentos 13 y 14.
+La integración de sesión móvil sigue pendiente: el login local por PIN no aprovisiona el JWT requerido por los endpoints cloud. No se debe presentar la solución como lista para producción o como evaluada con comerciantes hasta completar las validaciones documentadas en [13_Plan_de_Pruebas.md](13_Plan_de_Pruebas.md) y [14_Resultados_de_Pruebas.md](14_Resultados_de_Pruebas.md).
 
 ## 2. Alcance funcional evaluado
 
@@ -55,14 +55,14 @@ El modelo Vosk está excluido por la regla `.gitignore`; un build limpio debe ob
 
 | Área | Resultado registrado | Estado |
 |---|---|---|
-| Backend automatizado | 11 pruebas aprobadas; el proveedor ASR se simula en pruebas. | Verificado en pruebas automatizadas. |
+| Backend automatizado | 22 pruebas aprobadas; el proveedor ASR se simula en pruebas. | Verificado en pruebas automatizadas. |
 | TypeScript | `npm run build` y `npm run typecheck:test` completados correctamente. | Verificado en entorno de desarrollo. |
 | Docker Compose | La configuración se validó; no se construyó ni levantó el servicio porque el daemon no estaba activo. | Configuración validada; runtime pendiente. |
-| Android | No se generó APK ni se ejecutaron pruebas Android; falta Gradle Wrapper y Gradle instalado. | Pendiente. |
+| Android | `:app:testDebugUnitTest :app:assembleDebug` finalizó con `BUILD SUCCESSFUL`; la ejecución en dispositivo sigue pendiente. | Compilación y pruebas JVM verificadas; prueba física pendiente. |
 | ASR cloud real | No se ejecutó con credenciales de proveedor desde un dispositivo. | Pendiente. |
 | WER, SUS, latencia, memoria y batería | No existen mediciones de campo verificadas en este repositorio. | Pendiente. |
 
-El detalle de resultados y su plantilla de registro están en [Resultados de pruebas](14_Resultados_de_Pruebas.md). No utilizar cifras ilustrativas como resultados.
+El detalle de resultados y su plantilla de registro están en [Resultados de pruebas](05_Resultados_de_Pruebas.md) y [resultados operativos](14_Resultados_de_Pruebas.md). No utilizar cifras ilustrativas como resultados.
 
 ## 6. Despliegue de laboratorio
 
@@ -72,7 +72,7 @@ No ejecutar `docker compose down -v` si se deben conservar los datos locales de 
 
 ## 7. Riesgos y condiciones de cierre
 
-1. Restaurar Gradle Wrapper y ejecutar unit tests/build Android.
+1. Instalar el APK generado y ejecutar pruebas en un dispositivo o emulador.
 2. Integrar el inicio de sesión móvil con el backend sin exponer tokens.
 3. Probar confirmación, cancelación, permisos, TTS y las diez intenciones en dispositivos representativos.
 4. Levantar Docker, validar migraciones y comprobar sincronización Outbox/idempotencia.
@@ -80,4 +80,4 @@ No ejecutar `docker compose down -v` si se deben conservar los datos locales de 
 6. Ejecutar el protocolo de campo de 20 comerciantes, calcular WER y SUS y registrar latencia/observaciones anonimizadas.
 7. Resolver los requisitos académicos pendientes sobre MongoDB/Mongoose y cliente web.
 
-**Conclusión:** existe una base implementada y verificable parcialmente, pero la viabilidad integral permanece pendiente de build Android, pruebas de integración y evaluación de campo. El criterio definitivo debe basarse en los resultados reproducibles, no en las capacidades descritas por diseño.
+**Conclusión:** existe una base implementada y verificable parcialmente. Android y backend ya tienen validación automatizada; la viabilidad integral permanece pendiente de Docker/PostgreSQL accesible, integración end-to-end y evaluación de campo. El criterio definitivo debe basarse en resultados reproducibles, no en capacidades descritas por diseño.

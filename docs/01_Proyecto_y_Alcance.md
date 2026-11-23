@@ -105,4 +105,4 @@ El sistema opera bajo el paradigma **Offline-First**: todo el procesamiento de v
 ## 7. Denominación Oficial y Criterio de Vigencia Documental
 
 * **Denominación Oficial Vigente:** “Agente conversacional multilingüe (castellano, quechua, aimara y variantes mixtas) con procesamiento de lenguaje natural en el dispositivo para MYPES de Vinto” (denominado **Yapay**).
-* **Criterio de Vigencia:** La arquitectura e implementación técnica descrita en este documento y en `02_Arquitectura_SAD.md` corresponde al stack **Node.js 24 / Express 5 / PostgreSQL 16**. El SAD v1.1 histórico (que mencionaba Spring Boot) se conserva únicamente como antecedente académico.
+* **Criterio de Vigencia:** La arquitectura e implementación técnica descrita en este documento y en `03_SAD_Arquitectura.md` corresponde al stack **Node.js 24 / Express 5 / PostgreSQL 16**. El SAD v1.1 histórico (que mencionaba Spring Boot) se conserva únicamente como antecedente académico.
