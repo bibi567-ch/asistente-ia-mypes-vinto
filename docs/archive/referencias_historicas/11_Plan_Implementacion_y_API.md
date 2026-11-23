@@ -1,45 +1,77 @@
-# Plan de implementación y API
+# 11. Contrato API e integración
 
-## Objetivo inmediato
+**Proyecto:** Asistente Conversacional Offline para MYPES de Vinto
+**Estado:** Contrato del backend de voz
+**Actualizado:** 23/11/2026
 
-Implementar un recorrido vertical: catálogo protegido → venta manual → persistencia local → API Node.js/Express → PostgreSQL → reintento idempotente → estados de sincronización → parser de texto → voz offline experimental. No comenzar por Gemma, microservicios o una sincronización compleja antes de probar el flujo local. El primer incremento incluye alta administrativa de propietarios, login y lectura/creación de productos; la integración con PostgreSQL y la prueba de aislamiento entre negocios se ejecutan en CI y deben verificarse localmente.
+## 1. Propósito y límites
 
-## Stack
+El backend Node.js/TypeScript/Express ofrece autenticación, transcripción cloud y recepción de registros de comandos. PostgreSQL conserva usuarios y logs de voz. No hay rutas activas de productos, ventas, inventario ni transacciones comerciales; esos módulos están fuera del alcance vigente.
 
-Node.js + TypeScript + Express para la API; PostgreSQL para datos remotos; Room/SQLite para operación Android local; WorkManager/Outbox para diferir envío. PostgreSQL se accede mediante `pg`; las migraciones SQL numeradas se aplican transaccionalmente con `npm run db:migrate`. La instrucción de unificación conserva PostgreSQL del Perfil/SAD, sustituye Spring y requiere actualizar C4 y documentación. El módulo Mongo/Mongoose solo se añade si TI lo exige y se acota como evidencia curricular, sin convertirlo en segunda fuente del inventario.
+El contrato documenta el estado actual. La integración móvil de sesión aún debe proveer URL base y JWT de forma segura para activar ASR cloud y sincronización.
 
-## Primeras etapas
+## 2. Endpoints
 
-1. Levantar PostgreSQL local y aplicar migraciones versionadas.
-2. Crear propietarios por comando administrativo; no habilitar registro público.
-3. Autenticar con contraseña hasheada y token de vida corta.
-4. Implementar catálogo de lectura/alta, validación, paginación y aislamiento por negocio.
-5. Añadir pruebas de integración con dos negocios y completar edición/borrado.
-6. Implementar venta y líneas transaccionales, precios históricos y movimientos.
-7. Añadir recepción de Outbox con UUID idempotente y resultado por evento.
-8. Crear cliente local Room/SQLite y WorkManager; verificar modo avión y reintentos.
-9. Añadir parser textual; Vosk después de probar dispositivo y casos.
-10. Revisar seguridad, despliegue, documentación y métricas reproducibles.
+| Método | Ruta | Autenticación | Función | Estado |
+|---|---|---|---|---|
+| `GET` | `/api/v1/health` | No | Estado de la API y disponibilidad de la persistencia. | Implementado |
+| `POST` | `/api/v1/auth/login` | No | Autentica un usuario creado administrativamente y devuelve JWT de vida corta. | Implementado |
+| `POST` | `/api/v1/auth/change-password` | Bearer JWT | Verifica contraseña vigente y permite reemplazarla; la nueva clave requiere al menos 12 caracteres. | Implementado |
+| `POST` | `/api/v1/asr/transcribe` | Bearer JWT | Recibe archivo multipart `audio`, llama al proveedor configurado y devuelve `{ "texto": "..." }`. Límite de archivo: 5 MB. | Implementado; proveedor real requiere credenciales |
+| `POST` | `/api/v1/logs/comandos` | Bearer JWT | Persiste un evento de voz con control de duplicados por evento/negocio. | Implementado |
 
-## Endpoints iniciales
+No existe registro público. El propietario inicial se crea mediante el comando administrativo `admin:create-owner`.
 
-| Método y ruta | Función | Reglas mínimas |
-|---|---|---|
-| GET /api/v1/health | Estado del proceso/DB | No exponer secretos; informar dependencia sin credenciales |
-| POST /api/v1/auth/login | Autenticar propietario | Usuario creado administrativamente; contraseña hasheada; JWT expira en 15 minutos |
-| POST /api/v1/auth/change-password | Cambiar clave del usuario autenticado | Verificar clave actual y exigir nueva clave de al menos 12 caracteres |
-| GET /api/v1/products | Consultar catálogo autorizado | Negocio del token; paginación validada; no aceptar businessId del cliente |
-| POST /api/v1/products | Crear producto | Nombre, unidad y precio decimal validados; unicidad por negocio |
-| POST /api/v1/sync/operations | Recibir lote Outbox | operationId UUID, versión y payload tipado |
+## 3. Contratos principales
 
-**Implementado como primer incremento:** autenticación local, comando de alta administrativa y lectura/creación de productos. La verificación con base de datos y el aislamiento cruzado siguen pendientes antes de considerarlo listo para despliegue.
+### Inicio de sesión
 
-La respuesta de sync informa resultado por operación: accepted, duplicate, rejected o conflict; no confiar en businessId enviado por cliente. Documentar ejemplos JSON, códigos HTTP, errores, autenticación y colección de pruebas.
+`POST /api/v1/auth/login`
 
-## Modelo y consistencia
+```json
+{
+  "email": "propietario@example.test",
+  "password": "<contraseña>"
+}
+```
 
-Entidades: Business, User, Product, Sale, SaleLine, InventoryMovement y SyncOperation. Índice único por businessId + operationId. Los precios históricos quedan en SaleLine. Las ventas son hechos inmutables: no resolver concurrencia con Last Write Wins ni descartar eventos; conservarlos y enviar discrepancias de stock a conciliación explícita. Cantidad, precio y dinero tienen representación uniforme; elegir unidad menor entera o DECIMAL y documentarlo. Validar transacción completa, reinicio, retries, errores parciales y token vencido.
+La respuesta exitosa contiene `accessToken`, `tokenType` y `expiresIn`. El JWT caduca a los 15 minutos según la configuración actual del servicio.
 
-## Comandos de desarrollo
+### Transcripción
 
-Desde `backend/`: `npm ci`, `npm run db:migrate`, `npm run build`, `npm run typecheck:test`, `npm test` y `npm run test:integration`. La prueba de integración requiere PostgreSQL; el workflow usa una instancia efímera de PostgreSQL. No copiar secretos a `.env.example`. Antes de publicar, registrar qué validaciones se ejecutaron realmente y su resultado.
+`POST /api/v1/asr/transcribe` requiere `Authorization: Bearer <accessToken>` y `multipart/form-data` con el archivo en el campo `audio`.
+
+- `ASR_PROVIDER=google` requiere `GOOGLE_ASR_API_KEY`; `GOOGLE_ASR_LANGUAGE` es opcional.
+- `ASR_PROVIDER=whisper` requiere `OPENAI_ASR_API_KEY`; `OPENAI_ASR_BASE_URL` es opcional.
+- Sin proveedor/credenciales configurados, el servicio responde `503`.
+- Un fallo del proveedor responde `500` sin exponer claves ni detalles sensibles.
+- El endpoint de prueba usa mock; no acredita acceso a un proveedor cloud.
+
+### Registro de comandos
+
+`POST /api/v1/logs/comandos` requiere JWT y recibe `eventId`, `texto`, `intencion`, `confirmado`, `ejecutado` y `timestamp`. El cliente conserva el mismo `eventId` al reintentar. PostgreSQL impone idempotencia por negocio y evento.
+
+## 4. Configuración y ejecución
+
+La ejecución local y la configuración de Docker Compose se mantienen en la [guía de despliegue](15_Guia_de_Despliegue.md). El archivo `.env.example` contiene nombres de variables sin secretos; los valores reales se generan localmente y no se versionan.
+
+Desde `backend/`, los comandos de validación son:
+
+```powershell
+npm ci
+npm run db:migrate
+npm run build
+npm run typecheck:test
+npm test
+npm run test:integration
+```
+
+`npm run test:integration` requiere PostgreSQL y migraciones aplicadas. No marcar el backend listo para producción por pasar pruebas unitarias: faltan validaciones de seguridad, despliegue, sesión móvil y proveedor ASR real.
+
+## 5. Seguridad y pendientes
+
+- Mantener las claves de Google/Whisper y secretos JWT únicamente en configuración protegida del servidor.
+- No habilitar tráfico externo ni usar datos reales hasta revisar autorización, TLS, limitación de intentos, auditoría y gestión de sesiones.
+- El cliente móvil lee URL y JWT de preferencias privadas `voice_cloud`; el inicio de sesión local por PIN aún no provisiona esos valores.
+- Probar en Docker activo migraciones, health check, persistencia y reintentos idempotentes.
+- Evaluar separadamente cualquier requisito académico de MongoDB/Mongoose o interfaz web; PostgreSQL no se presenta como NoSQL.

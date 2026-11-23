@@ -1,58 +1,51 @@
-# Matriz de trazabilidad
+# 06. Matriz de trazabilidad
 
-**Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto  
-**Versión:** 1.3 — 30/09/2026
-**Estado:** trazabilidad documental; no implica que las funciones estén implementadas.
+**Proyecto:** Asistente Conversacional Offline para MYPES de Vinto
+**Estado:** Trazabilidad de requisitos, implementación y evidencia
+**Actualizado:** 23/11/2026
 
-## Propósito y lectura de estados
+## 1. Estados
 
-Esta matriz conecta requisitos priorizados con flujos, decisiones y evidencia localizable. Los estados se limitan a **documentado**, **propuesto**, **en desarrollo** y **verificado**. Solo se utilizará “verificado” cuando exista evidencia reproducible, fechada y revisable. Los diagramas representan una arquitectura objetivo; tampoco demuestran implementación.
+- **Implementado:** existe código relacionado; no implica que haya sido ejecutado en un dispositivo.
+- **Documentado:** existe especificación o contrato escrito.
+- **Pendiente:** falta implementar, ejecutar o registrar la evidencia requerida.
+- **Verificado:** existe evidencia reproducible, fechada y revisable.
 
-## Trazabilidad funcional
+## 2. Requisitos funcionales
 
-| Requisito | Flujo / historia | Componente objetivo | Evidencia en el repositorio | Estado |
-|---|---|---|---|---|
-| RF-004 reconocimiento de voz sin red | US-01 captura de voz | Android + Vosk local | `docs/02_Requisitos_y_UX.md`; `docs/03_SAD_Arquitectura.md` | Propuesto |
-| RF-005 clasificación de intención | US-01 | Clasificador conversacional local | `docs/02_Requisitos_y_UX.md`; `docs/11_Plan_Implementacion_y_API.md` | Propuesto |
-| RF-006 extracción de entidades | US-01 | Parser/NLU local | `docs/02_Requisitos_y_UX.md` | Propuesto |
-| RF-007 confirmación antes de venta | US-02 registrar venta | Aplicación Android | `docs/02_Requisitos_y_UX.md` | Documentado |
-| RF-009 guardar venta | US-02 | SQLite local y PostgreSQL remoto tras sincronizar | `docs/02_Requisitos_y_UX.md`; `backend/db/migrations/001_initial.sql` | Diseño documentado; código inicial |
-| RF-013 actualizar inventario | US-03 compra/venta | Servicio de dominio + persistencia | `docs/02_Requisitos_y_UX.md`; `docs/11_Plan_Implementacion_y_API.md` | Propuesto |
-| RF-017 consulta de stock | US-04 consulta | Aplicación local | `docs/02_Requisitos_y_UX.md` | Propuesto |
-| RF-018 guardar operaciones sin conexión | US-05 Outbox | SQLite/Room | `docs/02_Requisitos_y_UX.md`; `docs/03_SAD_Arquitectura.md` | Propuesto |
-| RF-019 sincronizar al recuperar conexión | US-05 | Android + API Node.js | `docs/02_Requisitos_y_UX.md`; `docs/11_Plan_Implementacion_y_API.md` | Propuesto |
-| RF-020 preservar ventas concurrentes | US-05 conciliación | Idempotencia API + conciliación de stock | `docs/02_Requisitos_y_UX.md`; ADR en `docs/04_Decisiones_Stack.md` | Decisión propuesta |
-| RF-021 resumen diario | US-06 dashboard | Cliente local/API | `docs/02_Requisitos_y_UX.md` | Propuesto |
+| Requisito | Componente | Evidencia actual | Estado |
+|---|---|---|---|
+| RF-01: captura de voz bajo demanda | `AsrEngine`, Dashboard Android | `mobile/app/src/main/java/com/mypes/vinto/nlu/AsrEngine.kt`; `docs/03_SAD_Arquitectura.md` | Implementado; dispositivo pendiente |
+| RF-02: transcripción offline | Vosk local | `AsrEngine.kt`; `docs/14_Resultados_de_Pruebas.md` | Implementado; precisión no medida |
+| RF-03: fallback cloud bajo condiciones | `AsistenteVozFacade`, `CloudAsrService` | `mobile/app/src/main/java/com/mypes/vinto/nlu/AsistenteVozFacade.kt`; `docs/11_Plan_Implementacion_y_API.md` | Código implementado; sesión/JWT y proveedor real pendientes |
+| RF-04/05: clasificar y extraer parámetros | `IntentClassifier`, `EntityExtractor` | `mobile/app/src/main/java/com/mypes/vinto/nlu/IntentClassifier.kt`; `EntityExtractor.kt` | Implementado; evaluación lingüística pendiente |
+| RF-06/07: confirmar o cancelar antes de acción | Dashboard y `PhoneActionExecutor` | `DashboardScreen.kt`; `PhoneActionExecutor.kt` | Código implementado; prueba en dispositivo pendiente |
+| RF-08: respuestas TTS | Dashboard / ViewModel | `mobile/app/src/main/java/com/mypes/vinto/presentation/dashboard/DashboardScreen.kt` | Código implementado; prueba de audio pendiente |
+| RF-09: guardar eventos localmente | Room / Outbox | `VintoDatabase.kt`; `OutboxEntry.kt`; `OutboxDao.kt` | Implementado; prueba offline pendiente |
+| RF-10: sincronizar idempotentemente | `OutboxWorker`, endpoint logs | `mobile/app/src/main/java/com/mypes/vinto/sync/OutboxWorker.kt`; `backend/src/routes/logs.routes.ts` | Implementado; prueba extremo a extremo pendiente |
+| RF-11: reportar fallos explícitamente | UI, API y ejecutor | `DashboardViewModel.kt`; `backend/src/routes/asr.routes.ts` | Implementado en código; aceptación UX pendiente |
 
-## Trazabilidad de calidad
+## 3. Requisitos de calidad
 
-| Requisito | Escenario / medición | Decisión relacionada | Evidencia esperada | Estado |
-|---|---|---|---|---|
-| RNF-001 uso de memoria | Medir RAM en Android de referencia; objetivo <500 MB sujeto a protocolo | Kotlin nativo y presupuesto de recursos | Registro de dispositivo, versión y medición | No verificado |
-| RNF-002 latencia | Medir captura a respuesta local; objetivo ≤2 s sujeto a protocolo | Inferencia local y consultas locales | Dataset/prueba y percentiles | No verificado |
-| RNF-003 operación offline | Ejecutar flujos del MVP sin red y verificar persistencia | SQLite local + Outbox | Video/logs de prueba sin datos reales | No verificado |
-| RNF-004 seguridad | Revisar cifrado local, TLS, secretos y controles de API | Seguridad por capas | Configuración y reporte de revisión | No verificado |
-| RNF-005 accesibilidad | Contraste, tamaño táctil, texto y navegación | Diseño UX accesible | Capturas y checklist | Por validar |
-| RNF-006 compatibilidad | Ejecutar en los Android acordados | Cliente nativo | Matriz dispositivo/versión | No verificado |
-| RNF-007 usabilidad | SUS con participantes y protocolo aprobado; objetivo ≥70 | Diseño centrado en comerciante | Instrumento y resultados anonimizados | No verificado |
+| Criterio | Objetivo | Evidencia necesaria | Estado |
+|---|---|---|---|
+| Reconocimiento de voz | WER offline ≤25% | Transcripciones de referencia anonimizadas y cálculo reproducible | No medido |
+| Usabilidad | SUS ≥70/100 | Cuestionarios válidos y cálculo documentado | No medido |
+| Latencia y recursos | Registrar mediana/P95, memoria y batería | Dispositivo, versión, condiciones y resultados | No medido |
+| Seguridad de sesión | No incluir secretos en APK; JWT requerido para endpoints protegidos | Revisión de configuración y pruebas de autorización | Parcial; revisión de seguridad pendiente |
+| Operación offline | Reconocer, confirmar y registrar sin red | Prueba en modo avión y revisión posterior del Outbox | Pendiente |
+| Despliegue | Levantar servicios con Compose y health check correcto | Build/runtime Docker y logs revisables | Compose configurado; ejecución pendiente |
 
-## Evidencias de arquitectura e integración
+## 4. Artefactos relacionados
 
-| Elemento | Ubicación | Qué demuestra actualmente |
+| Artefacto | Ubicación | Uso |
 |---|---|---|
-| C1 contexto | `diagrams/C1_Contexto.mmd` | Contexto propuesto; revisar/renderizar antes de presentar |
-| C2 contenedores | `diagrams/C2_Contenedores.mmd` | Contenedores objetivo y estado no implementado indicado en etiquetas |
-| API y plan de construcción | `docs/11_Plan_Implementacion_y_API.md` | Contrato inicial y estado de implementación; pruebas integradas pendientes |
-| Esquema PostgreSQL inicial | `backend/db/migrations/001_initial.sql`, `backend/db/migrations/002_authentication.sql` | DDL versionado; ejecución local/CI mediante `npm run db:migrate` |
-| Health check | `backend/src/routes/health.routes.ts` | Endpoint de estado del servicio y disponibilidad de PostgreSQL |
-| Acceso y catálogo | `backend/src/routes/auth.routes.ts`, `backend/src/routes/products.routes.ts` | Login, cambio de contraseña y catálogo limitado por negocio; falta verificar integración local |
-| Matriz académica | `docs/12_Matriz_Rubricas_Tres_Materias.md` | Relación documental con las tres materias; confirmaciones docentes pendientes |
+| Alcance y requisitos | `docs/01_Proyecto_y_Alcance.md`; `docs/02_Requisitos_y_UX.md` | Delimitar producto y criterios funcionales. |
+| Arquitectura | `docs/03_SAD_Arquitectura.md`; `diagrams/C1_Contexto.mmd`; `diagrams/C2_Contenedores.mmd` | Describir componentes y relaciones. |
+| Contrato API | `docs/11_Plan_Implementacion_y_API.md` | Rutas implementadas y configuración de integración. |
+| QA y métricas | `docs/13_Plan_de_Pruebas.md`; `docs/14_Resultados_de_Pruebas.md` | Protocolo y resultados realmente observados. |
+| Evidencia | `docs/10_Evidencias.md`; carpeta `evidence/` | Archivar evidencias anonimizadas y reproducibles. |
 
-## Pendientes para completar la trazabilidad
+## 5. Criterio de actualización
 
-1. Asignar cada RF a un issue de GitHub y una prueba de aceptación.
-2. Asociar requisitos UX con frames concretos de Figma y registrar acceso verificado.
-3. Añadir casos de uso UML versionados y comprobar consistencia de IDs.
-4. Para cada prueba, registrar fecha, commit, versión, dispositivo/entorno y resultado.
-5. Cambiar un estado a “verificado” solo cuando una tercera persona pueda repetir la comprobación.
-6. Confirmar con el docente si TI exige MongoDB/Mongoose además de la línea base unificada Node.js/PostgreSQL y si requiere frontend web.
+Al modificar un requisito, actualizar su criterio de aceptación, componente responsable y enlace a evidencia. No utilizar “Verificado” para describir funcionalidades que solo están diseñadas o compiladas.

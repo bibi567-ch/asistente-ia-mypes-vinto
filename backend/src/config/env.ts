@@ -11,7 +11,12 @@ export const env = {
   port: Number(process.env.PORT ?? 3000),
   host: process.env.HOST ?? '127.0.0.1',
   jwtSecret: required('JWT_SECRET'),
-  databaseUrl: required('DATABASE_URL', 'postgres://mypes_local:local_dev_only@127.0.0.1:5432/mypes_vinto_dev')
+  databaseUrl: required('DATABASE_URL', 'postgres://mypes_local:local_dev_only@127.0.0.1:5432/mypes_vinto_dev'),
+  asrProvider: process.env.ASR_PROVIDER?.trim().toLowerCase() || '',
+  googleAsrApiKey: process.env.GOOGLE_ASR_API_KEY?.trim() || '',
+  googleAsrLanguage: process.env.GOOGLE_ASR_LANGUAGE?.trim() || 'es-ES',
+  openaiAsrApiKey: process.env.OPENAI_ASR_API_KEY?.trim() || '',
+  openaiAsrBaseUrl: process.env.OPENAI_ASR_BASE_URL?.trim() || 'https://api.openai.com/v1'
 };
 
 if (!Number.isInteger(env.port) || env.port < 1 || env.port > 65535) {

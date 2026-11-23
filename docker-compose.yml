@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: mypes_vinto_dev
       POSTGRES_USER: mypes_local
-      POSTGRES_PASSWORD: local_dev_only
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env file}
     ports:
       - "127.0.0.1:5432:5432"
     healthcheck:
@@ -16,6 +16,27 @@ services:
       retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgres://mypes_local:${POSTGRES_PASSWORD}@postgres:5432/mypes_vinto_dev
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
+      ASR_PROVIDER: ${ASR_PROVIDER:-}
+      GOOGLE_ASR_API_KEY: ${GOOGLE_ASR_API_KEY:-}
+      GOOGLE_ASR_LANGUAGE: ${GOOGLE_ASR_LANGUAGE:-es-ES}
+      OPENAI_ASR_API_KEY: ${OPENAI_ASR_API_KEY:-}
+      OPENAI_ASR_BASE_URL: ${OPENAI_ASR_BASE_URL:-https://api.openai.com/v1}
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

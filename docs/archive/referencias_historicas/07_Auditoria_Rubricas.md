@@ -1,8 +1,9 @@
-# Auditoría de Rúbricas — Primera Entrega
+# 07. Auditoría de rúbricas
 
-**Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto  
-**Versión:** 1.1  
-**Estado:** Auditoría documental; no equivale a aprobación docente.
+**Proyecto:** Asistente Conversacional Offline para la Gestión de MYPES de Vinto
+**Versión:** 1.1
+**Estado:** Auditoría documental; no equivale a aprobación docente
+**Actualizado:** 23/11/2026
 
 ## 1. Criterios de Arquitectura de Software
 
@@ -30,7 +31,7 @@
 | Mínimo 10 requisitos funcionales | `02_Requisitos_y_UX.md` | Documentado | Revisar redacción formal final. |
 | Mínimo 5 requisitos no funcionales | `02_Requisitos_y_UX.md` | Documentado | Asociar método de verificación. |
 | Diagrama UML de casos de uso | `diagrams/Casos_Uso.puml` | Diseñado | Renderizar e insertar en documento final. |
-| Tres narrativas completas | `docs/02_Requisitos_y_UX.md` | Documentado | CU-01 Registrar venta, CU-02 Consultar inventario y CU-03 Sincronizar operaciones están narrados; no se presentan como implementados. |
+| Tres narrativas completas | `02_Requisitos_y_UX.md` | Documentado | CU-01 Procesar una orden de voz, CU-02 Sincronizar el Outbox y CU-03 Confirmar/cancelar una acción están definidos. |
 | Dos personas | Documento UX/UI | Propuesto | Confirmar si existe investigación real; de lo contrario, etiquetar como hipótesis. |
 | Mapas de empatía | Documento UX/UI | Pendiente | Incorporar dos mapas completos o declarar pendiente. |
 | Mapa del sitio | Documento UX/UI | Diseñado | Comparar con navegación real del prototipo. |
@@ -53,4 +54,4 @@
 
 ## 4. Conclusión de auditoría
 
-La entrega puede presentarse como un paquete de **análisis, requisitos, arquitectura propuesta y diseño UX/UI**. No debe presentarse como sistema implementado ni como solución validada en campo mientras no existan código ejecutable, pruebas reproducibles, capturas del prototipo y resultados documentados.
+La entrega contiene documentación y código de prototipo, pero la compilación Android, las pruebas en dispositivo y la evaluación de campo no están verificadas. Presentar cada componente según su estado real y no como solución validada hasta adjuntar evidencia reproducible.

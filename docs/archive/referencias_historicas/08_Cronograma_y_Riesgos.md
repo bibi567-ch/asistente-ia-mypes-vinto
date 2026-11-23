@@ -1,4 +1,4 @@
-# 07 Cronograma, riesgos y entregas
+# 08. Cronograma, riesgos y entregas
 
 **Corte actualizado:** 29/09/2026, martes. La semana W11 del Gantt es 28/09–04/10; se corrige la etiqueta de “lunes 29/09” presente en los archivos fuente.
 
