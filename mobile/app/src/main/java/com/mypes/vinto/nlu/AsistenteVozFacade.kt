@@ -1,24 +1,41 @@
 package com.mypes.vinto.nlu
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.HttpException
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 class AsistenteVozFacade(context: Context) : AutoCloseable {
     private val asr = AsrEngine(context)
     private val clasificador = IntentClassifier()
     private val extractor = EntityExtractor()
+    private val applicationContext = context.applicationContext
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val cloudPreferences =
+        applicationContext.getSharedPreferences("voice_cloud", Context.MODE_PRIVATE)
 
     data class Resultado(
         val intencion: IntentClassifier.Intencion,
         val entidades: EntityExtractor.Entidades,
-        val textoOriginal: String
+        val textoOriginal: String,
+        val confianzaVosk: Float
     )
 
     fun inicializar(): Boolean = asr.inicializar()
 
-    fun procesar(texto: String): Resultado = Resultado(
+    fun procesar(texto: String, confianza: Float = 0f): Resultado = Resultado(
         intencion = clasificador.clasificar(texto),
         entidades = extractor.extraer(texto),
-        textoOriginal = texto
+        textoOriginal = texto,
+        confianzaVosk = confianza
     )
 
     fun escuchar(
@@ -28,11 +45,78 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
     ) {
         asr.escuchar(object : AsrEngine.Resultado {
             override fun onTextoParcial(texto: String) = onParcial(texto)
-            override fun onTextoFinal(texto: String) = onResultado(procesar(texto))
+            override fun onTextoFinal(texto: String, confianza: Float, audioPcm: ByteArray) {
+                if (confianza >= 0.70f) {
+                    onResultado(procesar(texto, confianza))
+                    return
+                }
+
+                val baseUrl = cloudPreferences.getString("api_base_url", null)?.trim()
+                val accessToken = cloudPreferences.getString("access_token", null)?.trim()
+                if (baseUrl.isNullOrEmpty() || accessToken.isNullOrEmpty()) {
+                    onResultado(procesar(texto, confianza))
+                    return
+                }
+
+                scope.launch {
+                    var cloudFailure: String? = null
+                    val cloudText = try {
+                        CloudAsrService(baseUrl, accessToken).transcribeIfNeeded(
+                            applicationContext,
+                            audioPcm.toWaveRequestBody(),
+                            confianza
+                        )
+                    } catch (error: IOException) {
+                        cloudFailure = error.message ?: "No se pudo contactar el servicio cloud."
+                        null
+                    } catch (error: HttpException) {
+                        cloudFailure = "El servicio cloud respondió con HTTP ${error.code()}."
+                        null
+                    } catch (error: IllegalArgumentException) {
+                        cloudFailure = error.message ?: "La configuración cloud no es válida."
+                        null
+                    }
+                    withContext(Dispatchers.Main) {
+                        onResultado(procesar(cloudText?.takeIf(String::isNotBlank) ?: texto, confianza))
+                        cloudFailure?.let(onError)
+                    }
+                }
+            }
             override fun onError(mensaje: String) = onError(mensaje)
         })
     }
 
     fun detener() = asr.detener()
-    override fun close() = asr.close()
+    override fun close() {
+        scope.cancel()
+        asr.close()
+    }
+
+    private fun ByteArray.toWaveRequestBody() =
+        toWave().toRequestBody("audio/wav".toMediaType())
+
+    private fun ByteArray.toWave(): ByteArray {
+        val header = ByteArrayOutputStream(44)
+        fun writeInt(value: Int) {
+            repeat(4) { offset -> header.write((value shr (offset * 8)) and 0xff) }
+        }
+        fun writeShort(value: Int) {
+            header.write(value and 0xff)
+            header.write((value shr 8) and 0xff)
+        }
+        header.write("RIFF".toByteArray(Charsets.US_ASCII))
+        writeInt(size + 36)
+        header.write("WAVEfmt ".toByteArray(Charsets.US_ASCII))
+        writeInt(16)
+        writeShort(1)
+        writeShort(1)
+        writeInt(16_000)
+        writeInt(32_000)
+        writeShort(2)
+        writeShort(16)
+        header.write("data".toByteArray(Charsets.US_ASCII))
+        writeInt(size)
+        header.write(toByteArray())
+        return header.toByteArray()
+    }
 }

@@ -1,30 +1,29 @@
-# 01 Proyecto y alcance
+# 01. Proyecto y alcance: Agente Conversacional IA Vinto
 
-## Identificación
+**Estado:** Alcance vigente del asistente de voz
+**Actualizado:** 23/11/2026
 
-**Título de trabajo:** Asistente conversacional offline con procesamiento de lenguaje natural en el dispositivo para la gestión automatizada de ventas e inventario en MYPES del centro de Vinto, Cochabamba.
+## 1. Descripción del Proyecto
 
-**Equipo:** Eva Lizeth Chino Quispe (liderazgo, requisitos y QA documental); Christian Gonzales Mamani (IA y pipeline conversacional); Marializ Mamani Quispe (backend, seguridad y persistencia); Kevin Jhonathan Rocha Rojas (UX/UI); Luis Gerardo Lazo Bustamante (arquitectura C4 y QA técnico).
+El proyecto consiste en desarrollar un agente conversacional para Android que permita interactuar con herramientas del teléfono mediante comandos de voz en castellano y expresiones de quechuañol. El diseño usa un flujo híbrido: Vosk reconoce voz localmente y, si la confianza es menor al 70%, hay conectividad y existe una sesión válida, el cliente puede enviar el audio a una API cloud para transcribirlo.
 
-## Producto y problema
+## 2. Alcance del Sistema
 
-El proyecto propone un prototipo que permita gestionar operaciones comerciales mediante una interfaz sencilla, conserve información localmente cuando no existe Internet y sincronice después con un servicio remoto. El problema y las afirmaciones sobre alfabetización digital, conectividad, recursos de los teléfonos, errores y pérdida de datos deben sustentarse con las entrevistas, observación y fuentes citadas en el Perfil. No se deben presentar las descripciones del perfil como mediciones primarias sin evidencia.
+- **Interacción por voz:** diez intenciones: llamar, enviar mensaje, leer texto, crear alarma, abrir app, consultar hora, usar linterna, abrir ajustes de red, guía del teléfono y ayuda.
+- **Modo híbrido:** reconocimiento local en el dispositivo y fallback ASR cloud cuando hay conectividad, confianza Vosk baja y configuración válida.
+- **Confirmación humana:** la app presenta un diálogo antes de ejecutar acciones del teléfono; TextToSpeech comunica confirmaciones y resultados.
+- **Log de operaciones (Outbox):** guarda localmente texto, intención y estado de confirmación/ejecución para sincronizarlo cuando haya red.
+- **Backend:** API Node.js/Express con autenticación JWT, proxy ASR configurable y almacenamiento PostgreSQL de logs de voz.
 
-## MVP de desarrollo
+## 3. Límites
 
-1. Registrar y consultar productos localmente.
-2. Crear una venta con productos conocidos y confirmación antes de guardar.
-3. Mantener la venta y el movimiento local tras reiniciar la app sin red.
-4. Sincronizar la operación a una API Node.js/Express y PostgreSQL al recuperar conexión.
-5. Reintentar el mismo identificador sin producir ventas duplicadas.
-6. Incorporar texto conversacional y voz offline después del recorrido básico.
+- No incluye gestión de ventas, inventarios, fiados ni facturación.
+- Aimara no forma parte de esta versión; se plantea como trabajo futuro.
+- No se desarrolla para iOS.
+- La app actual clasifica intenciones mediante reglas Kotlin; LiteRT/TensorFlow Lite no está integrado.
+- El login local por PIN no emite por sí mismo el JWT del backend. La URL y un token válido deben ser proporcionados por una futura integración de sesión para activar ASR cloud y sincronización.
+- La búsqueda de contactos por nombre aún no está integrada; para llamar o enviar un mensaje se necesita reconocer un número telefónico.
 
-Las compras, fiados, reportes, onboarding por voz, NLU entrenado y validación de usabilidad se implementan conforme al cronograma y capacidad; su prioridad y aceptación requieren congelar alcance con tutor. Facturación electrónica SIN, pagos, iOS, escritorio y voz continua están excluidos según el Perfil compartido.
+## 4. Criterios de viabilidad
 
-## Decisión de stack
-
-La línea base unificada solicitada es **Kotlin/Compose + Room/SQLite + Node.js/TypeScript/Express + PostgreSQL**. PostgreSQL es el almacén remoto autoritativo; SQLite resuelve persistencia local. El stack anterior del Perfil y SAD usa Spring Boot/PostgreSQL, por lo que la sustitución de Spring debe quedar documentada como ADR y propagarse con aprobación docente. El sílabo de Tecnologías en Internet incluye MongoDB/Mongoose; PostgreSQL no satisface por sí solo ese resultado de aprendizaje. Eva confirmará si MongoDB se requiere dentro del producto o puede demostrarse mediante un ejercicio acotado separado.
-
-## Fuentes normativas del proyecto
-
-El Perfil de Grado, el SAD, la entrega de Tecnologías en Internet, el cronograma de ejecución, el Gantt, los sílabos y las rúbricas son fuentes distintas. Si difieren, registrar la discrepancia y consultar al docente. El manual operativo está en la raíz del repositorio y no sustituye ninguno de los documentos oficiales.
+La app fija Android API 26 como mínimo y utiliza el modelo Vosk español empaquetado como asset local. La prueba técnica debe medir uso de RAM, latencia, precisión en castellano/quechuañol y consumo de batería en dispositivos de campo antes de afirmar compatibilidad con una cantidad mínima de memoria.

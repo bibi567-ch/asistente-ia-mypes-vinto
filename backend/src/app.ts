@@ -1,16 +1,16 @@
 import express from 'express';
 import { authRouter } from './routes/auth.routes.js';
 import { healthRouter } from './routes/health.routes.js';
-import { productsRouter } from './routes/products.routes.js';
-import { transaccionesRouter } from './routes/transacciones.routes.js';
+import { asrRouter } from './routes/asr.routes.js';
+import { logsRouter } from './routes/logs.routes.js';
 
 export const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '100kb' }));
 app.use('/api/v1/health', healthRouter);
 app.use('/api/v1/auth', authRouter);
-app.use('/api/v1/products', productsRouter);
-app.use('/api/v1/transacciones', transaccionesRouter);
+app.use('/api/v1/asr', asrRouter);
+app.use('/api/v1/logs', logsRouter);
 
 app.use((_request, response) => {
   response.status(404).json({ error: { code: 'not_found', message: 'The requested endpoint does not exist.' } });

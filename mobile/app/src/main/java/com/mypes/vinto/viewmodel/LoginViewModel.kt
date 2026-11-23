@@ -3,7 +3,7 @@ package com.mypes.vinto.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.mypes.vinto.data.MypesDatabase
+import com.mypes.vinto.data.VintoDatabase
 import com.mypes.vinto.data.PinHasher
 import com.mypes.vinto.data.PoliticaAcceso
 import com.mypes.vinto.data.Usuario
@@ -20,7 +20,7 @@ sealed class LoginEstado {
 }
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
-    private val db = MypesDatabase.obtener(application)
+    private val db = VintoDatabase.obtener(application)
     private val _estado = MutableStateFlow<LoginEstado>(LoginEstado.Inicial)
     val estado: StateFlow<LoginEstado> = _estado
 

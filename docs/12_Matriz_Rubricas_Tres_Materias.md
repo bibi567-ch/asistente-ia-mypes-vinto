@@ -1,7 +1,7 @@
-# Matriz de cobertura de las rúbricas de las tres materias
+# 12. Matriz de cobertura de las rúbricas de las tres materias
 
-**Corte:** 30/09/2026  
-**Base:** sílabos, portal y rúbrica de perfil transcritos por la estudiante.  
+**Corte:** 23/11/2026
+**Base:** sílabos, portal y rúbrica de perfil transcritos por la estudiante.
 **Importante:** esta matriz organiza requisitos conocidos; no certifica calificación ni sustituye rúbricas completas que aún no se adjuntaron.
 
 ## Investigación I — Perfil de Trabajo de Grado
@@ -42,8 +42,8 @@ El sílabo compartido define como producto un SAD bajo modelo 4+1 con decisiones
 | Atributos de calidad y requisitos arquitectónicos | Escenarios con estímulo, entorno, respuesta y medida | Definidos en parte; objetivos sin resultados medidos |
 | Patrones/estilos | Justificar cliente offline-first y backend modular; explicar trade-offs | Documentado en SAD, revisar stack contradictorio |
 | Vistas 4+1 | Lógica, procesos, desarrollo, despliegue y escenarios | C1/C2 existen; completar vistas y consistencia |
-| Decisiones arquitectónicas | ADR con alternativas, estado y consecuencias | ADR v1.1 Spring/PostgreSQL; actualizar a Node/PostgreSQL y registrar aprobación |
-| Prototipo funcional | Demostrar recorrido vertical y atributo de calidad | Pendiente; backend actual solo health scaffold |
+| Decisiones arquitectónicas | ADR con alternativas, estado y consecuencias | Ver `04_Decisiones_Stack.md`; aprobación docente pendiente |
+| Prototipo funcional | Demostrar recorrido vertical y atributo de calidad | Código de app y API presentes; build Android y demostración en dispositivo pendientes (ver documento 14) |
 | Evaluación de calidad | Plan, ambiente, umbrales y resultados reproducibles | Pendiente de ejecutar |
 | Defensa | Recorrer escenario, diagramas, decisiones y evidencia | Preparar guion por integrante |
 

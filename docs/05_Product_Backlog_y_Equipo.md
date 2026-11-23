@@ -1,54 +1,51 @@
-# Product backlog y responsabilidades del equipo
+# 05. Product backlog y responsabilidades
 
-**Corte:** 30/09/2026  
-**Prioridad:** primero un recorrido pequeño que funcione y pueda revisarse. Las prioridades son de coordinación; el equipo debe refinarlas en Issues/Projects de GitHub y confirmar fechas contra [`08_Cronograma_y_Riesgos.md`](08_Cronograma_y_Riesgos.md).
+**Proyecto:** Asistente Conversacional Offline para MYPES de Vinto
+**Estado:** Backlog de consolidación y validación; refinar en GitHub Issues
+**Actualizado:** 23/11/2026
 
-Este backlog toma la organización del repositorio SMIA como referencia: épicas, historias, criterios de aceptación y relación con requisitos. No copia sus historias, su dominio municipal ni sus estimaciones de puntos. No se asignan story points hasta que el equipo acuerde una escala y capacidad real.
+## 1. Responsabilidades
 
-## Roles de trabajo
-
-| Integrante | Área principal | Responsabilidad verificable |
+| Integrante | Área de coordinación | Resultado verificable |
 |---|---|---|
-| Eva Chino Quispe | Liderazgo, requisitos y QA documental | Mantener prioridades, convocar revisión semanal, enlazar issues con criterios y rúbricas; apoyar a Marializ/Luis mediante contrato API, revisión de PR y evidencias |
-| Christian Gonzales | IA y flujo conversacional | Delimitar intenciones/entidades del MVP y crear conjunto de frases sintéticas de prueba con método, sin atribuir precisión no medida |
-| Marializ Mamani | Backend, seguridad y datos | Mantener API Node/Express y PostgreSQL; acordar esquema/migraciones; proponer autorización antes de exponer datos de negocio |
-| Kevin Rocha | UX/UI y prototipo | Diseñar y revisar flujos de catálogo/venta/confirmación, errores, estados vacíos y funcionamiento sin conexión |
-| Luis Lazo | Arquitectura C4 y QA técnico | Mantener C1/C2, decisiones, contratos y trazabilidad con el estado real del código |
+| Eva Lizeth Chino Quispe | Coordinación, requisitos y QA documental | Alcance, índice, revisiones y evidencias consistentes. |
+| Christian Gonzales Mamani | IA y flujo conversacional | Intenciones, extracción de parámetros y conjunto de evaluación. |
+| Marializ Mamani Quispe | Backend, seguridad y persistencia | API, autenticación, PostgreSQL, migraciones y sincronización. |
+| Kevin Jhonathan Rocha Rojas | UX/UI y prototipado | Dashboard de voz, confirmación, estados y accesibilidad. |
+| Luis Gerardo Lazo Bustamante | Arquitectura y QA técnico | SAD, diagramas, contratos, trazabilidad y validaciones reproducibles. |
 
-Los responsables pueden colaborar; la asignación indica quién coordina y presenta el resultado, no una división rígida.
+La responsabilidad indica quién coordina la tarea; no impide revisión cruzada ni colaboración.
 
-## Épicas y tareas iniciales
+## 2. Backlog priorizado
 
-| ID | Épica / historia | Criterio de aceptación | Responsable | Dependencias | Estado |
-|---|---|---|---|---|---|
-| EP-01 / US-01 | Acordar alcance común del MVP | Lista priorizada: catálogo mínimo, venta manual, consulta local y sincronización posterior; exclusiones explícitas en `01_Proyecto_y_Alcance.md` | Eva + equipo | Ninguna | Documentado; revisar con docente |
-| EP-01 / US-02 | Resolver observaciones docentes | Registrar respuestas sobre Node/PostgreSQL, Mongo/Mongoose y frontend web en ADR/acta con fecha | Eva | Consultar sílabos | Pendiente |
-| EP-02 / US-03 | Preparar backend local | Otro miembro puede levantar Compose, aplicar migraciones y obtener health check conectado a PostgreSQL con instrucciones del README | Marializ; Eva revisa | Docker, `.env.example` | En verificación local |
-| EP-02 / US-04 | Acordar modelo relacional v1 | Esquema revisado con negocio, producto, venta, líneas y movimientos; constraints/índices explicados; sin duplicar persistencia remota | Marializ + Luis | EP-01 | Parcial: esquema solo inicial |
-| EP-03 / US-05 | Definir contrato de productos | Ejemplos JSON, validación, errores, paginación y requisito de autorización por negocio documentados antes de CRUD | Eva + Marializ | EP-04 | Contrato inicial documentado |
-| EP-03 / US-06 | Implementar acceso y catálogo protegido | Alta de propietario controlada; login con contraseña hasheada; GET/POST de productos usa negocio del token; prueba de acceso anónimo y cruce entre negocios | Marializ; Luis revisa | US-03, US-05 | En progreso: código y pruebas unitarias; falta integración PostgreSQL y cruce entre negocios |
-| EP-04 / US-07 | Prototipar registrar venta manual | Figma permite completar venta, revisar detalle y confirmar; incluye error, vacío y precio/cantidad inválidos | Kevin | EP-01 | Por verificar |
-| EP-04 / US-08 | Registrar venta local | Venta confirmada queda guardada localmente tras reiniciar; modo avión no pierde operación; cálculo de total demostrable | Marializ + Kevin; Eva coordina | US-04, US-07 | Pendiente; móvil aún no creado |
-| EP-04 / US-09 | Sincronizar venta idempotentemente | Al repetir el mismo UUID, servidor no duplica la venta; preservar el evento y mostrar estado/conflicto de stock | Marializ + Luis | US-08, autenticación | Pendiente |
-| EP-05 / US-10 | Preparar conversación de alcance acotado | Intents iniciales documentadas y fallback a formulario ante baja confianza; frases de prueba anonimizadas; no es modelo entrenado | Christian + Kevin | US-07 | Pendiente |
-| EP-06 / US-11 | Construir evidencia de calidad | Registrar protocolo, versión y resultado real para offline, idempotencia, seguridad básica y latencia; no declarar objetivos como resultados | Luis + cada responsable | Implementaciones anteriores | Pendiente |
-| EP-06 / US-12 | Preparar entrega integrada | README, demo y checklist describen lo que corre, lo que está simulado y los límites; revisión de PR por otra integrante | Eva + equipo | Todos | En preparación |
+| ID | Trabajo | Criterio de aceptación | Estado |
+|---|---|---|---|
+| BL-01 | Integrar sesión móvil con el backend | La app recibe URL base y JWT de forma segura, y los configura para ASR y sincronización. | Pendiente; el PIN local no provisiona JWT. |
+| BL-02 | Restaurar build Android reproducible | Añadir Gradle Wrapper versionado y ejecutar `testDebugUnitTest` y `assembleDebug` en CI. | Bloqueado; no hay wrapper en el checkout. |
+| BL-03 | Validar flujo de voz offline | Probar las diez intenciones, permisos y errores en Android API 26+ sin conexión. | Pendiente en dispositivo. |
+| BL-04 | Validar confirmación y TTS | Demostrar confirmación, cancelación, resultado y error sin ejecutar acciones canceladas. | Pendiente en dispositivo. |
+| BL-05 | Completar evaluación ASR cloud | Configurar proveedor real, JWT y backend; medir latencia y registrar fallback offline. | Pendiente; los tests usan proveedor simulado. |
+| BL-06 | Validar sincronización Outbox | Crear eventos offline, recuperar conectividad, sincronizar con JWT y comprobar idempotencia. | Pendiente extremo a extremo. |
+| BL-07 | Evaluar métricas de campo | Aplicar protocolo con 20 comerciantes, 10 comandos, WER y SUS; anonimizar registros. | Pendiente; ver [plan](13_Plan_de_Pruebas.md). |
+| BL-08 | Validar Docker | Construir e iniciar servicios con Docker activo y comprobar health check, migraciones y persistencia. | Pendiente; daemon no disponible durante la última validación. |
+| BL-09 | Cerrar decisiones académicas | Documentar respuesta sobre MongoDB/Mongoose, cliente web y stack compartido. | Pendiente de confirmación docente. |
+| BL-10 | Revisar artefactos de arquitectura | Alinear C1/C2, SAD, contratos, índice y código con el alcance conversacional actual. | En curso. |
+| BL-11 | Preparar evidencia reproducible | Registrar fecha, versión, entorno, pasos y resultado para cada criterio que se afirme verificado. | En curso. |
 
-## Orden de trabajo recomendado
+## 3. Secuencia recomendada
 
-1. **Preparar acceso local:** Marializ aplica migraciones y crea el propietario; Eva verifica instrucciones y health check.
-2. **Cerrar catálogo protegido:** Marializ termina pruebas de integración con PostgreSQL; Luis revisa token y aislamiento entre dos negocios.
-3. **Desbloquear decisiones académicas:** Eva registra respuestas docentes sobre Mongo/Mongoose, frontend web y transición de backend.
-4. **Congelar el contrato del MVP:** Eva, Marializ y Luis acuerdan el contrato; Kevin ajusta prototipo a esos flujos.
-5. **Implementar el recorrido vertical:** catálogo autorizado → venta manual → almacenamiento local → Outbox → API → PostgreSQL.
-6. **Reintentar sin duplicar:** mismo UUID, resultados por evento y conciliación explícita; no usar LWW para reemplazar una venta.
-7. **Añadir voz y evaluación:** Christian y Kevin integran reconocimiento de intención solo después de que la venta manual sea confiable.
-8. **Revisar evidencia:** cada responsable hace demo; otra integrante repite los pasos; Eva verifica rúbrica y fecha del cronograma.
+1. Resolver sesión móvil y Gradle Wrapper.
+2. Ejecutar pruebas de unidad, build y backend con la configuración del proyecto.
+3. Validar llamadas, mensajes, alarma, linterna y otros permisos en dispositivo.
+4. Probar fallback cloud con credenciales exclusivamente del lado servidor.
+5. Validar Outbox y reintentos idempotentes.
+6. Ejecutar el protocolo de campo y actualizar [resultados](14_Resultados_de_Pruebas.md).
+7. Revisar la entrega y los requisitos pendientes por asignatura.
 
-## Reglas de gestión
+## 4. Reglas de gestión
 
-- Cada historia pasa a GitHub Issue con alcance pequeño, responsable, prioridad, dependencia y aceptación comprobable.
-- Columnas sugeridas: `Backlog`, `Ready`, `In progress`, `Review`, `Done`; una persona no cierra su propio trabajo sin revisión cruzada.
-- Registrar decisiones de stack, alcance, datos y fechas; no cambiar código, README y diagramas en direcciones distintas.
-- R3 (choque de evaluaciones) se gestiona en el cronograma: congelar opcionales antes de entregas y cortar alcance antes que ocultar retrasos.
-- R6 (ausencia/rotación) se mitiga con instrucciones reproducibles, revisora suplente y conocimiento compartido; no transferir secretos en el repositorio.
+- Gestionar cada elemento como issue pequeño, con responsable, dependencias y aceptación comprobable.
+- Usar estados coherentes: `Pendiente`, `En curso`, `Bloqueado` y `Verificado`.
+- Cambiar a `Verificado` solo con evidencia reproducible; un documento de diseño no demuestra ejecución.
+- Integrar cambios mediante PR y revisión cruzada.
+- No guardar credenciales, información personal ni audio identificable en el repositorio.

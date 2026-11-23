@@ -87,8 +87,5 @@ fun LoginScreen(nav: NavController, vm: LoginViewModel = viewModel()) {
             }
             Spacer(Modifier.size(8.dp))
         }
-        TextButton(onClick = { nav.navigate("onboarding_plantilla") }) {
-            Text("¿Primera vez? Configurar negocio", color = VerdeNeon)
-        }
     }
 }

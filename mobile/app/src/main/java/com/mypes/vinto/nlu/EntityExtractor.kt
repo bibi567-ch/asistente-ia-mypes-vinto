@@ -2,18 +2,14 @@ package com.mypes.vinto.nlu
 
 class EntityExtractor {
     data class Entidades(
-        val producto: String? = null,
-        val cantidad: Double? = null,
-        val unidad: String? = null,
-        val monto: Double? = null,
-        val cliente: String? = null,
-        val formaPago: String? = null
-    )
-
-    private val unidades = listOf(
-        "cuartilla", "arroba", "amarrito", "amarre", "caja", "unidad",
-        "docena", "kilo", "litro", "metro", "medio", "cuarto", "entero",
-        "plato", "vaso", "bolsa"
+        val contacto: String? = null,
+        val numeroTelefono: String? = null,
+        val mensaje: String? = null,
+        val hora: Int? = null,
+        val minutos: Int? = null,
+        val nombreApp: String? = null,
+        val textoALeer: String? = null,
+        val linternaEncendida: Boolean = true
     )
 
     private val palabrasANumeros = mapOf(
@@ -34,12 +30,16 @@ class EntityExtractor {
     fun extraer(texto: String): Entidades {
         val normalizado = normalizarNumerosHablados(texto.lowercase())
         return Entidades(
-            producto = extraerProducto(normalizado),
-            cantidad = extraerNumeros(normalizado).firstOrNull(),
-            unidad = unidades.firstOrNull(normalizado::contains),
-            monto = extraerMonto(normalizado),
-            cliente = extraerCliente(normalizado),
-            formaPago = extraerFormaPago(normalizado)
+            contacto = extraerContacto(normalizado),
+            numeroTelefono = Regex("""\d{7,15}""").find(normalizado)?.value,
+            mensaje = extraerMensaje(normalizado),
+            hora = Regex("""(\d{1,2})(?:\s*:|\s+y\s+)?""").find(normalizado)?.groupValues?.get(1)?.toIntOrNull(),
+            minutos = Regex("""(?:y\s+|:)(\d{1,2})""").find(normalizado)?.groupValues?.get(1)?.toIntOrNull(),
+            nombreApp = Regex("""(?:abrir|abre|kichay)\s+(?:la\s+)?(?:app\s+)?([a-záéíóúñ]+)""")
+                .find(normalizado)?.groupValues?.get(1),
+            textoALeer = Regex("""(?:lee|leer)\s+(?:en voz alta\s+)?(.+)""")
+                .find(normalizado)?.groupValues?.get(1),
+            linternaEncendida = !normalizado.contains("apaga") && !normalizado.contains("apagar")
         )
     }
 
@@ -51,29 +51,11 @@ class EntityExtractor {
             it.value.replace(',', '.').toDoubleOrNull()
         }.toList()
 
-    private fun extraerProducto(texto: String): String? {
-        val palabras = texto.split(" ")
-        palabras.forEachIndexed { indice, palabra ->
-            if (palabra == "de" && indice + 1 < palabras.size) return palabras[indice + 1]
-            if (palabra.startsWith("vend") && indice + 1 < palabras.size) {
-                val siguiente = palabras[indice + 1]
-                if (!siguiente.all(Char::isDigit)) return siguiente
-            }
-        }
-        return null
-    }
-
-    private fun extraerMonto(texto: String): Double? =
-        Regex("""(\d+(?:[.,]\d+)?)\s*(?:bolivianos?|bs\.?|pesos?)""")
-            .find(texto)?.groupValues?.get(1)?.replace(',', '.')?.toDoubleOrNull()
-
-    private fun extraerCliente(texto: String): String? =
-        Regex("""(?:a|para)\s+(?:doña|don|casera|casero)\s+(\w+)""")
+    private fun extraerContacto(texto: String): String? =
+        Regex("""(?:llama(?:r)?\s+a|mensaje\s+a|envía\s+un\s+mensaje\s+a)\s+([a-záéíóúñ]+)""")
             .find(texto)?.groupValues?.get(1)
 
-    private fun extraerFormaPago(texto: String): String? = when {
-        "fiado" in texto -> "FIADO"
-        "al contado" in texto || "al tiro" in texto -> "CONTADO"
-        else -> null
-    }
+    private fun extraerMensaje(texto: String): String? =
+        Regex("""(?:diciendo|que diga|mensaje(?:\s+a\s+\w+)?)\s+(.+)$""", RegexOption.IGNORE_CASE)
+            .find(texto)?.groupValues?.get(1)
 }
