@@ -69,6 +69,7 @@ fun LoginScreen(nav: NavController, vm: LoginViewModel = viewModel()) {
         verticalArrangement = Arrangement.Center
     ) {
         Text("🎤", fontSize = 42.sp)
+        Text("IA Vinto", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = VerdeNeon)
         Text("Ingresa a tu cuenta", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = TextoBlanco)
         Text("Usa tu carnet, celular o correo y tu PIN", color = TextoGris)
         Spacer(Modifier.size(20.dp))

@@ -1,6 +1,6 @@
-# Bitácora de evidencias y resultados
+# Registro de pruebas y evidencias
 
-Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas automatizadas y pruebas funcionales. No se infieren resultados de un commit ni se inventan evidencias.
+Bitácora cronológica de las comprobaciones registradas para el proyecto. Cada entrada identifica su alcance y distingue compilaciones, pruebas automatizadas y validaciones funcionales. Un resultado solo aplica a la revisión y al entorno indicados.
 
 ## Historial previo: funcionalidades y validaciones técnicas
 
@@ -9,26 +9,18 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Validaciones técnicas reportadas en la sesión previa:** build backend, chequeo de tipos, 8 pruebas unitarias, 6 pruebas de integración PostgreSQL y compilación Android debug finalizaron correctamente.
 - **Límite de esta constancia:** no se conservaron el enlace de CI, la fecha exacta ni los logs primarios. Es un antecedente de trabajo, no evidencia de GitHub Actions ni prueba funcional manual. Las pruebas funcionales de Android permanecen pendientes de capturas.
 
-## Fase 0: Evidencia visual del login Android
+## Fase 0: Carga de la pantalla inicial de acceso
 
 - **Fecha:** 2026-11-10
-- **Qué se probó:** se lanzó la app en un dispositivo Android conectado y se capturó la pantalla de login inicial.
-- **Resultado observado:** la pantallla de acceso cargó correctamente con el campo de carnet/celular/correo y la entrada del PIN con el botón de micrófono; la captura confirma la UI pero no la validación del dictado ni el acceso real del usuario.
+- **Escenario:** abrir la aplicación en un dispositivo Android conectado.
+- **Resultado observado:** se mostró la pantalla de acceso con los campos de identificación y PIN, además del control de micrófono.
 - **Evidencia:** ![Login local en dispositivo Android](evidencias/01_login/mypes_login.png)
-- **Estado:** evidencia de interfaz disponible; la validación funcional completa del PIN por voz y el acceso con credenciales sigue pendiente.
+- **Alcance:** confirma la carga visual inicial; no verifica el PIN, el dictado ni el acceso con credenciales. Esos escenarios permanecen pendientes.
 
-## Fase 0b: Plantilla de captura para login y registro
+## Estado de evidencia para acceso y registro
 
-- **Qué se necesita:** grabar la prueba funcional completa de login con PIN local y de registro persistido en PostgreSQL.
-- **Regla de integridad:** no se marca aprobada la prueba funcional de Android sin una captura o video en `docs/evidencias/`. Se usa la siguiente plantilla solo como referencia para insertar la evidencia real cuando exista.
-- **Markdown a insertar una vez se disponga de la captura real:**
-
-```markdown
-![Login exitoso](evidencias/01_login/login_exitoso.png)
-![Registro en PostgreSQL](evidencias/01_login/registro_en_postgres.png)
-```
-
-- **Estado actual:** las capturas `login_exitoso.png` y `registro_en_postgres.png` siguen pendientes; no se publican como evidencia aunque el flujo haya sido implementado y se haya validado la compilación.
+- Las capturas que demostrarían un acceso exitoso y un registro confirmado en PostgreSQL aún no están disponibles.
+- La implementación y la compilación no sustituyen esa evidencia funcional. Los casos se mantienen pendientes en el [plan de pruebas](04_Plan_de_Pruebas.md).
 
 ## Fase 1: Cambios Android recientes
 
@@ -58,15 +50,16 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Fecha:** 2026-11-10
 - **Qué se probó:** intento de preparar/migrar la base de pruebas local para ejecutar `npm run test:integration`.
 - **Resultado obtenido:** BLOQUEADO; PostgreSQL rechazó la autenticación para el usuario `mypes_test`. No se pudo confirmar el resultado de integración local.
-- **Acción pendiente:** ejecutar el workflow, que configura un PostgreSQL temporal con credenciales de prueba aisladas, y registrar su resultado real.
-- **Evidencia:** pendiente; enlazar el workflow o guardar una captura anonimizada en `evidencias/08_backend/`.
+- **Estado al momento del intento:** pendiente; la instancia local no permitió confirmar las pruebas.
+- **Seguimiento:** la suite de migraciones e integración sí pasó posteriormente en el [run de GitHub Actions 43157514411](https://github.com/bibi567-ch/asistente-ia-mypes-vinto/actions/runs/43157514411), con PostgreSQL 16 temporal. Ver Fase 16; ese resultado no convierte el intento local en exitoso.
+- **Evidencia:** conservar el bloqueo local como antecedente y usar el enlace al run para el resultado de CI.
 
 ## Fase 5: Pruebas funcionales en dispositivo
 
 - **Fecha:** pendiente
-- **Qué se probó:** pendiente de confirmación por el equipo.
-- **Resultado obtenido:** PENDIENTE. No hay capturas/videos confirmados en `evidencias/`.
-- **Evidencia:** añadir una entrada por escenario solo después de ejecutar la prueba y guardar su captura/video.
+- **Escenario ejecutado:** no registrado en esta bitácora.
+- **Resultado:** PENDIENTE. No se dispone de capturas o videos que acrediten los flujos funcionales completos.
+- **Evidencia requerida:** registrar cada escenario después de ejecutarlo y guardar su captura/video anonimizado.
 
 ## Fase 6: Pruebas unitarias JVM de NLU y PIN
 
@@ -138,7 +131,8 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Fecha:** 2026-11-10
 - **Qué se implementó:** Room v6 conserva los campos anteriores y añade nombres, apellidos, expedición y datos de nacimiento; el login local busca por carnet, celular o correo y ya no crea una cuenta al introducir un PIN en una base vacía. Se añadió extracción unitaria de cuatro dígitos hablados. Registro envía los datos del perfil al backend; la contraseña se almacena como hash scrypt en PostgreSQL y no se conserva en Room. El onboarding guarda nombre/rubro localmente y los actualiza en el negocio asociado al token. Si el registro fue offline, Sincronización permite volver a ingresar correo/contraseña para crear la cuenta con el perfil local.
 - **Android:** `:app:testDebugUnitTest :app:assembleDebug` finalizó correctamente con SDK explícito. JUnit reportó 9 pruebas, 0 fallos, 0 errores y 0 omitidas. La prueba incluye extracción de PIN hablado y casos ambiguos. La compilación no valida el flujo ni la migración Room en un dispositivo.
-- **Backend:** `npm run build`, `npm run typecheck:test` y `npm test` finalizaron correctamente; 8 pruebas unitarias pasaron. `npm run test:integration` terminó con 10 fallos y 0 aprobadas porque PostgreSQL rechazó la autenticación para `mypes_local`; Docker Desktop tampoco estaba disponible para iniciar la base temporal. La migración 005 y el endpoint de actualización del negocio no se verificaron contra PostgreSQL; REG-08 queda BLOQUEADO.
+- **Backend en la revisión de esa fase:** `npm run build`, `npm run typecheck:test` y `npm test` finalizaron correctamente; 8 pruebas unitarias pasaron. `npm run test:integration` tuvo 10 fallos y 0 aprobadas porque PostgreSQL rechazó la autenticación para `mypes_local`; Docker Desktop tampoco estaba disponible para iniciar la base temporal. Ese intento local quedó bloqueado.
+- **Seguimiento posterior:** el workflow de `main` ejecutó las migraciones y la suite de integración en PostgreSQL temporal con éxito (ver [Fase 16](#fase-16-ejecución-verificada-del-workflow-backend-en-main)). Esto valida CI para la revisión indicada allí, no la prueba local ni los flujos funcionales Android.
 - **Estado funcional Android:** PENDIENTE de ejecutar login por identificador/voz, registro, onboarding y migración 4→6 en dispositivo. No se generó captura/video ni se marca ninguna prueba funcional como aprobada.
 - **Evidencia:** reportes JUnit locales en `mobile/app/build/test-results/testDebugUnitTest/`; captura funcional pendiente en `evidencias/01_login/`, `evidencias/02_onboarding/` y `evidencias/06_chat_ia/`.
 
@@ -152,9 +146,20 @@ Registro incremental. Cada entrada distingue comprobaciones técnicas, pruebas a
 - **Backend:** desde `backend/`, `npm run build`, `npm run typecheck:test` y `npm test` finalizaron correctamente; 11 pruebas, 0 fallos. Incluye autenticación/rechazo de payload inválido para los endpoints nuevos y aislamiento unitario del bus de eventos.
 - **Integridad de iteración:** durante el desarrollo, una compilación Kotlin inicial detectó un error de tipo y una ejecución intermedia detectó un fallo en el fixture de prueba; se corrigieron y la ejecución final descrita arriba pasó.
 - **Comprobación de diff:** `git diff --check` finalizó sin errores.
-- **Pendiente:** no se ejecutaron `npm run test:integration` ni la migración 006 contra PostgreSQL. Tampoco se validaron factura/QR persistidos, transporte SSE real, interfaz en un dispositivo, ni un LLM o respuestas reales en quechua/aymara. No hay evidencia funcional ni ejecución GitHub Actions asociada.
+- **Estado al momento de la fase:** la integración local y la migración 006 aún no se habían confirmado. Posteriormente el workflow de `main` aplicó las migraciones y ejecutó la suite de integración con éxito (ver Fase 16); ese run no debe tomarse como prueba específica de los flujos factura/QR si no están cubiertos por sus casos.
+- **Pendiente:** no se validaron factura/QR persistidos desde cliente, transporte SSE real, interfaz en un dispositivo, ni un LLM o respuestas reales en quechua/aymara.
 - **Datos de plantillas:** no se encontró el documento fuente citado para Farmacia Eliana/Pastelería Pampas; los precios y porcentajes cargados son ejemplos editables, no datos confirmados como exactos.
 - **Estado funcional Android:** PENDIENTE de validar en dispositivo; no se declara aprobada ninguna prueba funcional.
+
+## Fase 16: Ejecución verificada del workflow backend en `main`
+
+- **Fecha:** 2026-11-12 (UTC).
+- **Revisión:** `03afcbd58e5d91a7374b52768e50061aaeb9fab9`.
+- **Ejecución:** [GitHub Actions run 43157514411](https://github.com/bibi567-ch/asistente-ia-mypes-vinto/actions/runs/43157514411).
+- **Qué se ejecutó:** `npm ci`, `npm run db:migrate`, `npm run build`, `npm run typecheck:test`, `npm test` y `npm run test:integration` con PostgreSQL 16 temporal.
+- **Resultado observado:** todos los pasos y el job `verify` finalizaron con `success`.
+- **Alcance:** evidencia CI del backend para esa revisión. No valida UI Android, reconocimiento acústico, migración Room en el teléfono, conexión física móvil–API, HTTPS productivo, ni los endpoints de factura/QR mediante persistencia end-to-end.
+- **Relación con registros anteriores:** la fase 14 documenta un bloqueo de integración local; este run posterior valida migraciones e integración en el entorno aislado de CI, sin borrar el registro histórico del intento local.
 
 ### Fase [n]: [módulo y escenario]
 

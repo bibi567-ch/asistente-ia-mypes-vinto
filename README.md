@@ -1,41 +1,45 @@
 # Asistente conversacional offline para MYPES de Vinto
 
-Prototipo de asistente configurable por rubro para registrar ventas y consultar el saldo local de existencias en MYPES del centro de Vinto, Cochabamba. Universidad Adventista de Bolivia, Carrera de Ingeniería en Sistemas.
+**Proyecto integrador · Ingeniería en Sistemas · Universidad Adventista de Bolivia**
 
-El proyecto busca guardar primero en el teléfono y funcionar sin red durante la atención. No es un sistema completo de almacén: compras a proveedores, lotes, costos, facturación, cobro QR y otros módulos están fuera del alcance vigente.
+Prototipo móvil local-first para registrar ventas y consultar existencias en micro y pequeñas empresas de Vinto, Cochabamba. La información de operación se conserva primero en el teléfono; la sincronización con el servidor ocurre después, cuando hay conexión y una cuenta API vinculada.
 
-## Estado del repositorio
+> **Corte documental:** 13 de noviembre de 2026 · revisión base `03afcbd` · rama local `feature/update-doc`. Esta copia de documentación no se ha publicado.
 
-Corte documental: 19/10/2026. Rama revisada: main, commit ec9028b.
+## En pocas palabras
 
-- El backend es Node.js, TypeScript, Express y PostgreSQL. Su README describe login de propietario, catálogo protegido y recepción idempotente de lotes; el servicio está pensado para pruebas locales.
-- El módulo Android está en mobile/: Kotlin, Jetpack Compose y persistencia local con Room. El código incluye login local con PIN, onboarding, dashboard, inventario y componentes de PLN/voz.
-- El usuario reportó que instaló la app en un Motorola G60 y pudo guardar un producto de prueba. Esa prueba debe archivarse en evidence/ con pasos, fecha, entorno y commit para que sea repetible.
-- El código móvil también contiene modelos de venta, outbox, WorkManager y cliente Retrofit. La integración completa móvil–API, especialmente desde un teléfono físico, todavía debe probarse. El cliente usa 10.0.2.2, dirección habitual del emulador Android, y el PIN local no equivale al token del backend.
-- No hay una opción de interfaz para eliminar productos en la pantalla de inventario revisada. No afirmar que esa función está implementada.
-- El modelo Vosk no se versiona en Git. El reconocimiento debe probarse después de instalar localmente el modelo requerido.
-- La rama contiene código fuente, no un APK de distribución publicado. Una instalación local exitosa no certifica todas las funciones.
+- **Aplicación:** Android nativo con Kotlin y Jetpack Compose.
+- **Datos locales:** Room/SQLite con SQLCipher; esquema Room versión 6.
+- **Servidor:** Node.js 24, TypeScript, Express y PostgreSQL.
+- **Asistencia por voz:** Vosk más extracción y clasificación basadas en reglas Kotlin. Yapay es demostrativo y solicita confirmación; no es un LLM.
+- **Estado de validación:** CI del backend aprobado para la revisión indicada; pruebas Android en dispositivo y sincronización integral teléfono–API todavía requieren evidencia.
 
-Consulta el estado, los criterios por materia y las brechas en la [Matriz de cumplimiento y evidencias](docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md).
+## Qué permite el prototipo
 
-## Justificación del stack
+La aplicación incluye acceso local mediante identificador y PIN, configuración inicial del negocio, inventario local, ventas, consulta de fiados, reportes y asistencia de voz. El PIN local es distinto de la autenticación remota: la API usa correo, contraseña y JWT.
 
-El backend usa Node.js 24, TypeScript y Express; Node.js/Express coincide con la unidad de backend de Tecnologías en Internet. PostgreSQL es la base central elegida para las relaciones entre negocios, productos, ventas y operaciones, y para sus restricciones y transacciones. La app Android guarda sus datos locales con Room/SQLite.
+El backend ofrece registro e inicio de sesión, catálogo por negocio, recepción idempotente de eventos, y endpoints de factura simulada, QR y SSE. La API no mantiene un saldo remoto completo de ventas fiadas. Los productos creados solo en el teléfono tampoco se cargan automáticamente al catálogo remoto.
 
-La materia también incluye MongoDB/Mongoose y front-end web HTML/CSS/JavaScript. PostgreSQL no reemplaza MongoDB, y Android Compose no reemplaza un front-end web. La razón técnica del stack y las opciones académicas pendientes de confirmar están en el [plan de segunda entrega por materia](docs/14_Segunda_Entrega_Tareas_por_Materia.md).
+La factura PDF es de demostración, no fiscal; no existe integración con el SIN. La voz depende de instalar el modelo Vosk. La presencia de una pantalla o endpoint en el código no demuestra por sí sola que el flujo completo haya sido probado.
 
-## Arquitectura resumida
+## Arquitectura
 
 ```mermaid
 flowchart LR
-  U[Comerciante] --> A[Android Kotlin / Compose]
-  A --> L[Room / SQLite local]
-  L --> O[Outbox y trabajo diferido]
-  O -->|cuando se configure y valide la conexión| API[Node.js / Express]
+  U[Comerciante] --> A[Aplicacion Android]
+  A --> L[(Room / SQLite cifrado)]
+  A --> O[Outbox y WorkManager]
+  O -->|con conexión y JWT| API[API Node.js / Express]
   API --> PG[(PostgreSQL)]
 ```
 
-Este dibujo resume la arquitectura prevista; no prueba que todos los enlaces estén conectados en el dispositivo. El SAD 1.1 conserva una entrega anterior que incluye decisiones basadas en Spring Boot. La arquitectura vigente debe documentarse como una versión nueva y coherente con el código Node.js.
+La base local conserva las operaciones del teléfono. PostgreSQL gestiona cuentas, negocios, catálogo y recepción de eventos de sincronización. Para componentes, límites y flujos, consulta [Arquitectura actual](docs/02_Arquitectura_SAD.md).
+
+## Decisiones tecnológicas y alcance académico
+
+PostgreSQL responde al modelo actual de propietarios, negocios, productos y operaciones relacionadas: el esquema existente usa migraciones SQL, relaciones, restricciones únicas y transacciones. Room/SQLite cubre el almacenamiento local necesario para operar sin conexión. Incorporar MongoDB/Mongoose para duplicar los mismos datos añadiría sincronización y mantenimiento sin una necesidad funcional identificada; no se sostiene esta decisión afirmando que MongoDB carezca de transacciones.
+
+La segunda entrega también solicita evidencias de MongoDB/Mongoose y una aplicación web. Este repositorio usa PostgreSQL y Android, que **no son equivalentes** a esos requisitos. La pertinencia de una demostración NoSQL separada o de una ampliación web debe confirmarse con la docente antes de afirmar cumplimiento. La explicación completa está en el [informe técnico](docs/Informe_Segunda_Entrega_TI.md).
 
 ## Inicio local del backend
 
@@ -44,13 +48,16 @@ Hace falta Node.js 24, npm y Docker Desktop con Compose. Desde la raíz del repo
 ```powershell
 docker compose up -d postgres
 Copy-Item backend/.env.example backend/.env
+$secret = node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))"
+(Get-Content backend/.env) -replace '^JWT_SECRET=.*$', "JWT_SECRET=$secret" | Set-Content -Encoding ascii backend/.env
 Set-Location backend
 npm ci
 npm run db:migrate
+npm run admin:create-owner -- "MYPE de prueba" "propietario@example.test"
 npm run dev
 ```
 
-La comprobación de salud local está en http://127.0.0.1:3000/api/v1/health. Para login y catálogo, sigue el [README del backend](backend/README.md). No publiques backend/.env ni uses datos reales.
+El alta genera una contraseña temporal para uso local; consérvala en privado y cámbiala según el [README del backend](backend/README.md). Comprueba la salud en http://127.0.0.1:3000/api/v1/health. No publiques `backend/.env` ni uses datos reales.
 
 Para compilar e instalar Android, abre mobile/ en Android Studio, sincroniza Gradle, selecciona el teléfono/emulador y ejecuta la variante debug. La sincronización hacia la API debe tratarse como una prueba aparte.
 
@@ -58,12 +65,16 @@ Para compilar e instalar Android, abre mobile/ en Android Studio, sincroniza Gra
 
 | Documento | Propósito |
 |---|---|
-| [Matriz de cumplimiento](docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md) | Criterios de ARQ-643, TEC-644 e INV-645, estados y evidencias por reunir |
-| [Mapa del trabajo](docs/MAPA_PRESENTACION.md) | Relación del proyecto con las tres materias |
-| [Perfil de Investigación I](docs/perfil/Perfil_final.md) | Perfil de Trabajo de Grado, versión 11 |
+| [Índice documental](docs/00_Indice.md) | Documentos vigentes, documentos académicos y archivos históricos |
 | [Proyecto y alcance](docs/01_Proyecto_y_Alcance.md) | Alcance vigente y exclusiones |
-| [Requisitos y UX/UI](docs/02_Requisitos_y_UX.md) | Requisitos y diseño |
-| [SAD](docs/03_SAD_Arquitectura.md) | SAD 1.1 entregado y nota sobre su estado |
+| [Requisitos y UX/UI](docs/02_Requisitos_y_UX.md) | Línea base académica y nota de implementación |
+| [Arquitectura actual](docs/02_Arquitectura_SAD.md) | Componentes implementados y límites verificados |
+| [Manual de usuario](docs/03_Manual_de_Usuario.md) | Flujos disponibles y precauciones de uso |
+| [Plan de pruebas](docs/04_Plan_de_Pruebas.md) | Casos funcionales y automatizados |
+| [Resultados](docs/05_Resultados_de_Pruebas.md) | Bitácora de ejecuciones confirmadas |
+| [Guía de ejecución](docs/06_Guia_de_Despliegue.md) | Instalación y configuración local paso a paso |
+| [CI/CD](docs/07_CI_CD_Report.md) | Ejecuciones reales de GitHub Actions |
+| [SAD académico](docs/03_SAD_Arquitectura.md) | SAD 1.1 histórico, con las decisiones originales |
 | [Informe de Segunda Entrega - TI](docs/Informe_Segunda_Entrega_TI.md) | Informe técnico de alcance, requisitos, arquitectura, persistencia y API |
 | [Backend](backend/README.md) | Inicio local, autenticación, catálogo y API |
 | [Android](mobile/README.md) | Módulo móvil y estado de integración |
@@ -78,7 +89,6 @@ Eva Lizeth Chino Quispe, Christian Gonzales Mamani, Marializ Mamani Quispe, Kevi
 
 ## Diseño
 
-- [Prototipo en Figma]([https://snake-dijon-92194767.figma.site/](https://www.figma.com/make/detrwbrxCanqoPjHb9TjwX/Mockup-Improvement-Request--Community---copia---copia-?p=f&t=qANDWN72XqQ9Pt4y-0))
+- [Figma vigente del proyecto](https://www.figma.com/make/detrwbrxCanqoPjHb9TjwX/Mockup-Improvement-Request--Community---copia---copia-?p=f&t=qANDWN72XqQ9Pt4y-0)
 
-
-Figma muestra una propuesta de interfaz; no reemplaza la aplicación ni una prueba de funcionamiento.
+Figma es la referencia visual vigente; no reemplaza la aplicación Android, no demuestra que cada pantalla esté implementada y no constituye una prueba funcional.

@@ -1,0 +1,23 @@
+@startuml C2_Gateway
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+Person(comerciante, "Comerciante de Vinto")
+System_Boundary(android, "Telefono Android") {
+  Container(app, "App IA Vinto", "Kotlin, Jetpack Compose")
+  Container(vosk, "ASR local", "Vosk")
+  ContainerDb(room, "Base local", "Room + SQLCipher")
+}
+System_Boundary(nube, "Nube") {
+  Container(gw, "API Gateway", "Node.js, Express, opossum", "JWT, rate limit, Circuit Breaker")
+  Container(auth, "Autenticacion", "Node.js")
+  Container(sync, "Sincronizacion", "Node.js")
+  Container(ia, "ASR en linea", "MMS")
+  ContainerDb(db, "Base central", "PostgreSQL 16")
+}
+Rel(comerciante, app, "Voz o toque")
+Rel(app, vosk, "Audio PCM")
+Rel(app, gw, "HTTPS + JWT")
+Rel(gw, auth, "HTTP")
+Rel(gw, sync, "HTTP (breaker)")
+Rel(gw, ia, "HTTP (breaker, timeout 2 s)")
+Rel(sync, db, "SQL")
+@enduml

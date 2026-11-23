@@ -61,6 +61,17 @@ interface VentaDao {
     @Query("SELECT COUNT(*) FROM ventas WHERE creadoEn >= :desde")
     fun observarCantidadDesde(desde: Long): Flow<Int>
 
+    @Query("SELECT * FROM movimientos_caja ORDER BY creadoEn DESC")
+    fun observarMovimientos(): Flow<List<MovimientoCaja>>
+
+    @Query(
+        """SELECT p.nombre AS nombre, SUM(d.cantidad) AS cantidad, SUM(d.cantidad * d.precioUnitario) AS total
+           FROM detalle_ventas d INNER JOIN productos p ON p.id = d.productoId
+           GROUP BY d.productoId, p.nombre
+           ORDER BY total DESC"""
+    )
+    fun observarRanking(): Flow<List<RankingProducto>>
+
     @Query("SELECT COALESCE(SUM(monto), 0) FROM movimientos_caja WHERE tipo = 'INGRESO'")
     fun observarTotalCaja(): Flow<Double>
 

@@ -1,0 +1,12 @@
+digraph S {
+  graph [rankdir=LR, fontname="Helvetica", bgcolor="white", pad=0.3, nodesep=0.6];
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=12, fontcolor="white", width=1.6, height=0.7];
+  edge [fontname="Helvetica", fontsize=9.5];
+  C [label="CERRADO\nlas llamadas pasan", fillcolor="#27AE60"];
+  A [label="ABIERTO\nfallback inmediato\n(sin llamar a la IA)", fillcolor="#C0392B"];
+  H [label="SEMIABIERTO\nuna llamada de prueba", fillcolor="#E67E22"];
+  C -> A [label="fallos ≥ 50 % con ≥ 4 llamadas\nen la ventana de 10 s"];
+  A -> H [label="pasan 10 s\n(resetTimeout)"];
+  H -> C [label="la prueba funciona"];
+  H -> A [label="la prueba falla"];
+}

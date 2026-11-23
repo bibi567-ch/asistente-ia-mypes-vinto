@@ -1,0 +1,27 @@
+C4Container
+title Contenedores - IA Vinto con API Gateway y Circuit Breaker
+Person(comerciante, "Comerciante de Vinto", "Castellano, quechua o quechuañol")
+System_Boundary(android, "Telefono Android") {
+  Container(app, "App IA Vinto", "Kotlin, Jetpack Compose", "Interfaz de voz y texto")
+  Container(agente, "Agente Yapay", "Kotlin", "Intenciones, entidades, confirmacion y acciones")
+  Container(vosk, "ASR local", "Vosk", "Reconocimiento sin conexion")
+  ContainerDb(room, "Base local", "Room + SQLCipher", "Datos y cola Outbox")
+  Container(outbox, "Sincronizador", "WorkManager", "Reintentos con backoff")
+}
+System_Boundary(nube, "Nube - Docker Compose") {
+  Container(gw, "API Gateway", "Node.js, Express, opossum", "JWT en el borde, limite de tasa, Circuit Breaker")
+  Container(auth, "Autenticacion", "Node.js", "Emite JWT HS256")
+  Container(sync, "Sincronizacion", "Node.js", "Lotes idempotentes")
+  Container(ia, "ASR en linea", "Modelo MMS", "Quechua del sur de Bolivia")
+  ContainerDb(db, "Base central", "PostgreSQL 16")
+}
+Rel(comerciante, app, "Voz o toque")
+Rel(app, vosk, "Audio PCM 16 kHz")
+Rel(app, agente, "Texto reconocido")
+Rel(agente, room, "Lee y escribe")
+Rel(outbox, gw, "POST /api/v1/sync/batch", "HTTPS, JWT")
+Rel(app, gw, "POST /api/v1/asr/transcribe si confianza < 0,70", "HTTPS, JWT")
+Rel(gw, auth, "POST /login", "HTTP")
+Rel(gw, sync, "POST /sync/batch", "HTTP, breaker sync")
+Rel(gw, ia, "POST /asr/transcribe", "HTTP, breaker ia, timeout 2 s")
+Rel(sync, db, "SQL")

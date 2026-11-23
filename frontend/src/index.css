@@ -1,0 +1,30 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilo tomado del prototipo Figma Make (fondo oscuro, acento neón #00E676, Inter + Montserrat) */
+:root { color-scheme: dark; }
+html, body, #root { height: 100%; }
+body { font-family: Inter, system-ui, sans-serif; color: #fff; -webkit-tap-highlight-color: transparent; }
+
+@layer components {
+  .escena { background: radial-gradient(ellipse at 50% 0%, rgba(0,230,118,.10), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(41,121,255,.08), transparent 50%), #0A0A0A; }
+  .vidrio { background: rgba(24,24,27,.72); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(14px); }
+  .btn-neon { background: linear-gradient(135deg, #00E676, #00C853); color: #06130D; font-weight: 600; border-radius: 12px; box-shadow: 0 0 24px rgba(0,230,118,.25); transition: transform .15s, box-shadow .15s; }
+  .btn-neon:active { transform: scale(.98); }
+  .btn-neon:disabled { opacity: .5; box-shadow: none; }
+  .btn-borde { border: 1px solid rgba(0,230,118,.45); color: #00E676; border-radius: 12px; }
+  .btn-sutil { border: 1px solid #27272A; color: #A1A1AA; border-radius: 12px; }
+  .campo { width: 100%; background: #18181B; border: 1px solid #27272A; border-radius: 12px; padding: .8rem 1rem; color: #fff; outline: none; font-size: 16px; }
+  .campo:focus { border-color: rgba(0,230,118,.6); box-shadow: 0 0 0 3px rgba(0,230,118,.12); }
+  .etiqueta { display: block; font-size: .8rem; color: #90A4AE; margin-bottom: .35rem; }
+  .titulo { font-family: Montserrat, Inter, sans-serif; font-weight: 700; }
+}
+
+@keyframes pulso { 0% { transform: scale(1); opacity: .55 } 100% { transform: scale(1.9); opacity: 0 } }
+.anillo { position: absolute; inset: 0; border-radius: 9999px; border: 2px solid #00E676; animation: pulso 1.6s ease-out infinite; }
+.anillo.d2 { animation-delay: .5s } .anillo.d3 { animation-delay: 1s }
+@keyframes flotar { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-6px) } }
+.flotar { animation: flotar 4s ease-in-out infinite; }
+.sin-barra::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: reduce) { .anillo, .flotar { animation: none; } }

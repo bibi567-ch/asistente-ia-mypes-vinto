@@ -1,28 +1,22 @@
 # Reporte de Integración Continua (CI)
 
-El workflow [Backend](../.github/workflows/backend.yml) ejecuta en GitHub Actions, para los eventos configurados, la instalación reproducible, migraciones PostgreSQL, build, chequeo de tipos, pruebas unitarias y pruebas de integración. Cada ejecución publica automáticamente su resultado y enlace en el resumen del run.
+El workflow [Backend](../.github/workflows/backend.yml) instala dependencias, aplica migraciones PostgreSQL y ejecuta build, chequeo de tipos, pruebas unitarias y de integración. Los resultados se registran en los enlaces oficiales de GitHub Actions; esta tabla no sustituye los logs del run.
 
-## Historial de ejecuciones
+## Ejecuciones verificadas
 
-| Fecha UTC | Commit ID | Estado de Tests Unitarios | Estado de Tests de Integración (PostgreSQL) | Estado General | Ejecución |
+| Fecha UTC | Rama | Revisión | Resultado | Alcance | Ejecución |
 |---|---|---|---|---|---|
-| 2026-11-10 (local) | `c187bba` | ✅ Aprobado: 8/8 | ⚪ No verificado: autenticación local de PostgreSQL bloqueó la ejecución | ⚪ Parcial; no es CI | Sin enlace de GitHub Actions |
-| Pendiente de CI | Pendiente | Pendiente | Pendiente | Pendiente | Agregar aquí el enlace al run real |
+| 2026-11-12 | `main` | `03afcbd58e5d91a7374b52768e50061aaeb9fab9` | Éxito: instalación, PostgreSQL, migraciones, build, typecheck, unit e integración | Workflow backend con PostgreSQL 16 temporal. No prueba Android ni despliegue. | [Run 43157514411](https://github.com/bibi567-ch/asistente-ia-mypes-vinto/actions/runs/43157514411) |
+| 2026-11-12 | `dev` | `6ec2a28c3e4ece1651ef39e99c786a2fc715842e` | Éxito | Workflow backend; no equivale a validación funcional Android. | [Run 43150156269](https://github.com/bibi567-ch/asistente-ia-mypes-vinto/actions/runs/43150156269) |
 
-La fila local refleja únicamente `npm test` en el equipo de desarrollo; no debe interpretarse como evidencia de GitHub Actions. La segunda fila se completa cuando el workflow termine. No registrar ejemplos inventados ni checks verdes antes de observar el resultado.
+El run `43157514411` corresponde a la revisión base de esta rama documental. La prueba local bloqueada del 10/11 se conserva como antecedente en [Resultados](05_Resultados_de_Pruebas.md); no se reemplaza por una afirmación de que esa ejecución local haya pasado.
 
-## Evidencia visual de la última ejecución
+## Alcance no cubierto por CI
 
-[INSERTAR IMAGEN AQUÍ: Captura de pantalla de GitHub Actions mostrando el check verde y los 8 tests pasando]
+- Interfaz y flujos completos Android en un teléfono.
+- Reconocimiento acústico con Vosk, latencia o precisión.
+- Migración de una base Room existente en dispositivo.
+- Conexión física Android–API, red pública o despliegue de producción.
+- Persistencia end-to-end de factura/QR y consumo real de eventos SSE.
 
-También se puede enlazar directamente el resumen de Actions, que conserva commit, fecha, estados por paso y logs:
-
-- **Enlace al último run:** pendiente de la primera ejecución del workflow después de este cambio.
-- **Captura:** guardar en `evidencias/08_backend/` y sustituir este marcador por `![Ejecución backend en GitHub Actions](evidencias/08_backend/github-actions-backend.png)`.
-
-## Observaciones
-
-- El job usa PostgreSQL efímero y no depende de la base de desarrollo local.
-- La ejecución local del 2026-11-10 completó build, chequeo de tipos y 8 pruebas unitarias; la base de integración local rechazó las credenciales de prueba proporcionadas y no permitió verificar integración.
-- El estado de integración queda pendiente hasta que GitHub Actions complete esa etapa correctamente.
-- Documentar aquí fallos reales, su diagnóstico, corrección y enlace al run posterior.
+Una captura aislada, una compilación Android o una ejecución de pruebas no debe presentarse como evidencia de los escenarios anteriores.

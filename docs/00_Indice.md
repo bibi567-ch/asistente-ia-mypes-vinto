@@ -1,22 +1,26 @@
 # Índice de documentación
 
-## Documentación operativa
+## Documentación vigente del proyecto
 
-1. [Requisitos y UX](01_Requisitos_y_UX.md) — índice hacia la especificación formal vigente.
-2. [Arquitectura actual](02_Arquitectura_SAD.md) — resumen de componentes implementados y límites frente al SAD académico existente.
-3. [Manual de usuario](03_Manual_de_Usuario.md) — guía de los flujos disponibles.
-4. [Plan de pruebas](04_Plan_de_Pruebas.md) — casos funcionales y automatizados, con estados verificables.
-5. [Resultados y evidencias](05_Resultados_de_Pruebas.md) — bitácora fechada de ejecuciones confirmadas.
-6. [Guía de configuración y despliegue local](06_Guia_de_Despliegue.md).
-7. [Reporte CI/CD](07_CI_CD_Report.md) — registro de ejecuciones reales de GitHub Actions.
-8. [Informe de Segunda Entrega - Tecnologías en Internet](Informe_Segunda_Entrega_TI.md) — alcance, trazabilidad, arquitectura, persistencia, API y ejecución local.
+1. [Proyecto y alcance](01_Proyecto_y_Alcance.md): propósito, límites y tecnologías.
+2. [Requisitos y UX — resumen operativo](01_Requisitos_y_UX.md): requisitos relevantes observados y límites de verificación.
+3. [Especificación formal de requisitos y UX](02_Requisitos_y_UX.md): línea base académica v1.1 más su nota de implementación.
+4. [Arquitectura actual](02_Arquitectura_SAD.md): componentes y conexiones presentes en el código, con limitaciones explícitas.
+5. [Manual de usuario](03_Manual_de_Usuario.md): pasos para los flujos implementados y fallos previsibles.
+6. [Plan de pruebas](04_Plan_de_Pruebas.md): escenarios y estados pendientes/aprobados.
+7. [Resultados de pruebas](05_Resultados_de_Pruebas.md): bitácora de comprobaciones con fecha, alcance y evidencia.
+8. [Guía de ejecución local](06_Guia_de_Despliegue.md): preparación de Android, API y PostgreSQL.
+9. [CI/CD](07_CI_CD_Report.md): enlace a ejecuciones reales de GitHub Actions.
+10. [Informe de Segunda Entrega — Tecnologías en Internet](Informe_Segunda_Entrega_TI.md): trazabilidad, arquitectura, persistencia, API, instalación y límites.
 
-La [guía del equipo](../COMO_DOCUMENTAR.md) define cómo agregar resultados y evidencias en `evidencias/`.
+## Fuentes y evidencias
 
-## Fuentes académicas y documentación existente
+- [Backend API](../backend/README.md) y [aplicación Android](../mobile/README.md).
+- [Fuentes de diagramas](../diagrams/README.md).
+- [Instrucciones para registrar evidencia](../evidence/README.md).
+- [Captura disponible del login](evidencias/01_login/README.md).
+- [Referencias históricas](archive/README.md). No usar como descripción de la implementación actual sin revisar su estado.
 
-- [Requisitos y UX formales](02_Requisitos_y_UX.md).
-- [SAD académico existente](03_SAD_Arquitectura.md); revisar la advertencia de vigencia antes de usarlo como descripción del backend actual.
-- [Matriz de cumplimiento](13_Matriz_Cumplimiento_Tres_Materias_2026-2.md).
-- [Plan de segunda entrega](14_Segunda_Entrega_Tareas_por_Materia.md).
-- [Referencias históricas](archive/README.md).
+## Criterio de vigencia
+
+El SAD [v1.1 entregado](03_SAD_Arquitectura.md) se conserva como artefacto académico histórico y contiene decisiones que ya no representan el backend implementado. Para describir el código actual, usar [Arquitectura actual](02_Arquitectura_SAD.md) y [Resultados de pruebas](05_Resultados_de_Pruebas.md). Ningún documento convierte por sí solo un requisito en evidencia de cumplimiento.

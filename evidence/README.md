@@ -1,6 +1,6 @@
 # Evidencias
 
-Guardar aquí registros revisables y anonimizados que demuestren los criterios de las materias. Relacionar cada archivo con un ID de la [Matriz de cumplimiento](../docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md).
+Guardar aquí registros revisables y anonimizados de pruebas. Relacionar cada evidencia con un caso del [plan de pruebas](../docs/04_Plan_de_Pruebas.md) y registrar su resultado en la [bitácora](../docs/05_Resultados_de_Pruebas.md). La cobertura académica debe contrastarse además con las rúbricas originales; este repositorio no mantiene una matriz vigente de cumplimiento de las tres materias.
 
 ## Qué registrar
 
@@ -17,9 +17,9 @@ Cada evidencia debe indicar:
 
 Usar una ruta descriptiva, por ejemplo:
 
-evidence/TEC-644/2026-10-19/EV-API-01-healthcheck.md
+`docs/evidencias/08_backend/EV-API-01-healthcheck.md`
 
-Para capturas, conservar el mismo ID: EV-MOB-02-inventario.png. Registrar el procedimiento y el resultado en un archivo Markdown asociado.
+Para capturas, conservar el mismo ID, por ejemplo `docs/evidencias/05_inventario/EV-MOB-02-inventario.png`. Registrar el procedimiento, el resultado y el alcance en un archivo Markdown asociado.
 
 ## Privacidad y verificación
 

@@ -121,6 +121,10 @@ abstract class MypesDatabase : RoomDatabase() {
                     )
                         .openHelperFactory(factory)
                         .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_6)
+                        // Si el teléfono tiene una base de una versión MÁS NUEVA de la app (por ejemplo 7)
+                        // y se instala esta (6), Room no puede bajar de versión: se recrea la base local.
+                        // Solo ocurre al bajar de versión; las migraciones normales (1 → 6) no se tocan.
+                        .fallbackToDestructiveMigrationOnDowngrade()
                         .build()
                         .also { instancia = it }
                 }

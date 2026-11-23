@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yapay · Arquitectura en vivo</title>
+<style>
+  :root { --fondo:#0C110E; --panel:#161D19; --borde:#26302A; --texto:#EEF3EE; --suave:#A3B0A7;
+          --verde:#00E676; --rojo:#FF6B6B; --ambar:#FFB020; --azul:#4C8DFF; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--fondo); color:var(--texto); font:15px/1.45 system-ui, "Segoe UI", Inter, sans-serif; }
+  header { padding:18px 28px; border-bottom:1px solid var(--borde); display:flex; align-items:center; gap:16px; }
+  header h1 { font-size:20px; margin:0; }
+  header .sub { color:var(--suave); font-size:13px; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:99px; font-size:12px; font-weight:600; border:1px solid; }
+  main { display:grid; grid-template-columns: 1.15fr 1fr; gap:20px; padding:20px 28px; }
+  h2 { font-size:14px; letter-spacing:2px; text-transform:uppercase; color:var(--verde); margin:0 0 12px; }
+  .card { background:var(--panel); border:1px solid var(--borde); border-radius:16px; padding:18px; }
+
+  /* Diagrama */
+  .diagrama { position:relative; height:470px; width:640px; max-width:100%; margin:0 auto; }
+  .nodo { position:absolute; border-radius:12px; padding:10px 12px; background:#1F5FA8; border:2px solid transparent; transition: background .3s, border-color .3s, box-shadow .3s; }
+  .nodo b { display:block; font-size:14px; }
+  .nodo span { font-size:12px; color:#DCE8F7; }
+  .nodo.cliente { background:#0B3A6E; }
+  .gw { z-index:0; position:absolute; left:205px; top:20px; width:230px; height:430px; border:2px dashed #C0392B; border-radius:16px; padding:10px; background:rgba(192,57,43,.08); }
+  .gw > .titulo { font-weight:700; color:#FF8A7A; margin-bottom:8px; }
+  .capa { border-radius:10px; padding:7px 10px; margin-bottom:8px; background:#2A1513; border:2px solid #4A2620; font-size:13px; transition: all .3s; }
+  .capa small { display:block; color:var(--suave); font-size:11px; }
+  .breaker { display:flex; justify-content:space-between; align-items:center; }
+  .activo { box-shadow:0 0 0 3px var(--ambar), 0 0 24px rgba(255,176,32,.5); border-color:var(--ambar) !important; }
+  .CERRADO { border-color:var(--verde) !important; }
+  .ABIERTO { border-color:var(--rojo) !important; background:#3A1212 !important; }
+  .SEMIABIERTO { border-color:var(--ambar) !important; }
+  .caido { background:#5A1D1D !important; }
+  .lento { background:#5A4410 !important; }
+  svg.flechas { position:absolute; left:0; top:0; pointer-events:none; z-index:1; }
+
+  /* Escenarios y registro */
+  .botones { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  button { background:var(--panel); color:var(--texto); border:1px solid var(--borde); border-radius:12px; padding:10px 12px; text-align:left; cursor:pointer; font:inherit; }
+  button:hover { border-color:var(--verde); }
+  button small { display:block; color:var(--suave); font-size:12px; }
+  button:disabled { opacity:.5; cursor:wait; }
+  .explica { margin-top:14px; padding:12px 14px; border-left:4px solid var(--verde); background:#0F1A14; border-radius:8px; min-height:64px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; color:var(--verde); border-bottom:1px solid var(--verde); padding:6px; }
+  td { border-bottom:1px solid var(--borde); padding:6px; vertical-align:top; }
+  td.mono { font-family: ui-monospace, Consolas, monospace; white-space:nowrap; }
+  .ok { color:var(--verde); } .mal { color:var(--rojo); }
+  .metricas { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
+  .metricas div { background:#0F1A14; border-radius:10px; padding:8px 10px; }
+  .metricas b { display:block; font-size:20px; }
+  .metricas span { color:var(--suave); font-size:12px; }
+  @media (max-width: 1100px) { main { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Yapay · Arquitectura en vivo</h1>
+    <div class="sub">API Gateway + Circuit Breaker · cada escenario muestra qué pieza de la arquitectura actuó</div>
+  </div>
+  <span id="conexion" class="pill" style="color:var(--suave)">conectando…</span>
+</header>
+
+<main>
+  <section>
+    <div class="card">
+      <h2>Contenedores (C4 nivel 2) en tiempo real</h2>
+      <div class="diagrama">
+        <svg class="flechas" viewBox="0 0 640 470" width="640" height="470" aria-hidden="true">
+          <defs><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8A968F"/></marker></defs>
+          <line x1="175" y1="235" x2="203" y2="235" stroke="#8A968F" stroke-width="2.5" marker-end="url(#p)"/>
+          <line x1="437" y1="312" x2="468" y2="90"  stroke="#8A968F" stroke-width="2.5" marker-end="url(#p)"/>
+          <line x1="437" y1="362" x2="468" y2="230" stroke="#8A968F" stroke-width="2.5" marker-end="url(#p)"/>
+          <line x1="437" y1="411" x2="468" y2="375" stroke="#FF6B6B" stroke-width="2.5" marker-end="url(#p)"/>
+        </svg>
+        <div class="nodo cliente" style="left:0;top:170px;width:175px;height:130px">
+          <b>Cliente</b><span>App Android (Kotlin) o este panel<br>HTTPS + JWT</span>
+        </div>
+        <div class="gw">
+          <div class="titulo">API Gateway · gateway.ts</div>
+          <div class="capa" id="c-id"><b>1 · Correlación</b><small>x-request-id · línea 55</small></div>
+          <div class="capa" id="c-tasa"><b>2 · Límite de tasa</b><small>120/min por IP → 429 · línea 68</small></div>
+          <div class="capa" id="c-jwt"><b>3 · JWT y rol</b><small>requiereJwt · soloRol · líneas 125 y 137</small></div>
+          <div class="capa" style="background:transparent;border-color:transparent;padding:4px 2px 0"><b>4 · Circuit Breakers (opossum)</b><small>uno por servicio · líneas 79–102</small></div>
+          <div class="capa breaker" id="b-auth"><span>auth</span><span class="pill" id="e-auth">—</span></div>
+          <div class="capa breaker" id="b-sync"><span>sync</span><span class="pill" id="e-sync">—</span></div>
+          <div class="capa breaker" id="b-ia"><span>ia</span><span class="pill" id="e-ia">—</span></div>
+        </div>
+        <div class="nodo" id="s-auth" style="left:470px;top:30px;width:170px;height:100px"><b>Autenticación</b><span>authMock.ts · :3001<br>emite JWT HS256</span></div>
+        <div class="nodo" id="s-sync" style="left:470px;top:170px;width:170px;height:110px"><b>Sincronización</b><span>syncMock.ts · :4000<br>idempotente</span><br><span id="m-sync">modo —</span></div>
+        <div class="nodo" id="s-ia" style="left:470px;top:315px;width:170px;height:120px"><b>ASR en línea (MMS)</b><span>iaMock.ts · :5000</span><br><span id="m-ia">modo —</span><br><span id="l-ia">llamadas —</span></div>
+      </div>
+      <div class="metricas">
+        <div><b id="k-exitos">—</b><span>éxitos ia · últimos 10 s</span></div>
+        <div><b id="k-fallos">—</b><span>fallos ia · últimos 10 s</span></div>
+        <div><b id="k-rech">—</b><span>cortadas por el circuito</span></div>
+        <div><b id="k-lat">—</b><span>latencia media ia</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="card">
+      <h2>Escenarios de calidad</h2>
+      <div class="botones" id="botones"></div>
+      <div class="explica" id="explica">Elige un escenario. Sugerencia de orden: Normal → ID-05 → ID-01/02 → ID-04 → ID-03 → ID-06 → breaker de sync.</div>
+    </div>
+    <div class="card" style="margin-top:20px">
+      <h2>Respuestas</h2>
+      <table>
+        <thead><tr><th>#</th><th>HTTP</th><th>Circuito</th><th>ms</th><th>Qué actuó</th><th>Detalle</th></tr></thead>
+        <tbody id="registro"><tr><td colspan="6" style="color:var(--suave)">Sin peticiones todavía.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const COLORES = { CERRADO: 'var(--verde)', ABIERTO: 'var(--rojo)', SEMIABIERTO: 'var(--ambar)' };
+const RESALTAR = {
+  'sin-token': ['c-jwt'], rol: ['c-jwt'], normal: ['b-ia', 's-ia'], caida: ['b-ia'],
+  lenta: ['b-ia'], recuperar: ['b-ia', 's-ia'], sync: ['b-sync', 's-sync'], 'sync-caido': ['b-sync'],
+};
+let corriendo = false;
+
+async function cargarEscenarios() {
+  const lista = await (await fetch('/api/escenarios')).json();
+  $('botones').innerHTML = '';
+  for (const e of lista) {
+    const b = document.createElement('button');
+    b.innerHTML = `${e.titulo}<small>${e.atributo}</small>`;
+    b.onclick = () => correr(e);
+    $('botones').appendChild(b);
+  }
+}
+
+function resaltar(ids) {
+  document.querySelectorAll('.activo').forEach((n) => n.classList.remove('activo'));
+  (ids || []).forEach((id) => $(id) && $(id).classList.add('activo'));
+}
+
+async function correr(e) {
+  if (corriendo) return;
+  corriendo = true;
+  document.querySelectorAll('#botones button').forEach((b) => (b.disabled = true));
+  resaltar(RESALTAR[e.id]);
+  $('explica').innerHTML = `<b>${e.titulo}</b><br>${e.explicacion}` + (e.id === 'recuperar' ? '<br><i>Esperando 11 s (resetTimeout)…</i>' : '');
+  try {
+    const r = await (await fetch('/api/escenario/' + e.id, { method: 'POST' })).json();
+    $('registro').innerHTML = r.resultados.map((x) => `
+      <tr><td>${x.n}</td>
+      <td class="mono ${x.http === 200 ? 'ok' : 'mal'}">${x.http === -1 ? 'sin red' : x.http}</td>
+      <td class="mono" style="color:${COLORES[x.circuito] || 'var(--suave)'}">${x.circuito || '—'}</td>
+      <td class="mono">${x.ms}</td><td>${x.actuo}</td><td style="color:var(--suave)">${x.detalle}</td></tr>`).join('');
+    $('explica').innerHTML = `<b>${e.titulo}</b><br>${e.explicacion}`;
+  } catch (err) {
+    $('explica').innerHTML = `<b class="mal">No se pudo ejecutar.</b> ¿Está corriendo <code>npm run servicios</code>?`;
+  } finally {
+    corriendo = false;
+    document.querySelectorAll('#botones button').forEach((b) => (b.disabled = false));
+  }
+}
+
+async function refrescar() {
+  try {
+    const s = await (await fetch('/api/estado')).json();
+    $('conexion').textContent = s.gateway ? 'gateway conectado' : 'gateway sin respuesta';
+    $('conexion').style.color = s.gateway ? 'var(--verde)' : 'var(--rojo)';
+    for (const n of ['auth', 'sync', 'ia']) {
+      const g = s.gateway && s.gateway[n];
+      const est = g ? g.estado : '—';
+      const caja = $('b-' + n);
+      caja.classList.remove('CERRADO', 'ABIERTO', 'SEMIABIERTO');
+      if (g) caja.classList.add(est);
+      $('e-' + n).textContent = est;
+      $('e-' + n).style.color = COLORES[est] || 'var(--suave)';
+    }
+    const gi = s.gateway && s.gateway.ia;
+    if (gi) {
+      $('k-exitos').textContent = gi.exitos; $('k-fallos').textContent = gi.fallos + gi.timeouts;
+      $('k-rech').textContent = gi.rechazadasPorCircuito; $('k-lat').textContent = gi.latenciaMediaMs + ' ms';
+    }
+    $('m-ia').textContent = 'modo ' + (s.ia.modo ?? '—');
+    $('l-ia').textContent = 'llamadas recibidas: ' + (s.ia.llamadas ?? '—');
+    $('s-ia').classList.toggle('caido', s.ia.modo === 'caido');
+    $('s-ia').classList.toggle('lento', s.ia.modo === 'lento');
+    $('m-sync').textContent = 'modo ' + (s.sync.modo ?? '—');
+    $('s-sync').classList.toggle('caido', s.sync.modo === 'caido');
+  } catch {
+    $('conexion').textContent = 'panel sin respuesta';
+    $('conexion').style.color = 'var(--rojo)';
+  }
+}
+
+cargarEscenarios();
+refrescar();
+setInterval(refrescar, 1000);
+</script>
+</body>
+</html>

@@ -1,14 +1,19 @@
-# ESPECIFICACIÓN DE REQUISITOS Y DISEÑO UX/UI (v1.1)
+# Especificación de requisitos y diseño UX/UI
 
-**UNIVERSIDAD ADVENTISTA DE BOLIVIA — INGENIERÍA EN SISTEMAS**
-**ASIGNATURA:** Tecnologías en Internet
-**SISTEMA:** Asistente Conversacional Offline para la Gestión de MYPES en Vinto, Cochabamba
-**INTEGRANTES:** Eva Chino Quispe, Christian Gonzales, Marializ Mamani, Kevin Rocha, Luis Lazo
-**DOCENTE:** _(completar)_ — **FECHA:** _(completar)_ — **VERSIÓN:** 1.1
+**Universidad Adventista de Bolivia · Ingeniería en Sistemas · Tecnologías en Internet**
 
-> Este es el documento activo de requisitos y UX del repositorio; conserva el contenido de la versión consolidada anterior. No sustituye una rúbrica, consigna o aprobación docente. Las copias anteriores se guardan en `docs/archive/referencias_historicas/` para consulta.
+| Control del documento | Detalle |
+|---|---|
+| Versión de la línea base académica | 1.1 |
+| Sistema | Asistente conversacional offline para MYPES de Vinto, Cochabamba |
+| Integrantes | Eva Chino Quispe, Christian Gonzales, Marializ Mamani, Kevin Rocha y Luis Lazo |
+| Docente | Completar con el dato oficial de la asignatura |
+| Fecha de la línea base | Confirmar con la portada original antes de entregar |
+| Actualización técnica | 13 de noviembre de 2026 |
 
-> Desde el 13/10/2026 el nombre vigente no es “gestión de ventas e inventario”. Ver [Nota_de_nombre.md](Nota_de_nombre.md). RF-014 queda excluido: no hay compras a proveedores.
+> **Cómo leer este documento.** La especificación v1.1 conserva los requisitos académicos de referencia. La sección final contrasta esa línea base con el código revisado; un requisito escrito o implementado no se considera probado automáticamente. Este documento no sustituye la rúbrica oficial ni una aprobación docente.
+
+> Nombre operativo: asistente conversacional offline para MYPES de Vinto. RF-014 queda excluido: no se registran compras a proveedores.
 
 
 ---
@@ -16,9 +21,7 @@
 ## 1. DATOS GENERALES DE LA ENTREGA
 - **Modalidad:** Equipo de 5 integrantes.
 - **Formato de entrega:** enlace público a Figma + esta documentación técnica (Markdown/PDF).
-- **Enlaces Figma:**
-  - Prototipo navegable: https://snake-dijon-92194767.figma.site/
-  - Sistema de diseño: https://www.figma.com/make/jr73cU7am5OisMNhkgxkkr/Sistema-de-Diseño-MYPES-Vinto
+- **Figma vigente:** [Mockup Improvement Request — Community](https://www.figma.com/make/detrwbrxCanqoPjHb9TjwX/Mockup-Improvement-Request--Community---copia---copia-?p=f&t=qANDWN72XqQ9Pt4y-0). Las URLs anteriores no son la referencia visual vigente.
 
 ## 2. MATRIZ DE REQUISITOS FUNCIONALES (RF)
 
@@ -114,47 +117,52 @@ Sintaxis formal obligatoria: *«El sistema debe [acción] + [entidad/objeto] + [
 
 ## 5. DISEÑO UX/UI EN FIGMA
 
-### 5.1 Usuarios y Personas — Mapas de Empatía
-*Elaborados por Kevin Rocha (UX/UI) y Marializ Mamani.*
+### 5.1 Arquetipos de usuario y mapas de empatía
 
-**Persona 1: María Elena Quispe Flores — Comerciante de Tienda de Barrio**
-Edad: 52 años · Ubicación: Av. 6 de Agosto, Vinto · Ocupación: dueña de tienda de abarrotes "El Hogar" · Nivel educativo: primaria completa · Dispositivo: Samsung Galaxy J2 Prime (Android 8.1, 1.5 GB RAM) · Alfabetización digital: baja (solo WhatsApp para llamadas y notas de voz).
+Los siguientes arquetipos se utilizan para orientar decisiones de diseño. Son escenarios ilustrativos del equipo, no entrevistas, participantes reales ni resultados de investigación de campo. Las frases en primera persona son necesidades hipotéticas y no citas textuales de comerciantes.
+
+**Arquetipo 1 — Comerciante de tienda de barrio**
+
+Perfil ilustrativo: persona adulta que administra un pequeño comercio, usa el teléfono principalmente para llamadas y mensajería y prefiere instrucciones directas. No se asignan identidad, dirección ni dispositivo reales.
 
 | Dimensión | Contenido |
 | :--- | :--- |
-| Piensa y siente | "Necesito controlar mi mercadería, pero no tengo tiempo para aprender sistemas complicados. Temo perder plata por no saber cuánto vendí en el día". |
+| Piensa y siente | Necesita controlar sus productos sin dedicar demasiado tiempo a aprender una herramienta compleja. |
 | Ve | Vecinos usando cuadernos, sus hijos usando el celular con facilidad, la competencia creciendo. |
-| Oye | "Los sistemas son caros y difíciles", "Internet falla todo el tiempo en Vinto", "Si le hablas al celular, es más fácil". |
-| Dice y hace | "Yo no sé de computadoras, prefiero mi cuaderno"; anota todo a mano y calcula mentalmente. |
+| Oye | Comentarios sobre el costo y la dificultad de algunos sistemas, y sobre la conveniencia de herramientas que funcionen con conectividad limitada. |
+| Dice y hace | Puede preferir registrar las ventas en papel y hacer cálculos manuales. |
 | Esfuerzos (pains) | Pierde tiempo contando mercadería, errores al calcular ganancias, mercadería que se vence sin darse cuenta. |
 | Resultados (gains) | Quiere saber cuánto ganó al día sin complicaciones; necesita alertas de stock; desea un sistema que "le hable" en vez de obligarla a leer menús. |
 
-*Cita clave: "Si el celular me entendiera cuando le hablo como a una persona, sí lo usaría. Pero si tengo que aprender botones y menús, mejor sigo con mi cuaderno".*
+| Necesidad de diseño | Reducir pasos, usar etiquetas comprensibles y ofrecer revisión antes de guardar una operación. |
 
-**Persona 2: Carlos Mamani Condori — Comerciante con Ruido Ambiental**
-Edad: 38 años · Ubicación: Mercado Central, Vinto · Ocupación: dueño de ferretería "El Constructor" · Nivel educativo: secundaria + curso técnico · Dispositivo: Xiaomi Redmi 9A (Android 10, 2 GB RAM) · Alfabetización digital: media-baja (WhatsApp, Facebook Marketplace, YouTube).
+**Arquetipo 2 — Comerciante en un entorno con ruido**
+
+Perfil ilustrativo: persona que atiende clientes mientras realiza otras tareas, utiliza aplicaciones móviles comunes y puede trabajar en un ambiente donde el reconocimiento de voz no siempre es fiable. No representa a una persona entrevistada.
 
 | Dimensión | Contenido |
 | :--- | :--- |
-| Piensa y siente | "Necesito modernizarme para competir. Tengo miedo de que el sistema borre mis datos si se va el internet". |
+| Piensa y siente | Quiere agilizar la atención y teme perder información cuando se interrumpe la conexión. |
 | Ve | Ferreterías grandes usando computadoras, clientes pidiendo factura rápido, competidores con mejores precios. |
-| Oye | "Debes tener un sistema para no perder ventas", "El internet en Vinto es malo", "Los sistemas necesitan internet sí o sí". |
-| Dice y hace | "Mi celular es viejo pero funciona"; usa WhatsApp para pedidos y anota las fiadas en un cuaderno aparte. |
+| Oye | Recomendaciones de digitalizar el negocio y dudas sobre la dependencia de Internet. |
+| Dice y hace | Puede alternar entre el teléfono y un registro manual para pedidos o ventas fiadas. |
 | Esfuerzos (pains) | Pierde ventas por no encontrar rápido el precio, clientes se van por la demora, no sabe su margen de ganancia real. |
-| Resultados (gains) | Quiere registrar ventas rápido con la voz; necesita saber su stock sin contar manualmente; desea algo que funcione 100% sin internet. |
+| Resultados (gains) | Quiere registrar ventas con rapidez, consultar existencias y disponer de una alternativa manual si falla la voz o la conexión. |
 
-*Cita clave: "Si el sistema me entendiera por voz y funcionara sin internet, lo usaría. Pero si depende de internet y se pone lento, mejor sigo como estoy".*
+| Necesidad de diseño | Hacer visible el estado de conexión, permitir corregir la transcripción y mantener disponible el ingreso manual. |
 
-### 5.2 Mapa de Sitio
-Estructura plana, máximo 2 niveles de profundidad:
-`Login/PIN → Dashboard (Voz) → {Inventario, Reportes, Fiados}`
+### 5.2 Mapa de sitio
+
+El diseño Figma es la referencia visual. En el código Android revisado, la ruta inicial es Login; el formulario permite ir a Registro, y el alta continúa a Onboarding y luego al Dashboard. Desde la app se navega a productos, ventas, fiados, reportes, perfil, chat y sincronización. No existe una pantalla de bienvenida independiente. La presencia de rutas no demuestra que todos los recorridos estén validados de extremo a extremo.
 
 ### 5.3 Sistema de Diseño (Figma)
-- **Paleta de color:** primario Verde `#2E7D32` (éxito / ingreso monetario); negativo Rojo `#F44336` (cancelar / falta de stock); neutros en escala de grises con contraste WCAG AA verificado.
+- **Paleta de referencia vigente:** fondo navy `#071725`, superficies oscuras `#111C2B` y `#17263A`, acento menta `#27D9A0`, azul `#2584E8` y texto claro. La paleta actualmente declarada en Android (`FondoOscuro #101418`, `SuperficieOscura #1B232C`, `VerdeNeon #8BE28B`) todavía difiere de esos valores; no afirmar paridad visual exacta.
 - **Tipografía:** escala modular basada en Material Design 3; jerarquía H1/H2/H3/Body/Small configurada como Text Styles en Figma.
 - **Componentes:** botón principal de micrófono con retroalimentación visual (ondas de audio), tarjetas de confirmación, inputs, modales, barra de navegación inferior — todos construidos con Auto Layout y Component Properties (variantes).
 - **Estados obligatorios por componente clave:** Vacío, Carga, Error/Alerta, Éxito — deben estar diseñados explícitamente para el flujo de Registrar Venta y el flujo de Sincronización.
 - **Tokens/Variables:** variables de Figma para espaciado y, si aplica, modo claro/oscuro.
+
+La descripción anterior establece objetivos del diseño, no certifica que estén presentes en la app. El contraste WCAG AA, la cobertura de estados y la equivalencia pantalla por pantalla siguen pendientes de medición/documentación.
 
 ### 5.4 Prototipado
 - Pantallas responsive: Desktop 1440 px (panel de reportes del dueño) y Mobile 375/390 px (uso diario del comerciante, prioritario).
@@ -179,6 +187,23 @@ Estructura plana, máximo 2 niveles de profundidad:
 *Tecnologías en Internet — Proyecto Integrador — Documento consolidado v1.1*
 
 
-## Nota de coherencia de stack — 30/09/2026
+## Antecedente de cambio de stack — 30/09/2026
 
-La especificación original menciona backend Spring Boot y PostgreSQL. La línea base solicitada para la siguiente versión unifica Node.js/TypeScript/Express con PostgreSQL y conserva la base local SQLite. Por tanto, referencias a Spring en esta versión son antecedentes y deben actualizarse junto con SAD y API. El requisito MongoDB del sílabo TI se mantiene pendiente de aclaración; no se declara cubierto por PostgreSQL.
+Esta nota conserva el contexto de la actualización del 30/09/2026: se pasó de la referencia inicial a Spring Boot a la línea Node.js/TypeScript/Express y PostgreSQL que aparece en el repositorio actual. La descripción vigente está en [Arquitectura actual](02_Arquitectura_SAD.md); las menciones anteriores a Spring se interpretan como antecedentes, no como componentes actuales. El requisito curricular de MongoDB/Mongoose se mantiene separado y pendiente de confirmación; PostgreSQL no lo sustituye.
+
+## Estado de implementación observado — 13/11/2026
+
+La tabla de requisitos anterior expresa la línea base académica. Esta tabla resume el estado del código de la revisión `03afcbd`; **implementado en código** no significa **validado funcionalmente**.
+
+| Área | Estado observado en el repositorio | Límite / validación pendiente |
+|---|---|---|
+| Registro y acceso local | Formulario de perfil, PIN local y acceso por carnet, celular o correo; PIN derivado con PBKDF2-HMAC-SHA256. | No hay verificación SMS/OTP. Probar registro, login y política de bloqueo en dispositivo. |
+| Cuenta remota | API de registro/login con contraseña scrypt y JWT, separada del PIN local; el registro puede continuar con perfil local si la nube falla. | Probar en dispositivo y comprobar la sincronización con el backend configurado. |
+| Persistencia móvil | Room/SQLite con SQLCipher; esquema Room versión 6 y migraciones definidas hasta esa versión. | La migración de bases existentes requiere una prueba con datos de prueba y evidencia; no se afirma como validada en todos los dispositivos. |
+| Voz / PLN | Vosk puede transcribir localmente si se dispone del modelo; extracción de entidades y clasificación están implementadas con reglas Kotlin. | No se encontró un clasificador TFLite activo. Falta medir latencia, precisión y reconocimiento acústico en dispositivo. |
+| Ventas / fiados | Flujo manual de ventas, persistencia local, Outbox y consulta/cobro local de fiados presentes en el código. | Pruebas UI y de operación offline en dispositivo pendientes según el plan. |
+| Asistente Yapay | Consulta el total vendido del día y propone productos con confirmación; es lógica local basada en reglas. | No es un LLM, no ofrece respuestas reales en quechua/aimara y no reemplaza el registro manual de ventas. |
+| Backend | Node.js/TypeScript/Express con PostgreSQL; registro, catálogo protegido, recepción de lotes, factura simulada, QR y SSE. | Las pruebas de CI cubren backend; no acreditan integración móvil end-to-end ni despliegue productivo. |
+| Interfaz / Figma | Figma vigente enlazado arriba; la app revisada inicia en login y usa colores propios declarados en Android. | La bienvenida independiente y la paridad visual completa no están demostradas. |
+
+Consultar [04_Plan_de_Pruebas.md](04_Plan_de_Pruebas.md) y [05_Resultados_de_Pruebas.md](05_Resultados_de_Pruebas.md) para estados y evidencias. La decisión PostgreSQL frente al requisito académico MongoDB/Mongoose se justifica en [Informe_Segunda_Entrega_TI.md](Informe_Segunda_Entrega_TI.md); PostgreSQL no se presenta como equivalente a MongoDB.

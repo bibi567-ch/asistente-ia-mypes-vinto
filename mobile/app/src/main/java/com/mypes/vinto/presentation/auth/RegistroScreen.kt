@@ -83,6 +83,20 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
         && pin.length == 4
         && pin.all(Char::isDigit)
 
+    // Qué falta para habilitar el botón (se muestra encima de «Crear cuenta y continuar»).
+    val faltantes = buildList {
+        if (nombres.isBlank()) add("nombres")
+        if (apellidos.isBlank()) add("apellidos")
+        if (carnet.isBlank()) add("carnet")
+        if (expedido.isBlank()) add("expedido")
+        if (fechaNacimiento.isBlank()) add("fecha de nacimiento")
+        if (lugarNacimiento.isBlank()) add("lugar de nacimiento")
+        if (celular.isBlank()) add("celular")
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) add("correo válido")
+        if (password.length < 12) add("contraseña de 12 caracteres o más")
+        if (pin.length != 4) add("PIN de 4 dígitos")
+    }
+
     Column(
         Modifier.fillMaxSize()
             .background(FondoOscuro)
@@ -169,6 +183,11 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
             value = password,
             onValueChange = { password = it; vm.reiniciarError() },
             label = { Text("Contraseña para la nube (mínimo 12 caracteres)") },
+            supportingText = {
+                if (password.isNotEmpty() && password.length < 12) {
+                    Text("Faltan ${12 - password.length} caracteres (llevas ${password.length})", color = NaranjaAlerta)
+                }
+            },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true,
@@ -200,6 +219,9 @@ fun RegistroScreen(nav: NavController, vm: RegistroViewModel = viewModel()) {
             is EstadoRegistro.Error -> Text(actual.mensaje, color = RojoCancelar)
             EstadoRegistro.Cargando -> Text("Guardando perfil y registrando cuenta...", color = VerdeNeon)
             else -> Unit
+        }
+        if (faltantes.isNotEmpty()) {
+            Text("Para continuar falta: ${faltantes.joinToString(", ")}.", color = NaranjaAlerta, fontSize = 13.sp)
         }
         Spacer(Modifier.height(12.dp))
 

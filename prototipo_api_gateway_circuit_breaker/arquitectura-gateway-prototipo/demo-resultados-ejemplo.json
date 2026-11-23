@@ -1,0 +1,65 @@
+{
+  "config": {
+    "timeout": 2000,
+    "errorThresholdPercentage": 50,
+    "resetTimeout": 10000,
+    "volumeThreshold": 4,
+    "rollingCountTimeout": 10000
+  },
+  "faseA": {
+    "exitos": 10,
+    "latencia": {
+      "n": 10,
+      "mediaMs": 155.1,
+      "p50Ms": 148.3,
+      "p95Ms": 189.3,
+      "maxMs": 189.3
+    }
+  },
+  "faseB": {
+    "peticiones": 20,
+    "llegaronALaIA": 11,
+    "respondidasConCircuitoAbierto": 9,
+    "todasConFallbackVoskLocal": true,
+    "latenciaConCircuitoAbierto": {
+      "n": 9,
+      "mediaMs": 1.7,
+      "p50Ms": 1.6,
+      "p95Ms": 2.1,
+      "maxMs": 2.1
+    },
+    "latenciaAntesDeAbrir": {
+      "n": 11,
+      "mediaMs": 149.7,
+      "p50Ms": 139.6,
+      "p95Ms": 194.5,
+      "maxMs": 194.5
+    }
+  },
+  "estadoTrasFaseB": {
+    "estado": "ABIERTO",
+    "exitos": 10,
+    "fallos": 11,
+    "timeouts": 0,
+    "rechazadasPorCircuito": 9,
+    "fallbacks": 0,
+    "latenciaMediaMs": 149
+  },
+  "faseC": {
+    "exitos": 5,
+    "estadoFinal": "CERRADO",
+    "segundosHastaRecuperar": 11.1
+  },
+  "faseD": {
+    "primerEnvio": {
+      "aceptadas": 3,
+      "duplicadas": 0,
+      "usuario": "comerciante"
+    },
+    "reenvioDelMismoLote": {
+      "aceptadas": 0,
+      "duplicadas": 3,
+      "usuario": "comerciante"
+    }
+  }
+}

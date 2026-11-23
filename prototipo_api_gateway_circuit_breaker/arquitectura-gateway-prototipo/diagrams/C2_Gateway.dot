@@ -1,0 +1,34 @@
+digraph C4 {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=11, nodesep=0.5, ranksep=0.9, bgcolor="white", pad=0.3];
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#1F3864", fillcolor="#438DD5", fontcolor="white", margin="0.15,0.08"];
+  edge [fontname="Helvetica", fontsize=8.5, color="#555555", fontcolor="#333333"];
+  persona [label="Comerciante de Vinto\n[Persona]\nHabla en castellano, quechua\no quechuañol", shape=box, fillcolor="#08427B"];
+  subgraph cluster_android {
+    label="Teléfono Android (cliente Kotlin)"; style="dashed"; color="#888888"; fontcolor="#333333";
+    app [label="App IA Vinto\n[Kotlin, Jetpack Compose]\nInterfaz de voz y texto"];
+    agente [label="Agente Yapay\n[Kotlin]\nIntenciones, entidades,\nconfirmación y acciones"];
+    vosk [label="ASR local\n[Vosk]\nReconocimiento sin conexión"];
+    room [label="Base local\n[Room + SQLCipher]\nDatos y cola Outbox", shape=cylinder];
+    outbox [label="Sincronizador\n[WorkManager]\nReintentos con backoff"];
+  }
+  subgraph cluster_cloud {
+    label="Nube (Docker Compose)"; style="dashed"; color="#888888"; fontcolor="#333333";
+    gw [label="API Gateway\n[Node.js, Express, opossum]\nJWT en el borde, límite de tasa,\nCircuit Breaker por servicio", fillcolor="#C0392B"];
+    auth [label="Servicio de autenticación\n[Node.js]\nEmite JWT HS256"];
+    sync [label="Servicio de sincronización\n[Node.js]\nLotes idempotentes"];
+    ia [label="Servicio ASR en línea\n[Modelo MMS]\nQuechua del sur de Bolivia"];
+    db [label="Base central\n[PostgreSQL 16]", shape=cylinder];
+  }
+  persona -> app [label="Voz / toque"];
+  app -> agente [label="Texto reconocido"];
+  app -> vosk [label="Audio PCM 16 kHz"];
+  agente -> room [label="Lectura / escritura"];
+  room -> outbox [label="Operaciones pendientes"];
+  app -> gw [label="HTTPS + JSON\nBearer JWT\n(si confianza < 0,70)", color="#C0392B", fontcolor="#C0392B"];
+  outbox -> gw [label="HTTPS POST /sync/batch"];
+  gw -> auth [label="HTTP /login"];
+  gw -> sync [label="HTTP + X-Usuario\n[breaker sync]"];
+  gw -> ia [label="HTTP /asr/transcribe\n[breaker ia, timeout 2 s]", color="#C0392B", fontcolor="#C0392B"];
+  sync -> db [label="SQL"];
+  gw -> app [label="503 + fallback: vosk_local\n(circuito abierto)", style=dashed, color="#C0392B", fontcolor="#C0392B", constraint=false];
+}

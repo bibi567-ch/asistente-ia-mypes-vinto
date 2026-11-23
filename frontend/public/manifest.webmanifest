@@ -1,0 +1,3 @@
+{ "name": "IA Vinto", "short_name": "IA Vinto", "start_url": "/", "display": "standalone",
+  "background_color": "#0A0A0A", "theme_color": "#0A0A0A", "lang": "es",
+  "icons": [{ "src": "/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }] }

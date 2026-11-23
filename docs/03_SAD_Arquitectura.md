@@ -1,6 +1,6 @@
 # DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v1.1 ENTREGADO)
 
-> **Estado:** se conserva aquí la versión 1.1 presentada, con una propuesta de migración añadida. Desde el 13/10/2026 el nombre vigente del sistema no es “gestión de ventas e inventario”; ver `docs/Nota_de_nombre.md`. Esta v1.1 no se reescribe. La arquitectura entregada describe Spring Boot/PostgreSQL. La línea base objetivo solicitada por el equipo es Node.js/TypeScript/Express/PostgreSQL; debe emitirse un SAD v2.0 coherente y obtener aprobación docente. Este archivo no es la entrega v2.0 aprobada.
+> **Estado:** artefacto académico histórico SAD v1.1, conservado para trazabilidad y no reescrito como si fuera la arquitectura actual. La arquitectura entregada describe Spring Boot/PostgreSQL; el backend implementado en la revisión `03afcbd` usa Node.js 24/TypeScript/Express/PostgreSQL. Las figuras y decisiones v1.1 que muestran Spring o LWW no representan el estado actual. Para describir el código vigente, consultar [02_Arquitectura_SAD.md](02_Arquitectura_SAD.md). No se declara una revisión SAD v2.0 aprobada.
 
 **UNIVERSIDAD ADVENTISTA DE BOLIVIA**
 **FACULTAD DE CIENCIAS EXACTAS E INGENIERÍA — CARRERA DE INGENIERÍA EN SISTEMAS**
@@ -271,5 +271,11 @@ Rel(api, pg, "Persiste vía JPA / Hibernate")
 El SAD entregado en versión 1.1 seleccionó Java/Spring Boot y PostgreSQL. Por instrucción de la líder del equipo, la línea base de trabajo pasa a Node.js/TypeScript/Express con PostgreSQL: se sustituye el framework servidor y se conserva el motor remoto relacional. Esta nota no representa aprobación del docente ni cambio retroactivo de la entrega 1.1. Eva solicitará aprobación de Arquitectura y actualizará ADR, vistas, especificación, seguridad y cronograma antes de presentar una revisión oficial. El sílabo de TI exige evidencia de MongoDB/Mongoose en su unidad; PostgreSQL no satisface por sí solo ese criterio y la docente debe indicar si la práctica puede ser separada.
 
 Hasta que se publique el SAD revisado, las menciones a Spring Boot en el cuerpo y diagramas describen la versión entregada y están desactualizadas como arquitectura objetivo. La próxima edición deberá actualizar los escenarios de sincronización para preservar ventas concurrentes, evitando aplicar Last Write Wins a hechos comerciales.
+
+### Estado contrastado con el repositorio — 13/11/2026
+
+La rama `feature/update-doc` revisada incorpora una API Node.js/TypeScript/Express con PostgreSQL y un cliente Android Kotlin/Compose con Room/SQLite cifrado mediante SQLCipher, Outbox y WorkManager. El esquema Room llega a versión 6; el backend incluye registro, catálogo protegido, lotes idempotentes, facturas de prueba, QR y SSE. La aplicación mantiene login local por identificador/PIN y login remoto por JWT como mecanismos distintos. El reconocimiento Vosk requiere el modelo local y Yapay usa reglas; no se encontró TFLite activo ni un LLM conectado.
+
+Esta nota actualiza la descripción factual del repositorio, no la decisión académica ni su aprobación. La API y Docker Compose siguen siendo de desarrollo local; la integración en teléfono físico, seguridad de despliegue, rendimiento y comportamiento funcional Android requieren evidencias propias. Ver [plan](04_Plan_de_Pruebas.md) y [bitácora](05_Resultados_de_Pruebas.md).
 
 **Regla para la propuesta de revisión:** la línea base objetivo es API Node.js/TypeScript/Express + PostgreSQL, pendiente de aprobación docente. SQLite local conserva operaciones offline y Outbox; cada evento utiliza un UUID idempotente. Las ventas y sus líneas se conservan como hechos; no se permite resolver conflictos sobrescribiendo una venta con otra mediante LWW. Las discrepancias de stock deben quedar visibles para conciliación explícita. C1/C2 muestran la propuesta y no deben citarse como evidencia de código implementado. La cobertura de MongoDB/Mongoose y la necesidad de frontend web siguen pendientes de confirmación por Tecnologías en Internet.

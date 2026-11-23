@@ -6,35 +6,36 @@
 
 **Equipo:** Eva Lizeth Chino Quispe, Christian Gonzales Mamani, Marializ Mamani Quispe, Kevin Jhonathan Rocha Rojas y Luis Gerardo Lazo Bustamante.
 
-El texto completo del perfil está en [Perfil_final.md](perfil/Perfil_final.md). Si este resumen y el perfil no coinciden, manda el perfil.
+El propósito y los límites descritos en esta página constituyen el perfil vigente del proyecto.
 
 ## De qué se trata
 
-El prototipo anota una venta y muestra cuánto queda de cada producto, en el teléfono y sin internet. El comerciante elige una plantilla según el rubro (abarrotes, pensión, broastería o ferretería) y puede ajustarla.
+El prototipo permite registrar ventas y consultar existencias en el teléfono, incluso sin internet. El comerciante puede partir de una de seis plantillas locales —farmacia, pastelería, ferretería, licorería, broastería o minimarket— y ajustar los ejemplos.
 
 La copia remota, en la API, llega cuando hay conexión. Atender no depende de esa copia.
 
 ## Qué incluye
 
-- Productos guardados en el teléfono.
-- Registro de una venta de productos ya cargados, con total y cambio, y confirmación antes de guardar.
-- Consulta del saldo local.
-- El mismo dato sigue ahí si se cierra la aplicación sin red.
-- Envío posterior a la API (Node.js, Express y PostgreSQL) sin duplicar la operación.
-- Texto y voz en castellano, y texto con vocabulario acotado en quechua, cuando el registro en pantalla ya funciona.
+- Perfil local del comerciante y acceso mediante identificador y PIN.
+- Catálogo local de productos, onboarding por plantillas, ventas manuales, fiados y consultas/reportes locales.
+- Asistente de voz en español con Vosk cuando el modelo está disponible; una sugerencia no guarda una venta sin revisión de la persona.
+- Operaciones locales y cola Outbox para sincronización diferida con una API Node.js/TypeScript/Express y PostgreSQL, cuando se configura y valida la conexión.
+- Asistente Yapay basado en reglas locales para funciones demostrativas; no se conecta a un LLM.
+
+La existencia de una función en el código no demuestra que se haya validado en un teléfono. Consulta el [estado de las pruebas](04_Plan_de_Pruebas.md) y su [bitácora](05_Resultados_de_Pruebas.md).
 
 ## Qué no incluye
 
-Compras a proveedores, lotes, costos, facturación, reconocimiento de voz en quechua, aimara, lector de códigos, impresora y cobro por QR.
+Compras a proveedores, gestión de lotes/costos, facturación fiscal, reconocimiento de voz en quechua o aimara, lector de códigos, impresora, cobro QR y un frontend web integrado.
 
 Descontar lo vendido del saldo del teléfono forma parte de registrar la venta. No abre un módulo de almacén.
 
 ## Cómo está construido
 
-La aplicación prevista es Kotlin y Jetpack Compose, con SQLite en el teléfono. La API de esta versión del repositorio es Node.js, TypeScript, Express y PostgreSQL.
+La aplicación Android usa Kotlin y Jetpack Compose; Room/SQLite con SQLCipher conserva datos locales. La API de esta versión usa Node.js 24, TypeScript, Express y PostgreSQL. La configuración, los contratos y los límites están en [Arquitectura actual](02_Arquitectura_SAD.md).
 
-El documento de arquitectura v1.1 describe Spring Boot. Esa entrega se conserva. El código actual no usa Spring.
+El SAD v1.1 presentado describe Spring Boot. Se conserva como antecedente y no describe el backend actual, que usa Node.js/Express. El código actual no usa Spring.
 
 ## Nombre
 
-El sistema no se llama “gestión de ventas e inventario”. El nombre vigente es el del título de esta página. El detalle está en [Nota_de_nombre.md](Nota_de_nombre.md).
+El nombre descriptivo vigente es “Prototipo de asistente conversacional offline para MYPES de Vinto”, como se indica en el título de esta página. No se presenta como un sistema integral de gestión de ventas e inventario.

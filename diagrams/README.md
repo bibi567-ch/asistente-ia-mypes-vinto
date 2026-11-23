@@ -17,4 +17,4 @@ La app móvil contiene Room, componentes de ventas y Outbox/WorkManager. Su pres
 
 ## Criterio para presentar
 
-Cada vista debe tener versión/fecha, leyenda de estado (actual, propuesta o pendiente) y enlace a requisitos/decisiones. Un diagrama describe diseño; no es evidencia de ejecución. Ver [Matriz de cumplimiento de las tres materias](../docs/13_Matriz_Cumplimiento_Tres_Materias_2026-2.md) para las brechas y las evidencias por reunir.
+Cada vista debe tener versión/fecha, leyenda de estado (actual, propuesta o pendiente) y enlace a requisitos/decisiones. Un diagrama describe diseño; no es evidencia de ejecución. Para vincular una vista con pruebas, consulta el [plan](../docs/04_Plan_de_Pruebas.md) y la [bitácora](../docs/05_Resultados_de_Pruebas.md); la evaluación académica debe cotejarse con las rúbricas originales.

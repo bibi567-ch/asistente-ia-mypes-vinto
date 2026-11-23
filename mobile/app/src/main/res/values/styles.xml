@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.MypesLocal" parent="android:style/Theme.Material.Light.NoActionBar" />
+    <style name="Theme.MypesLocal" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#FF0A0A0A</item>
+        <item name="android:statusBarColor">#FF0A0A0A</item>
+        <item name="android:navigationBarColor">#FF18181B</item>
+    </style>
 </resources>

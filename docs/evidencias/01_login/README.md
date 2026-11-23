@@ -1,13 +1,12 @@
-# Evidencias pendientes del login y registro
+# Evidencia visual disponible y pruebas pendientes
 
-No se marcan como aprobadas pruebas funcionales de Android sin una captura o video real guardado en esta carpeta. Cuando el escenario esté validado en dispositivo, sustituir este contenido por las capturas finales.
+La captura existente demuestra que la pantalla inicial de acceso se visualizó; no demuestra que el PIN se validó, que la sesión local se abrió ni que el usuario se registró correctamente.
 
-```markdown
-![Login exitoso](evidencias/01_login/login_exitoso.png)
-![Registro en PostgreSQL](evidencias/01_login/registro_en_postgres.png)
-```
+![Pantalla inicial de acceso Android](mypes_login.png)
 
-Archivos esperados:
+Siguen pendientes las capturas de una prueba funcional de login y de registro confirmado contra PostgreSQL. No marcar esos escenarios aprobados hasta ejecutar los pasos y adjuntar evidencia anonimizada.
 
-- `docs/evidencias/01_login/login_exitoso.png`
-- `docs/evidencias/01_login/registro_en_postgres.png`
+Archivos previstos:
+
+- `login_exitoso.png`
+- `registro_en_postgres.png`

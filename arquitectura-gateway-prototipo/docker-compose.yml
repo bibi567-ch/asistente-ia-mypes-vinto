@@ -1,0 +1,26 @@
+# Prototipo API Gateway + Circuit Breaker (ARQ-643). Uso: docker compose up --build
+services:
+  auth:
+    build: .
+    command: npx tsx src/authMock.ts
+    environment: { JWT_SECRET: "${JWT_SECRET:-solo-desarrollo-cambiar-en-produccion-32b}" }
+    expose: ["3001"]
+  sync:
+    build: .
+    command: npx tsx src/syncMock.ts
+    expose: ["4000"]
+  ia:
+    build: .
+    command: npx tsx src/iaMock.ts
+    environment: { IA_MODO: "${IA_MODO:-normal}" }
+    ports: ["5000:5000"]   # expuesto solo para cambiar el modo en la demostración
+  gateway:
+    build: .
+    command: npx tsx src/gateway.ts
+    environment:
+      AUTH_URL: http://auth:3001
+      SYNC_URL: http://sync:4000
+      IA_URL: http://ia:5000
+      JWT_SECRET: "${JWT_SECRET:-solo-desarrollo-cambiar-en-produccion-32b}"
+    ports: ["8080:8080"]
+    depends_on: [auth, sync, ia]

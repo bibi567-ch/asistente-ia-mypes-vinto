@@ -25,22 +25,27 @@ import com.mypes.vinto.presentation.perfil.PerfilScreen
 import com.mypes.vinto.presentation.reportes.ReportesScreen
 import com.mypes.vinto.presentation.sync.SincronizacionScreen
 import com.mypes.vinto.presentation.ventas.VentaManualScreen
+import com.mypes.vinto.presentation.theme.EsquemaVinto
+import com.mypes.vinto.presentation.vinto.VintoApp
 
 class MainActivity : ComponentActivity() {
-    private val solicitarAudio = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
+    private val solicitarPermisos = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
     ) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            MaterialTheme(colorScheme = EsquemaVinto) {
                 val nav = rememberNavController()
                 NavHost(navController = nav, startDestination = "login") {
                     composable("login") { LoginScreen(nav) }
                     composable("registro") { RegistroScreen(nav) }
                     composable("onboarding_plantilla") { OnboardingPlantillaScreen(nav) }
-                    composable("dashboard") { DashboardScreen(nav) }
+                    // Inicio con barra inferior: negocio (Figma) + agente de voz IA Vinto.
+                    composable("dashboard") { VintoApp(nav) }
+                    // Panel anterior, conservado como referencia.
+                    composable("dashboard_anterior") { DashboardScreen(nav) }
                     composable("perfil") { PerfilScreen(nav) }
                     composable("fiados") { FiadosScreen(nav) }
                     composable("inventario") { InventarioScreen(nav) }
@@ -74,12 +79,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.RECORD_AUDIO
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            solicitarAudio.launch(Manifest.permission.RECORD_AUDIO)
+        val faltan = listOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.CALL_PHONE).filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
+        if (faltan.isNotEmpty()) solicitarPermisos.launch(faltan.toTypedArray())
     }
 }

@@ -1,6 +1,6 @@
 # Guía de configuración y ejecución local
 
-> Guía de desarrollo/pruebas locales. El repositorio no define un despliegue de producción aprobado; no expongas la API ni uses datos reales.
+> Guía de desarrollo y pruebas locales. El repositorio no define un despliegue de producción aprobado; no expongas la API ni uses datos reales.
 
 ## Requisitos
 
@@ -18,7 +18,12 @@ docker compose ps
 Copy-Item backend/.env.example backend/.env
 ```
 
-Edita `backend/.env` con valores locales: usa un secreto JWT aleatorio de al menos 32 bytes y el usuario/base PostgreSQL de desarrollo definidos en `docker-compose.yml`. No copies secretos a Git ni a capturas.
+Reemplaza el valor de ejemplo de `JWT_SECRET` por uno aleatorio de al menos 32 bytes y utiliza únicamente la configuración PostgreSQL local definida en `docker-compose.yml`. No agregues una segunda línea de `JWT_SECRET`: algunas cargas de `.env` conservan la primera definición. No copies secretos a Git ni a capturas.
+
+```powershell
+$secret = node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))"
+(Get-Content backend/.env) -replace '^JWT_SECRET=.*$', "JWT_SECRET=$secret" | Set-Content -Encoding ascii backend/.env
+```
 
 ```powershell
 Set-Location backend

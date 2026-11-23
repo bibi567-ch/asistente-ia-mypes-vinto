@@ -1,6 +1,6 @@
 # Arquitectura actual del sistema
 
-> **Estado del documento:** resumen técnico de la implementación del repositorio; no es una aprobación académica ni reemplaza el SAD entregado.
+> **Corte de revisión:** 13/11/2026, código de `feature/update-doc` en la revisión `03afcbd`. Este resumen describe el repositorio local; no es una aprobación académica ni reemplaza el SAD entregado.
 
 ## Documentos de referencia
 
@@ -10,23 +10,24 @@ El documento académico existente [03_SAD_Arquitectura.md](03_SAD_Arquitectura.m
 
 | Componente | Tecnología | Responsabilidad |
 |---|---|---|
-| Aplicación móvil | Kotlin, Android, Jetpack Compose | Interfaz, acceso local, inventario, ventas, voz y sincronización; plantillas de negocio y Yapay local simulado |
-| Persistencia móvil | Room/SQLite y SQLCipher | Datos locales y cola Outbox para operación offline |
-| API | Node.js 24, TypeScript, Express | Registro/autenticación, actualización del negocio, catálogo, lotes offline, facturas simuladas, QR y eventos SSE |
-| Persistencia del servidor | PostgreSQL | Usuarios, negocios, productos, transacciones, facturas y QR de pago |
-| Automatización backend | GitHub Actions | Migraciones, compilación, chequeo de tipos y pruebas unitarias/de integración |
+| Aplicación móvil | Kotlin, Android, Jetpack Compose | Login/registro, onboarding, perfil, inventario, ventas, fiados, reportes y chat. La ruta inicial actual es login; no hay una pantalla separada de bienvenida. |
+| Voz y reglas locales | Vosk + Kotlin | Reconocimiento de voz sujeto al modelo disponible; extracción/clasificación con lógica basada en reglas. Yapay es demostrativo y no conecta con un LLM. |
+| Persistencia móvil | Room/SQLite, versión 6, y SQLCipher | Perfil, productos, ventas, detalles, movimientos de caja y Outbox para operación local. Migraciones definidas hasta la versión 6. |
+| API | Node.js 24, TypeScript, Express | Registro/login, perfil de negocio, CRUD remoto de productos, sincronización de lotes, facturas de prueba, QR y SSE. |
+| Persistencia del servidor | PostgreSQL | Propietarios, negocios, productos, eventos/transacciones recibidas, facturas y QR. No equivale a un libro remoto completo de ventas/deudas. |
+| Automatización backend | GitHub Actions | Migraciones, compilación TypeScript, chequeo de tipos y pruebas unitarias/de integración contra PostgreSQL temporal. |
 
 ## Flujos y límites
 
-1. El comerciante entra localmente con carnet, celular o correo y PIN; el PIN puede escribirse o dictarse con el modelo Vosk offline. La autenticación remota es independiente: usa email/contraseña y entrega un JWT. El servidor conserva solo el hash scrypt de la contraseña; Room conserva solo el hash del PIN.
-2. El registro guarda primero el perfil personal en Room y, cuando hay conexión, también en PostgreSQL. El negocio remoto se crea provisionalmente y se actualiza con nombre/rubro durante el onboarding cuando existe conexión. Si el alta se hizo offline, Sincronización puede registrar el perfil local al volver a introducir el correo y la contraseña; la contraseña no se persiste en el dispositivo.
-3. Las ventas se guardan localmente con sus cambios de stock y operación pendiente dentro de una transacción Room.
-4. El worker de sincronización envía el Outbox al backend autenticado. La API procesa lotes con identificadores de operación idempotentes.
-5. El catálogo del servidor se descarga de forma paginada; el stock local se conserva durante la sincronización.
-6. El asistente de voz solo traslada sugerencias al formulario de venta. No persiste una venta sin confirmación.
-7. Yapay agrega productos a Room solo después de confirmar; las consultas y consejos son reglas locales demostrativas, no inferencias de un LLM. El catálogo no conserva costos de compra ni categoría actualmente.
-8. La API puede emitir eventos SSE a conexiones autenticadas del mismo negocio. La distribución es en memoria por instancia y no reemplaza el mecanismo paginado de sincronización del móvil.
-9. Las facturas devuelven un PDF simulado no fiscal, y el QR se almacena como Base64 con límite de tamaño en PostgreSQL.
+1. El login local busca un perfil por carnet, celular o correo y valida el PIN. El PIN se deriva con PBKDF2-HMAC-SHA256; el bloqueo local se aplica tras cinco intentos fallidos durante 60 segundos. El dictado depende del modelo Vosk. La autenticación remota es independiente: usa email/contraseña y entrega un JWT.
+2. El registro guarda el perfil y el hash del PIN en Room antes de intentar crear la cuenta remota. La contraseña de nube se envía al API y no se conserva en Room; el backend la almacena como hash scrypt. Si la persona continúa sin nube, debe vincular la cuenta después desde Sincronización. El onboarding guarda nombre/rubro localmente e intenta actualizar el negocio remoto cuando hay token y conexión.
+3. Las ventas actualizan la persistencia local y el stock; el evento Outbox permite reintentar el envío después. El alta de venta, stock y Outbox debe tratarse como una operación local; las pruebas funcionales en dispositivo siguen pendientes.
+4. WorkManager envía el Outbox al backend con JWT. El API limita los lotes a 100 operaciones y usa `operationId` para reconocer reintentos; la política de conflictos no debe describirse como una sobrescritura LWW de ventas.
+5. El cliente descarga productos de forma paginada; en este MVP no sube al catálogo los productos creados solo localmente y conserva el stock local durante la actualización de nombre/precio.
+6. La voz puede sugerir producto/cantidad y abrir el formulario manual. La persona revisa y guarda la venta; el reconocimiento en un dispositivo depende del modelo y requiere prueba independiente.
+7. Yapay consulta el total local del día y propone productos con confirmación. Sus reglas, consultas y consejos no son inferencias de un LLM; el modelo local no guarda costos de compra.
+8. La API emite eventos SSE autenticados por negocio, pero su bus está en memoria por proceso; no garantiza replay ni coordinación entre réplicas.
+9. Facturación y QR son endpoints backend: el PDF es simulado/no fiscal y no existe una interfaz Android end-to-end verificada para esos endpoints.
 
 ## Contratos de API
 
@@ -34,4 +35,12 @@ El backend actual documenta rutas, autenticación, paginación, sincronización 
 
 ## Verificación
 
-El workflow [backend.yml](../.github/workflows/backend.yml) publica un resumen verificable de cada ejecución. La compilación Android es una comprobación técnica y no sustituye pruebas funcionales documentadas en dispositivo.
+El workflow [backend.yml](../.github/workflows/backend.yml) publica un resumen verificable de cada ejecución. La ejecución de `main` sobre la revisión `03afcbd` completó los pasos del backend; el enlace y su alcance están en [CI/CD](07_CI_CD_Report.md). La compilación Android es una comprobación técnica y no sustituye pruebas funcionales, migraciones de una base real ni pruebas teléfono–API documentadas en dispositivo.
+
+## Límites de la línea base
+
+- La API y Docker Compose son para desarrollo local; la base se publica solo en loopback. La conexión desde un teléfono físico no queda habilitada por defecto.
+- El cliente móvil usa `10.0.2.2` por defecto, válido para emulador Android y no para un teléfono físico.
+- No se declara un frontend React/web, una base MongoDB/Mongoose, un despliegue productivo, TLS verificado ni una integración fiscal.
+- El Figma vigente es una referencia de diseño; no todas sus pantallas o interacciones se han validado como equivalentes en la app Android.
+- Para contrastar requisitos, casos y evidencias, consultar la [especificación](02_Requisitos_y_UX.md), el [plan](04_Plan_de_Pruebas.md) y la [bitácora](05_Resultados_de_Pruebas.md).

@@ -52,6 +52,6 @@ El script descarga el modelo pequeño de español Vosk 0.42 desde alphacephei.co
 3. Ejecutar las pruebas unitarias JVM desde `mobile/` con `.\gradlew.bat :app:testDebugUnitTest`; los resultados JUnit quedan en `app/build/test-results/testDebugUnitTest/`.
 4. Probar con datos ficticios el PIN, onboarding, alta y persistencia de productos, modo avión y registro de ventas.
 5. Probar voz y sincronización por separado; anotar cualquier comportamiento pendiente.
-6. Registrar la evidencia según [`COMO_DOCUMENTAR.md`](../COMO_DOCUMENTAR.md) y guardarla bajo `docs/evidencias/`.
+6. Registrar pasos, entorno, resultado y evidencia anonimizada según [la guía de evidencias](../evidence/README.md) y [el plan de pruebas](../docs/04_Plan_de_Pruebas.md); guardar las capturas funcionales bajo `docs/evidencias/`.
 
 No incluir APK, keystore, token, datos reales de comerciantes ni audios identificables en el repositorio.

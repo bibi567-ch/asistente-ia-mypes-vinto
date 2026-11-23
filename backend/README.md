@@ -4,7 +4,7 @@
 
 API local con Node.js 24, TypeScript, Express y PostgreSQL. Incluye migraciones SQL versionadas, registro de propietarios, inicio de sesión con contraseña hasheada mediante scrypt, actualización protegida del perfil del negocio, JWT de 15 minutos, consulta/creación de productos limitadas al negocio del token, recepción idempotente de lotes de transacciones offline, facturas simuladas en PDF, almacenamiento del QR de pagos por negocio y notificaciones SSE en proceso.
 
-Actualización/borrado de productos, recuperación de contraseña, limitación de intentos y despliegue todavía no están implementados. No exponer esta API a una red ni usarla con datos reales.
+La API incluye consulta, alta, actualización y borrado de productos dentro del negocio autenticado. No incluye recuperación de contraseña ni limitación de intentos; no hay despliegue productivo aprobado. No expongas esta API a una red pública ni uses datos reales.
 
 ## Requisitos
 
@@ -27,7 +27,7 @@ En otra terminal:
 ```powershell
 Copy-Item backend/.env.example backend/.env
 $secret = node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))"
-Add-Content backend/.env "JWT_SECRET=$secret"
+(Get-Content backend/.env) -replace '^JWT_SECRET=.*$', "JWT_SECRET=$secret" | Set-Content -Encoding ascii backend/.env
 Set-Location backend
 npm ci
 npm run db:migrate
@@ -162,15 +162,15 @@ npm run db:migrate
 
 `npm test` no requiere PostgreSQL. `npm run test:integration` requiere PostgreSQL, migraciones aplicadas y limpia sus dos negocios de prueba al finalizar. El workflow de GitHub ejecuta ambos tipos de pruebas contra un servicio PostgreSQL temporal.
 
-## Próximos incrementos
+## Pendientes antes de ampliar el uso
 
-1. Completar pruebas de integración PostgreSQL, incluyendo aislamiento entre dos negocios.
-2. Añadir actualización/borrado seguro de productos y paginación documentada.
-3. Añadir limitación de intentos y revocación de sesiones antes de permitir acceso desde una red.
-4. Añadir ventas, líneas y movimientos en transacción.
-5. Actualizar ADR/C4 y ampliar pruebas de seguridad antes de cualquier despliegue.
+- Definir limitación de intentos, cierre/revocación de sesiones y recuperación de contraseña.
+- Reforzar las pruebas de aislamiento por negocio y la cobertura de las rutas cloud según los requisitos de aceptación.
+- Definir autorización diferenciada por rol si el producto necesita permisos de propietario y personal; hoy el token limita por negocio, no por rol.
+- Diseñar configuración segura, TLS, observabilidad, copias de seguridad y despliegue antes de cualquier uso fuera de desarrollo.
+- Usar un mecanismo compartido de publicación SSE antes de ejecutar varias instancias.
 
-La materia Tecnologías en Internet incluye MongoDB/Mongoose; la profesora debe confirmar si se exige módulo NoSQL dentro del producto o basta una evidencia didáctica acotada. PostgreSQL no equivale a MongoDB y este backend no declara cubrir ese punto.
+La materia Tecnologías en Internet incluye MongoDB/Mongoose; confirmar con la docente si se exige un módulo NoSQL dentro del producto o basta una evidencia didáctica acotada. PostgreSQL no equivale a MongoDB y este backend no declara cubrir ese punto. La ejecución CI de referencia está registrada en [el reporte](../docs/07_CI_CD_Report.md); no acredita Android ni despliegue.
 
 
 ## Justificación de Node.js y PostgreSQL para el proyecto
@@ -180,5 +180,3 @@ Node.js, TypeScript y Express son la implementación actual del backend y coinci
 PostgreSQL se eligió para el dominio central porque el backend relaciona negocios, propietarios, productos y transacciones. Las claves, restricciones y transacciones SQL ayudan a preservar integridad entre estas entidades y a procesar operaciones de venta de forma consistente. El equipo ya tiene migraciones SQL y API construidas sobre PostgreSQL; agregar una segunda base sin una necesidad del producto requeriría mantener otro esquema, duplicar/sincronizar datos y ampliar las pruebas.
 
 El sílabo TEC-644 sí incluye MongoDB/Mongoose. PostgreSQL no lo sustituye ni acredita por equivalencia ese resultado. Si la asignatura lo exige, confirmar con el docente si se acepta una práctica MongoDB/Mongoose separada; si se requiere cambiar la base del producto, registrar antes una decisión arquitectónica y un plan de migración. No afirmar que el proyecto usa MongoDB.
-
-La asignación de responsables, fechas y tareas de las tres materias se detalla en [el plan de segunda entrega](../docs/14_Segunda_Entrega_Tareas_por_Materia.md).
