@@ -91,6 +91,7 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **API-03** | Protección de Endpoints mediante API Gateway y JWT | Solicitudes sin cabecera `Authorization: Bearer <token>` o con JWT expirado reciben HTTP 401 Unauthorized. | Backend / Gateway | **APROBADO** (CI Run #43157514411) |
 | **API-04** | Emisión de Eventos en Tiempo Real (SSE) | La API emite eventos SSE aislados por negocio para notificar cambios de catálogo o estado de sincronización. | Backend / SSE | **APROBADO** (CI Run #43157514411) |
 | **API-05** | Distribución cloud de actualización Android | El cliente consulta `app-updates/latest`, compara `versionCode`, descarga el APK configurado, verifica SHA-256 y abre el instalador del sistema solo si existe una versión superior. | Android / API | **PENDIENTE** (Docker y dispositivo) |
+| **API-06** | Despliegue del backend en Railway | El servicio usa `/backend`, aplica migraciones contra el Postgres privado con TLS y CA validada, y responde HTTP 2xx en `/api/v1/health`. | Railway / API | **PENDIENTE** (Despliegue bloqueado por CA de PostgreSQL) |
 
 #### 2.8 Módulo de Asistente Conversacional Híbrido (ASIST / VOICE)
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
@@ -102,6 +103,16 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **ASIST-05** | Corrección de transcripción con consentimiento | La corrección se guarda localmente y solo entra en la cola de aprendizaje cuando el comerciante autoriza el envío. | Android / Room v7 | **APROBADO** (Compilación; dispositivo pendiente) |
 | **ASIST-06** | ASR cloud demostrativo | El endpoint indica explícitamente que no transcribió audio real cuando `ASR_PROVIDER=simulated`. | Backend / API | **APROBADO** (Prueba aislada) |
 | **ASIST-07** | Persistencia de feedback autorizado | El backend conserva correcciones por negocio y deduplica por `eventId`. | PostgreSQL / Integración | **BLOQUEADO** (Credenciales locales rechazadas; `28P01`) |
+
+#### 2.9 Ejecución backend en Windows
+
+- Ejecutar desde `backend/`. En PowerShell, usar `npm.cmd` si `npm` resuelve a `npm.ps1` y produce `PSSecurityException`; no es necesario borrar dependencias ni cambiar políticas globales.
+- La suite automatizada levanta servidores HTTP locales en puertos dinámicos. El entorno debe permitir conexiones de loopback a `127.0.0.1`; si el sandbox las deniega, registrar el bloqueo y ejecutar la suite en el flujo autorizado de GitHub Actions.
+
+#### 2.10 Validación Android
+
+- Desde `mobile/`, ejecutar `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug`.
+- La ejecución necesita acceso al caché de Gradle del usuario (`%USERPROFILE%\.gradle`). Si la política del sandbox deniega ese acceso, registrar la prueba como bloqueada; la CI actual del backend no valida ni compila Android.
 
 ---
 
