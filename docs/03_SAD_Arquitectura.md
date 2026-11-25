@@ -7,7 +7,7 @@
 | :--- | :--- |
 | **Proyecto Integrador** | Gestión 2-2026 (Investigación I, Arquitectura de Software, Tecnologías en Internet) |
 | **Sistema** | Asistente Conversacional Offline con PLN Edge (Yapay) para la Gestión de Ventas e Inventario en MYPES de Vinto, Cochabamba |
-| **Versión Vigente** | **v2.10 (Vosk con decodificación abierta en español)** — Noviembre 2026 |
+| **Versión Vigente** | **v2.12 (consultas cognitivas con proveedor Gemini opcional)** — Noviembre 2026 |
 | **Equipo de Desarrollo** | **Eva Chino Quispe** — Líder de Proyecto, Requisitos y QA Documental<br>**Christian Gonzales** — Ingeniería de IA y Pipeline Conversacional<br>**Marializ Mamani** — Backend, Seguridad y Persistencia de Datos<br>**Kevin Rocha** — Diseño UX/UI y Prototipado<br>**Luis Lazo** — Arquitectura C4 y QA Técnico |
 | **Corte de Código** | Revisión de la implementación del asistente híbrido (Node.js 24, Express 5, PostgreSQL 16, Kotlin Room v7) |
 
@@ -30,6 +30,8 @@
 | **2.8** | 25/11/2026 | Equipo de Proyecto | Se habilita un chat textual local con Yapay y se conecta desde el Dashboard. Sus comandos pueden abrir el formulario de venta con producto/cantidad sugeridos, el inventario con filtro o las cuentas por cobrar. La venta sigue requiriendo revisión y guardado explícito; el precio unitario lo resuelve el formulario desde el catálogo local. |
 | **2.9** | 25/11/2026 | Equipo de Proyecto | El chat incorpora push-to-talk reutilizando el `DashboardViewModel` y la única instancia del motor ASR. Al soltar procesa una transcripción validada; texto vacío, fragmentos sin contenido útil, baja confianza e intención Quechua no confirmada se abstienen sin ejecutar acciones. |
 | **2.10** | 25/11/2026 | Equipo de Proyecto | Se confirma el modelo Vosk `vosk-model-small-es-0.42` (español) y se quita la gramática cerrada de frases del reconocedor. Vosk usa ahora el vocabulario completo del modelo para admitir habla española libre; las reglas de negocio siguen en el clasificador Kotlin. La precisión acústica requiere pruebas en dispositivo. |
+| **2.11** | 25/11/2026 | Equipo de Proyecto | Compose local permite parametrizar el puerto host de PostgreSQL (5433 por defecto; 5432 interno), mantiene el ASR simulado por defecto y añade un perfil opcional `quechua` con token Bearer, health check y caché persistente de modelos. El ASR no se expone al host ni se activa automáticamente; su modelo CC BY-NC 4.0 queda restringido a evaluación no comercial salvo autorización. |
+| **2.12** | 25/11/2026 | Equipo de Proyecto | Las consultas `CONSULTA_COGNITIVA` del chat y la voz reutilizan `/api/v1/assistant/query` autenticado. El backend usa Gemini solo si se configura `GEMINI_API_KEY`; sin clave conserva la guía demostrativa. Comandos comerciales, ventas, inventario y fiados siguen locales y requieren sus flujos existentes. La clave nunca se incluye en Android; la interfaz informa el envío externo de consultas generales. |
 
 ---
 
@@ -182,11 +184,13 @@ Rel(api_gateway, sync_service, "Pasa payloads validados")
 Rel(api_gateway, quechua_asr, "POST /transcribe (multipart audio, Bearer; HTTPS o HTTP privado .railway.internal)")
 Rel(sync_service, postgres_db, "Consolida transacciones e inventario")
 Rel(ui_view, phone_actions, "Ejecuta acciones solo después de confirmación")
-Rel(ui_view, api_gateway, "Consulta /api/v1/assistant/query y envía feedback autorizado")
+Rel(ui_view, api_gateway, "Consulta guía cognitiva autenticada en /api/v1/assistant/query y envía feedback autorizado")
 Rel(pln_engine, api_gateway, "Usa /api/v1/asr/transcribe solo como fallback configurado")
 ```
 
-El destino `chat` presenta el historial de `YapayAgent` y acepta comandos de texto procesados localmente por `ChatViewModel`. También reutiliza el `DashboardViewModel` de la entrada `dashboard` para compartir la única instancia Vosk/ASR; no carga una segunda copia del modelo. El clasificador y extractor existentes derivan navegación hacia venta, inventario o cuentas por cobrar; el formulario de venta recibe producto y cantidad como sugerencias, obtiene el precio del catálogo Room y no persiste hasta la confirmación del comerciante. Las transcripciones Quechua requieren respuesta cloud e intención remota aceptada; si falta cualquiera, el chat se abstiene. Los comandos de consulta de ventas y el alta de productos con datos completos continúan por el agente local; el alta solicita confirmación antes de escribir.
+El entorno local Docker Compose publica PostgreSQL solo en loopback con puerto host configurable (por defecto `5433`) y conserva el puerto interno `5432` que usa el backend. El servicio Quechua se añade únicamente con el perfil `quechua`, comparte una red privada con la API, exige token para transcribir y conserva los pesos en un volumen dedicado. El proveedor sigue en `simulated` por defecto; habilitar el perfil no cambia el proveedor, y el modelo CC BY-NC 4.0 no debe usarse comercialmente sin autorización.
+
+El destino `chat` presenta el historial de `YapayAgent` y acepta comandos de texto procesados localmente por `ChatViewModel`. También reutiliza el `DashboardViewModel` de la entrada `dashboard` para compartir la única instancia Vosk/ASR; no carga una segunda copia del modelo. El clasificador y extractor existentes derivan navegación hacia venta, inventario o cuentas por cobrar; el formulario de venta recibe producto y cantidad como sugerencias, obtiene el precio del catálogo Room y no persiste hasta la confirmación del comerciante. Las transcripciones Quechua requieren respuesta cloud e intención remota aceptada; si falta cualquiera, el chat se abstiene. Las consultas clasificadas `CONSULTA_COGNITIVA` en chat o voz usan el contrato autenticado `POST /api/v1/assistant/query`; el backend llama al modelo Gemini configurado solo cuando existe `GEMINI_API_KEY`, con un límite de tiempo y sin acceso a datos de ventas o inventario. Sin clave se mantiene la respuesta demostrativa existente y un error del proveedor se responde explícitamente. La app muestra que las consultas generales pueden enviarse a Gemini y recomienda no incluir datos sensibles. Las ventas, inventario, fiados, confirmación de producto y consultas comerciales continúan por las rutas locales existentes.
 
 ---
 

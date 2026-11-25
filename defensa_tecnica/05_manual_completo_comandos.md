@@ -2,7 +2,9 @@
 
 Este documento explica el sistema completo para la defensa. Los comandos se ejecutan desde la raíz del repositorio salvo que se indique `cd backend` o `cd mobile`.
 
-## 0. Estado comprobado el 23/11/2026
+## 0. Registro histórico de comprobaciones del 23/11/2026
+
+La tabla conserva un registro anterior; **no representa el estado de la última integración**. El estado más reciente disponible se resume a continuación y está detallado en la Fase 38 de [docs/05_Resultados_de_Pruebas.md](../docs/05_Resultados_de_Pruebas.md).
 
 Estos son resultados ejecutados, no supuestos:
 
@@ -18,6 +20,16 @@ Estos son resultados ejecutados, no supuestos:
 | APK Android debug | **GENERADO** — `mobile\app\build\outputs\apk\debug\app-debug.apk`, `com.mypes.vinto`, versión `2.3.0` (`versionCode 5`) |
 
 Una compilación no demuestra funcionamiento en dispositivo. Las pruebas de integración solo se pueden aprobar después de corregir el acceso a PostgreSQL o iniciar Docker Desktop y repetirlas.
+
+### Estado posterior registrado el 25/11/2026
+
+- Backend: `npm run build` y `npm run typecheck:test` pasaron; la suite `npm test` terminó **10/31**, bloqueada por loopback HTTP del sandbox.
+- Proveedor Gemini con mocks: **2/2** pruebas enfocadas pasaron. No se llamó a Google ni se usó una clave real.
+- Android: Gradle no llegó a iniciar porque el sandbox denegó el lockfile de la caché; no se generó APK en esa validación.
+- Docker y `/api/v1/health`: no se pudieron verificar después de la integración Gemini.
+- Railway: hubo un health check satisfactorio en un despliegue anterior; eso no demuestra el despliegue de la versión con Gemini.
+
+Para localizar endpoints, modelos, rutas Retrofit y comandos por entorno, consultar el [mapa técnico](06_mapa_tecnico_apis_conexiones_ia.md) y el [contrato detallado](../.github/modernize/assessment/engines/facts/api-service-contracts.md).
 
 La actualización cloud de Android ahora usa `GET /api/v1/app-updates/latest`. El backend publica únicamente el APK configurado mediante `ANDROID_UPDATE_APK_PATH`; Android compara `versionCode`, descarga el APK, verifica SHA-256 y abre el instalador del sistema. Esto no sustituye la firma del APK ni permite una actualización silenciosa.
 
@@ -37,11 +49,11 @@ Android Compose
    +---- cuando hay red ----> API Node.js/Express
                                 |-- auth
                                 |-- sync/transacciones
-                                |-- assistant/query
+                                |-- assistant/query -> Gemini opcional
                                 |-- asr/transcribe
                                 |-- learning/feedback
                                 v
-                           PostgreSQL 16
+                           PostgreSQL 16 privado/TLS
 ```
 
 ### Capas Android
@@ -66,7 +78,7 @@ El código propuesto en la guía adjunta ya está integrado, pero no debe reempl
 
 | Propuesta | Implementación vigente | Mejora conservada |
 |---|---|---|
-| `IntentClassifier.kt` | `mobile/app/src/main/java/com/mypes/vinto/nlu/IntentClassifier.kt` | Mantiene exactamente 11 intenciones y usa `AYUDA` como fallback, sin agregar una intención no contemplada. |
+| `IntentClassifier.kt` | `mobile/app/src/main/java/com/mypes/vinto/nlu/IntentClassifier.kt` | Clasifica intenciones del teléfono y del negocio con reglas deterministas; usa `DESCONOCIDA` si no reconoce una expresión. |
 | `PhoneActionExecutor.kt` | `mobile/app/src/main/java/com/mypes/vinto/nlu/PhoneActionExecutor.kt` | Extrae parámetros, solicita confirmación, comprueba permisos y usa marcador cuando no hay permiso de llamada. |
 | `CloudAsrService.kt` | `mobile/app/src/main/java/com/mypes/vinto/nlu/CloudAsrService.kt` | Usa Retrofit, JWT, multipart, conectividad validada y marca explícitamente el modo ASR simulado. |
 | `AsistenteVozFacade.kt` | `mobile/app/src/main/java/com/mypes/vinto/nlu/AsistenteVozFacade.kt` | Usa Vosk primero, deriva a cloud solo con baja confianza y sesión válida, y reporta errores en vez de ocultarlos. |
@@ -99,8 +111,9 @@ Docker no es la aplicación ni reemplaza el repositorio. Es el entorno reproduci
 
 - `postgres`: PostgreSQL 16 Alpine, base `mypes_vinto_dev`, usuario `mypes_local`, volumen persistente `postgres_data` y healthcheck.
 - `backend`: construye `backend/Dockerfile`, escucha internamente en el puerto 3000 y se conecta a PostgreSQL usando el nombre de servicio `postgres`, no `localhost`.
-- Los puertos se publican solo en `127.0.0.1`: el backend queda en `http://127.0.0.1:3000` y PostgreSQL en `127.0.0.1:5432`.
+- Los puertos se publican solo en `127.0.0.1`: el backend queda en `http://127.0.0.1:3000` y PostgreSQL en `127.0.0.1:5433` por defecto. PostgreSQL conserva el puerto interno `5432`; el backend se conecta a `postgres:5432` dentro de Compose.
 - `ASR_PROVIDER` queda en `simulated` si no se configura un proveedor real.
+- `quechua-asr` es opcional: solo se inicia con `--profile quechua`, usa el puerto interno 8000 y descarga los modelos a un volumen. No publica el servicio en el host.
 
 ### Preparar variables sin exponer secretos
 
@@ -121,6 +134,7 @@ docker compose ps
 docker compose logs --tail=100 postgres
 docker compose logs --tail=100 backend
 docker compose exec postgres pg_isready -U mypes_local -d mypes_vinto_dev
+docker compose --profile quechua up -d --build
 docker compose down
 ```
 
@@ -128,7 +142,7 @@ Antes de `docker compose up`, construir el APK y preparar las variables de actua
 
 ```powershell
 Set-Location mobile
-.\gradlew.bat :app:assembleDebug
+.\gradlew.bat :app:assembleDebug -PMYPES_API_BASE_URL=http://10.0.2.2:3000/
 Set-Location ..
 Copy-Item .env.example .env
 # En .env usar una contraseña/JWT locales y confirmar:
@@ -140,7 +154,7 @@ docker compose up -d --build
 Invoke-WebRequest http://127.0.0.1:3000/api/v1/app-updates/latest
 ```
 
-Para un teléfono físico, `ANDROID_UPDATE_BASE_URL` debe ser la IP LAN del equipo, no `10.0.2.2`.
+Para un teléfono físico, `ANDROID_UPDATE_BASE_URL` y `MYPES_API_BASE_URL` deben usar la IP LAN del equipo, no `10.0.2.2`. Compose publica el backend en `127.0.0.1` por defecto; para una prueba física local se requiere `API_BIND_ADDRESS=0.0.0.0` en el `.env`, acceso solo desde una LAN confiable y APK debug. No dejar el puerto expuesto ni usar HTTP en producción.
 
 Interpretación:
 
@@ -192,19 +206,21 @@ Si aparece `28P01`, PostgreSQL rechazó usuario/contraseña. No es una aprobaci�
 Set-Location mobile
 .\download-vosk-model.ps1
 .\gradlew.bat :app:testDebugUnitTest
-.\gradlew.bat :app:assembleDebug
+.\gradlew.bat :app:assembleDebug -PMYPES_API_BASE_URL=http://10.0.2.2:3000/
 ```
 
 Para instalar el APK con ADB:
 
 ```powershell
 adb devices
-adb install -r mobile\app\build\outputs\apk\debug\app-debug.apk
+adb install -r .\app\build\outputs\apk\debug\app-debug.apk
 ```
 
-Instala exclusivamente el APK de `mobile\app\build\outputs\apk\debug\`; no uses archivos de `intermediates/` ni el APK de otro proyecto. La aplicación actual se identifica como `com.mypes.vinto`, versión `2.3.0`. Si Android Studio muestra una versión anterior, abre la carpeta `mobile/`, selecciona la variante `app > debug`, ejecuta `Clean Project` y vuelve a instalar este archivo.
+Estos comandos mantienen la terminal dentro de `mobile/`; por eso el APK se instala desde `.\app\build\outputs\apk\debug\app-debug.apk`. No uses archivos de `intermediates/` ni el APK de otro proyecto. La aplicación actual se identifica como `com.mypes.vinto`, versión `2.3.0`. Si Android Studio muestra una versión anterior, abre la carpeta `mobile/`, selecciona la variante `app > debug`, ejecuta `Clean Project` y vuelve a instalar este archivo.
 
 La primera instalación del actualizador cloud debe hacerse manualmente: una versión antigua que no contiene `AppUpdateManager` no puede actualizarse a sí misma. Después de instalar la versión `2.3.0` (`versionCode 5`) y configurar el backend, las siguientes versiones sí pueden descargarse desde la nube.
+
+Para más detalle sobre Retrofit, autenticación JWT y URL por entorno, consultar la sección “Conexión Android ↔ Backend” del [mapa técnico](06_mapa_tecnico_apis_conexiones_ia.md).
 
 `adb install` demuestra instalación, no una prueba funcional. Para probar de verdad:
 
@@ -252,7 +268,9 @@ La primera instalación del actualizador cloud debe hacerse manualmente: una ver
 ## 8. Qué debe decirse en la defensa
 
 - “La arquitectura está implementada por capas y diseñada para operar offline-first”.
-- “La compilación y las pruebas automatizadas pasan en el entorno registrado”.
+- “La validación más reciente registrada tiene build/typecheck backend aprobados y 2/2 pruebas mock del proveedor Gemini; la suite HTTP completa, Android y Docker quedaron bloqueados o pendientes según el resultado documentado”.
+- “El health check HTTPS de Railway pasó en un despliegue anterior; no se volvió a validar después de la integración Gemini”.
 - “La integración PostgreSQL se considera aprobada solo después de una ejecución real contra una base accesible”.
 - “El ASR simulado demuestra el contrato, no la calidad de un proveedor cloud”.
+- “Vosk es el reconocedor neuronal local; el clasificador Android de intenciones funciona con reglas. Gemini y el servicio Whisper/MiniLM de Quechua son modelos externos opcionales”.
 - “Las métricas WER, SUS y latencia siguen pendientes hasta realizar la campaña”.

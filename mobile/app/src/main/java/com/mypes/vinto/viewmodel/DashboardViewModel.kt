@@ -60,7 +60,7 @@ data class DashboardEstado(
     val mensajes: List<MensajeAsistente> = listOf(
         MensajeAsistente(
             texto = "Soy Yapay, tu asistente. Puedo ayudarte con acciones del teléfono y consultas de negocio. " +
-                "Las consultas en línea usan una guía de demostración.",
+                "Las consultas generales pueden enviarse a Gemini; no incluyas datos sensibles.",
             esUsuario = false
         )
     ),

@@ -49,8 +49,8 @@ class YapayAgent private constructor(private val tools: Tools, @Suppress("UNUSED
     data class ProductoPendiente(val nombre: String, val precio: Double, val stock: Double)
 
     /**
-     * Prompt de sistema para el adaptador LLM futuro. En esta versión no se envían
-     * conversaciones a un servicio remoto; las intenciones se resuelven localmente.
+     * Prompt de referencia; las acciones y consultas comerciales de esta clase se resuelven localmente.
+     * ChatViewModel envía solo consultas cognitivas al backend autenticado.
      */
     val systemPrompt: String = """
         Eres Yapay, un consultor financiero experto en contabilidad, auditoría y administración

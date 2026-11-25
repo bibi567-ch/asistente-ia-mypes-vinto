@@ -15,6 +15,7 @@ class IntentClassifierTest {
         assertEquals(IntentClassifier.Intencion.CONSULTA_COGNITIVA, classifier.clasificar("¿Qué es el IVA?"))
         assertEquals(IntentClassifier.Intencion.CONSULTA_COGNITIVA, classifier.clasificar("¿Cómo calculo mi ganancia?"))
         assertEquals(IntentClassifier.Intencion.REGISTRAR_VENTA, classifier.clasificar("Quiero vender un producto"))
+        assertEquals(IntentClassifier.Intencion.REGISTRAR_VENTA, classifier.clasificar("Vender dos papas"))
         assertEquals(IntentClassifier.Intencion.CONSULTAR_STOCK, classifier.clasificar("¿Cuánto queda de harina?"))
         assertEquals(IntentClassifier.Intencion.CONSULTAR_VENTAS, classifier.clasificar("¿Cuánto vendí hoy?"))
         assertEquals(IntentClassifier.Intencion.REGISTRAR_VENTA, classifier.clasificar("qhatuy papa"))

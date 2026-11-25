@@ -1,5 +1,7 @@
 # Guion de demostración y modelado C4
 
+Para ubicar cada API, enlace, modelo y comando antes de la exposición, usar el [mapa técnico](06_mapa_tecnico_apis_conexiones_ia.md) y el [contrato detallado](../.github/modernize/assessment/engines/facts/api-service-contracts.md).
+
 ## 1. Orden recomendado de la demostración
 
 ### Paso A — Contexto C4

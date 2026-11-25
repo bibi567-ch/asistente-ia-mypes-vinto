@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { requireAuth } from '../auth/require-auth.js';
+import { env } from '../config/env.js';
+import { generarRespuestaGemini } from '../services/gemini-assistant.js';
 
 export const assistantRouter = Router();
 assistantRouter.use(requireAuth);
 
-assistantRouter.post('/query', (request, response) => {
+assistantRouter.post('/query', async (request, response) => {
   const body: unknown = request.body;
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
     response.status(400).json({
@@ -27,7 +29,22 @@ assistantRouter.post('/query', (request, response) => {
     return;
   }
 
-  response.status(200).json({ respuesta: responder(pregunta, idioma) });
+  if (!env.geminiApiKey) {
+    response.status(200).json({ respuesta: responder(pregunta, idioma) });
+    return;
+  }
+
+  try {
+    const respuesta = await generarRespuestaGemini(pregunta.trim(), idioma);
+    response.status(200).json({ respuesta });
+  } catch (error) {
+    console.error('Gemini assistant request failed.', {
+      name: error instanceof Error ? error.name : 'UnknownError'
+    });
+    response.status(502).json({
+      error: { code: 'assistant_provider_failed', message: 'No se pudo consultar la guía. Inténtalo de nuevo.' }
+    });
+  }
 });
 
 function responder(pregunta: string, idioma: string): string {

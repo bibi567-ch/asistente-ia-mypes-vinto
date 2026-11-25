@@ -18,6 +18,8 @@ export const env = {
   googleAsrLanguage: process.env.GOOGLE_ASR_LANGUAGE?.trim() || 'es-ES',
   openaiAsrApiKey: process.env.OPENAI_ASR_API_KEY?.trim() || '',
   openaiAsrBaseUrl: process.env.OPENAI_ASR_BASE_URL?.trim() || 'https://api.openai.com/v1',
+  geminiApiKey: process.env.GEMINI_API_KEY?.trim() || '',
+  geminiModel: process.env.GEMINI_MODEL?.trim() || 'gemini-3.5-flash-lite',
   quechuaAsrApiUrl: process.env.QUECHUA_ASR_API_URL?.trim() || '',
   quechuaAsrApiToken: process.env.QUECHUA_ASR_API_TOKEN?.trim() || '',
   databaseSslCa: process.env.DATABASE_SSL_CA?.replace(/\\n/g, '\n').trim() || '',

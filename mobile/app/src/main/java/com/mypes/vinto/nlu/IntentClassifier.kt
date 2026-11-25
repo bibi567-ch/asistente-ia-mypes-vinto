@@ -33,7 +33,8 @@ class IntentClassifier {
                 Intencion.CONSULTAR_STOCK
             contiene(normalizado, "agrega producto", "agregar producto", "añade producto", "anade producto", "nuevo producto") ->
                 Intencion.AGREGAR_PRODUCTO
-            contiene(normalizado, "registrar venta", "registra venta", "anota venta", "hacer una venta", "quiero vender", "vender producto", "qhatuy") ->
+            contiene(normalizado, "registrar venta", "registra venta", "anota venta", "hacer una venta", "quiero vender", "vender producto", "qhatuy") ||
+                Regex("""\b(vender|vende|vendi|vendeme)\b""").containsMatchIn(normalizado) ->
                 Intencion.REGISTRAR_VENTA
             contiene(normalizado, "imaynalla", "allillan") -> Intencion.SALUDO
             contiene(normalizado, "llama", "llamar", "telefonear", "wawq") -> Intencion.LLAMAR_CONTACTO

@@ -98,7 +98,7 @@ fun ChatScreen(
             }
             Column {
                 Text("Yapay", color = TextoBlanco, fontSize = 22.sp)
-                Text("Asistente local para tu negocio", color = TextoGris, fontSize = 12.sp)
+                Text("Acciones locales · guía en línea opcional", color = TextoGris, fontSize = 12.sp)
             }
         }
 
@@ -241,7 +241,7 @@ fun ChatScreen(
             }
         }
         Text(
-            "Las ventas se abren para revisión; Yapay no las guarda sin confirmación.",
+            "Consultas generales pueden enviarse a Gemini. No incluyas datos sensibles. Las ventas requieren tu confirmación.",
             color = TextoGris,
             fontSize = 11.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)

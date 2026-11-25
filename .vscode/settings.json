@@ -1,4 +1,5 @@
 {
     "java.configuration.updateBuildConfiguration": "interactive",
-    "java.project.explorer.showNonJavaResources": false
+    "java.project.explorer.showNonJavaResources": false,
+    "python.terminal.useEnvFile": true
 }

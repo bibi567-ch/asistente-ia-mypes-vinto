@@ -281,6 +281,37 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
 * **Comprobaciones ejecutadas:** Diagnósticos del editor sin errores en `AsrEngine.kt` y `git diff --check` con código 0. No se recompiló Android porque la ejecución de Gradle ya estaba bloqueada por la denegación del sandbox al lockfile de la caché.
 * **Pendiente:** Probar frases españolas espontáneas con micrófono en un dispositivo y ejecutar build/pruebas JVM cuando el sandbox permita acceso a `%USERPROFILE%\.gradle`. No se desplegó ni cambió Railway.
 
+##### Fase 35: Preparación del entorno Docker local
+* **Fecha:** 2026-11-25.
+* **Cambio:** Puerto host de PostgreSQL parametrizable con valor predeterminado `5433` (el contenedor mantiene `5432`); el backend recibe los nombres de configuración reales `QUECHUA_ASR_API_URL` y `QUECHUA_ASR_API_TOKEN`. Se añadió el perfil Compose optativo `quechua`, con token, health check, red interna y volumen persistente para los modelos; `ASR_PROVIDER` continúa en `simulated` por defecto.
+* **Licencia y alcance:** El perfil Quechua no se activa automáticamente. El modelo Whisper Puno tiene licencia CC BY-NC 4.0; la documentación limita su uso a evaluación no comercial hasta contar con autorización apropiada.
+* **Validación:** No se ejecutó `docker compose config`, ni arranque/health check después de estos cambios. Un intento anterior de `docker compose up -d --build`, antes de esta fase, fue bloqueado por el sandbox al leer la configuración y conectar con `npipe:////./pipe/docker_engine`; no fue un error observado de bind del puerto 5432. OPS-01 permanece **BLOQUEADO** en este entorno; la verificación manual en Windows sigue **PENDIENTE**.
+
+##### Fase 36: Validación backend disponible en sandbox
+* **Fecha:** 2026-11-25.
+* **Comandos ejecutados:** `npm.cmd --prefix backend run build` (código 0), `npm.cmd --prefix backend run typecheck:test` (código 0) y `npm.cmd --prefix backend test` (código 1). No se ejecutó `npm ci`: las dependencias ya estaban instaladas y los manifiestos no cambiaron.
+* **Resultado de pruebas:** 8 de 27 pasaron y 19 fallaron. Las pruebas que requieren HTTP local no pudieron conectar a puertos dinámicos de `127.0.0.1` a través del proxy del sandbox; el resultado mostró `Proxy upstream connect error` y `os error 10060`. No se atribuye esta falla a la lógica de negocio sin repetir la suite en un entorno con loopback disponible.
+* **Alcance:** El build y el chequeo de tipos sí se completaron. No valida PostgreSQL, migraciones, Compose, health check, el servicio ASR ni Android. Docker ya había sido denegado por la política del sandbox; no se reintentó.
+* **Estado:** OPS-01 **BLOQUEADO**; la verificación manual en Windows permanece **PENDIENTE** y no se registra como aprobada sin resultado/evidencia del desarrollador.
+
+##### Fase 37: Comando breve de venta por voz en español
+* **Fecha:** 2026-11-25.
+* **Hallazgo:** La frase del escenario `"Vender dos papas"` no coincidía con las expresiones de venta del clasificador local, aunque el extractor sí obtiene cantidad y producto.
+* **Cambio:** El clasificador acepta imperativos/conjugaciones breves (`vender`, `vende`, `vendí` y `véndeme`) como intención de registrar venta. Se añadieron casos JVM para la intención y la extracción de `papas` y cantidad `2`. El Dashboard pasa el intent y los parámetros al formulario, que conserva revisión explícita antes de guardar.
+* **Validación:** No se ejecutaron pruebas JVM ni build Android porque Gradle había sido bloqueado por acceso denegado a `%USERPROFILE%\.gradle`. `git diff --check` finalizó con código 0; esto no valida la lógica de reconocimiento ni el flujo en Android.
+* **Límite:** Se verifica por código la ruta al formulario, no el reconocimiento acústico de esa frase, la coincidencia del producto con el catálogo de cada negocio, ni el guardado/sincronización en dispositivo.
+
+##### Fase 38: Consultas cognitivas con Gemini opcional
+* **Fecha:** 2026-11-25.
+* **Cambio:** El chat y la guía de voz conservan el contrato autenticado `/api/v1/assistant/query`; solo `CONSULTA_COGNITIVA` puede consultar el proveedor. Gemini se habilita mediante `GEMINI_API_KEY` y `GEMINI_MODEL` en el backend, con timeout de 15 segundos, límite de salida e instrucciones que excluyen operaciones y datos comerciales. Sin clave sigue la guía de demostración; el fallo del proveedor devuelve HTTP 502 sin respuesta exitosa de fallback. La clave no se añade a Android ni al repositorio, y las interfaces advierten que las consultas generales pueden enviarse a Gemini.
+* **Build y tipos:** `npm.cmd --prefix backend run build` y `npm.cmd --prefix backend run typecheck:test` finalizaron con código 0 tras el cambio.
+* **Pruebas del proveedor:** Desde `backend/`, `.\node_modules\.bin\tsx.cmd --test test\gemini-assistant.test.ts` finalizó con 2/2 aprobadas. Se simularon respuestas y error HTTP del proveedor; no se contactó a Google ni se usó una clave real.
+* **Pruebas API:** Desde `backend/`, `.\node_modules\.bin\tsx.cmd --test test\assistant.test.ts` terminó con 0/4 aprobadas. Las cuatro fallaron antes de recibir respuesta HTTP porque el proxy del sandbox no pudo conectar con `127.0.0.1` (HTTP 502 / error 10060).
+* **Suite backend:** `npm.cmd test` desde `backend/` terminó con 10/31 aprobadas y 21 fallidas; las fallas fueron peticiones HTTP a puertos locales interceptadas por el proxy del sandbox (`502`/`10060`). La suite no queda aprobada.
+* **Android:** `mobile\gradlew.bat :app:assembleDebug` se detuvo antes de iniciar Gradle por acceso denegado al lockfile en `%USERPROFILE%\.gradle\wrapperdists\gradle-8.7-bin\`. No se compiló ni probó Android.
+* **Docker y salud:** `docker compose up -d --build backend` fue bloqueado por la política del sandbox al leer `C:\Users\ADMIN\.docker\config.json` y conectar al pipe `npipe:////./pipe/docker_engine`. No se iniciaron contenedores y `/api/v1/health` no se verificó.
+* **Estado:** Integración unitaria del adaptador Gemini **APROBADA con proveedor simulado**; la API sobre HTTP, el build Android, la llamada real a Google, Docker, health check y flujo end-to-end **PENDIENTES/BLOQUEADOS**. No existe un resultado CI asociado a este cambio.
+
 ---
 
 #### 3. MATRIZ DE EVIDENCIAS Y ALCANCE DE VERIFICACIÓN

@@ -77,7 +77,7 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
 | :--- | :--- | :--- | :--- | :--- |
 | **IA-01** | Transcripción ASR local con motor Vosk en español | Con el modelo `vosk-model-small-es-0.42`, una frase española libre que no esté en una lista cerrada se transcribe; mantener presionado inicia la captura y soltar finaliza/agrega segmentos una sola vez. La inicialización no bloquea la UI y recupera una copia privada incompleta del modelo. | Android / Vosk | **BLOQUEADO** (JVM por acceso denegado a Gradle; evaluación acústica en dispositivo pendiente) |
-| **IA-02** | Clasificación de Intención y Extracción de Entidades | Interpreta comandos verbales (ej. "Vendí 2 cuartillas de arroz a 20 pesos") extrayendo intención, producto y monto. | Android / NLU | **APROBADO** (Prueba Unit/JVM) |
+| **IA-02** | Clasificación de Intención y Extracción de Entidades | Interpreta comandos verbales (ej. "Vender dos papas" y "Vendí 2 cuartillas de arroz a 20 pesos") extrayendo intención, producto y parámetros disponibles. La venta solo abre el formulario para revisión; no se guarda por reconocer la frase. | Android / NLU | **PARCIAL** (Caso breve añadido; ejecución JVM bloqueada por acceso denegado a Gradle) |
 | **IA-03** | Confirmación humana obligatoria antes de guardar | Ningún comando dictado por voz se guarda automáticamente; se exige confirmación explícita mediante diálogo modal. | Android / UI | **APROBADO** (Prueba local) |
 | **IA-04** | Cancelación e interrupción verbal | Si el usuario dice "cancelar" o "me equivoqué", el orquestador aborta la captura y vuelve al estado inicial. | Android / VUI | **PENDIENTE** (Prueba acústica) |
 | **IA-05** | Sugerencia inteligente de productos (Asistente Yapay) | Yapay consulta las existencias en Room y sugiere productos con bajo stock o resumen diario mediante reglas locales. | Android / Logic | **APROBADO** (Prueba Unit/JVM) |
@@ -85,7 +85,8 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **IA-07** | Abstención ante texto local desconocido | Una frase sin intención reconocida recibe respuesta de no comprensión y no navega ni ejecuta una acción. | Android / JVM | **PENDIENTE** (Prueba JVM añadida; ejecución Gradle bloqueada por acceso a caché) |
 | **IA-08** | Respuesta ASR simulada o vacía | El cliente no presenta el mensaje del proveedor como transcripción; usa el texto Vosk solo si su confianza permite procesarlo. En modo Quechua explícito sin transcripción cloud no ejecuta acciones locales. | Android / JVM / API | **PENDIENTE** (Validación de cliente y dispositivo) |
 | **IA-09** | Fragmento de reconocimiento sin contenido útil | El texto aislado `de` no se agrega como transcripción ni ejecuta una intención; Yapay pide repetir manteniendo presionado y soltando al terminar. | Android / JVM / VUI | **PENDIENTE** (Validación en dispositivo) |
-| **IA-10** | Chat textual local con Yapay | El usuario envía texto, ve ambos lados del historial y recibe respuesta o error visible. La consulta de ventas y la confirmación de alta de producto siguen usando `YapayAgent`; si hay un alta pendiente, el siguiente mensaje se interpreta como confirmación/cancelación y no como navegación. | Android / JVM / Compose | **BLOQUEADO** (Ejecución JVM denegada por sandbox; UI/dispositivo pendiente) |
+| **IA-10** | Chat Yapay y enrutamiento comercial local | El usuario envía texto, ve ambos lados del historial y recibe respuesta o error visible. Ventas, inventario, fiados y confirmación de producto siguen usando los flujos locales; si hay un alta pendiente, el siguiente mensaje se interpreta como confirmación/cancelación y no como navegación. | Android / JVM / Compose | **BLOQUEADO** (Ejecución JVM denegada por sandbox; UI/dispositivo pendiente) |
+| **IA-13** | Consulta cognitiva autenticada con Gemini opcional | Solo una entrada clasificada `CONSULTA_COGNITIVA` puede llamar `POST /api/v1/assistant/query` con JWT. Con `GEMINI_API_KEY` configurada se devuelve respuesta del proveedor; sin clave se mantiene la guía demostrativa. Un fallo del proveedor produce error explícito, no una respuesta exitosa de fallback. La clave no aparece en móvil y la UI advierte que la consulta general puede enviarse a Gemini. | Backend / Android / API | **PARCIAL** (2 pruebas del proveedor con HTTP simulado aprobadas; API local y Android bloqueados) |
 | **IA-11** | Navegación comercial desde el chat | Un comando de venta abre el formulario con producto/cantidad sugeridos y no guarda; stock abre inventario filtrado; fiados abre cuentas por cobrar. El precio unitario proviene del catálogo local. | Android / JVM / Compose | **BLOQUEADO** (Ejecución JVM denegada por sandbox; UI/dispositivo pendiente) |
 | **IA-12** | Push-to-talk desde el chat | Mantener presionado inicia ASR y soltar finaliza una sola transcripción usando el motor ya cargado por el Dashboard. Texto vacío/`de`, baja confianza o falta de transcripción/clasificación cloud en modo Quechua se abstienen sin navegar ni guardar. | Android / JVM / Compose | **BLOQUEADO** (Pruebas JVM no ejecutadas por acceso denegado a Gradle; prueba física pendiente) |
 
@@ -118,17 +119,23 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **ASIST-06** | ASR cloud demostrativo | El endpoint indica explícitamente que no transcribió audio real cuando `ASR_PROVIDER=simulated`. | Backend / API | **APROBADO** (Prueba aislada) |
 | **ASIST-07** | Persistencia de feedback autorizado | El backend conserva correcciones por negocio y deduplica por `eventId`. | PostgreSQL / Integración | **BLOQUEADO** (Credenciales locales rechazadas; `28P01`) |
 
-#### 2.9 Ejecución backend en Windows
+#### 2.9 Entorno local Docker Compose
+
+| ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
+| :--- | :--- | :--- | :--- | :--- |
+| **OPS-01** | Arranque local de DB y API | Compose levanta PostgreSQL usando el puerto host configurable (5433 por defecto), aplica migraciones y devuelve `status=ok` y `database=connected` en `/api/v1/health`; el perfil Quechua queda excluido por defecto y, al habilitarse con token, solo está accesible por la red interna y reporta `healthy` tras cargar modelos. | Windows / Docker Compose | **BLOQUEADO** (Sandbox denegó el acceso a la configuración y al pipe de Docker; no hay verificación manual local aportada) |
+
+#### 2.10 Ejecución backend en Windows
 
 - Ejecutar desde `backend/`. En PowerShell, usar `npm.cmd` si `npm` resuelve a `npm.ps1` y produce `PSSecurityException`; no es necesario borrar dependencias ni cambiar políticas globales.
 - La suite automatizada levanta servidores HTTP locales en puertos dinámicos. El entorno debe permitir conexiones de loopback a `127.0.0.1`; si el sandbox las deniega, registrar el bloqueo y ejecutar la suite en el flujo autorizado de GitHub Actions.
 
-#### 2.10 Validación Android
+#### 2.11 Validación Android
 
 - Desde `mobile/`, ejecutar `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug`.
 - La ejecución necesita acceso al caché de Gradle del usuario (`%USERPROFILE%\.gradle`). Si la política del sandbox deniega ese acceso, registrar la prueba como bloqueada; la CI actual del backend no valida ni compila Android.
 
-**Último intento local (2026-11-25):** `npm.cmd test` terminó con código 1 (7 aprobadas, 19 fallidas); las fallas fueron `fetch failed` al conectar con servidores de prueba en `127.0.0.1` a través del proxy. `npm.cmd run build` y `npm.cmd run typecheck:test` terminaron con código 0. `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` se bloqueó antes de iniciar Gradle por acceso denegado al lockfile en `%USERPROFILE%\.gradle\wrapperdists\gradle-8.7-bin\`. Ver detalle en [05_Resultados_de_Pruebas.md](05_Resultados_de_Pruebas.md); no se considera validación funcional.
+**Último intento del agente (2026-11-25):** `npm.cmd --prefix backend run build` y `npm.cmd --prefix backend run typecheck:test` terminaron con código 0. `npm.cmd --prefix backend test` terminó con código 1 (8 aprobadas, 19 fallidas); las solicitudes HTTP de pruebas no alcanzaron los servidores locales en puertos dinámicos `127.0.0.1` a través del proxy del sandbox (`os error 10060`). No se reintentó mediante otra herramienta. Un intento anterior de Gradle se bloqueó antes de iniciar por acceso denegado al lockfile en `%USERPROFILE%\.gradle\wrapperdists\gradle-8.7-bin\`. Docker y Android no se verificaron localmente. Ver detalle en [05_Resultados_de_Pruebas.md](05_Resultados_de_Pruebas.md); no se considera validación funcional.
 
 ---
 

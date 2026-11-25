@@ -17,6 +17,14 @@ class EntityExtractorTest {
     }
 
     @Test
+    fun `extrae entidades del comando de venta breve`() {
+        val resultado = extractor.extraer("Vender dos papas")
+
+        assertEquals(2.0, resultado.cantidad!!, 0.0)
+        assertEquals("papas", resultado.producto)
+    }
+
+    @Test
     fun `detecta forma de pago al fiado y extrae cliente`() {
         val resultado = extractor.extraer("Anota 3 panes al fiado para doña Maria")
 

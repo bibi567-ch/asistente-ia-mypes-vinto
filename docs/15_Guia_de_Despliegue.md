@@ -18,29 +18,36 @@
 Desde PowerShell, en la raíz del proyecto:
 
 ```powershell
-Copy-Item .env.example .env
-$env:POSTGRES_PASSWORD = (& node -e "process.stdout.write(require('node:crypto').randomBytes(24).toString('base64url'))")
-$env:JWT_SECRET = (& node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))")
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 $configuracion = Get-Content .env
-$configuracion = $configuracion -replace '^POSTGRES_PASSWORD=.*$', "POSTGRES_PASSWORD=$env:POSTGRES_PASSWORD"
-$configuracion = $configuracion -replace '^JWT_SECRET=.*$', "JWT_SECRET=$env:JWT_SECRET"
+if (-not ($configuracion | Where-Object { $_ -match '^POSTGRES_PASSWORD=.+$' })) {
+    $env:POSTGRES_PASSWORD = (& node -e "process.stdout.write(require('node:crypto').randomBytes(24).toString('base64url'))")
+    $configuracion = $configuracion -replace '^POSTGRES_PASSWORD=.*$', "POSTGRES_PASSWORD=$env:POSTGRES_PASSWORD"
+}
+if (-not ($configuracion | Where-Object { $_ -match '^JWT_SECRET=.+$' })) {
+    $env:JWT_SECRET = (& node -e "process.stdout.write(require('node:crypto').randomBytes(32).toString('base64url'))")
+    $configuracion = $configuracion -replace '^JWT_SECRET=.*$', "JWT_SECRET=$env:JWT_SECRET"
+}
 Set-Content -Encoding ASCII .env $configuracion
 docker compose up -d --build
 docker compose ps
 Invoke-RestMethod http://127.0.0.1:3000/api/v1/health
 ```
 
-La API escucha en el puerto `3000`, no `4000`, y Compose la enlaza solo a loopback. Las claves de ASR son opcionales:
+PostgreSQL escucha dentro de Compose en `5432`; el puerto del equipo es `POSTGRES_HOST_PORT` (por defecto `5433`) para evitar conflictos con una instalación local. Si ese puerto también está ocupado, cambia el valor en `.env`; el backend sigue conectándose al puerto interno `5432`. La API escucha en el puerto `3000`, no `4000`, y Compose la enlaza solo a loopback. Las claves de ASR son opcionales:
 
 - Google: `ASR_PROVIDER=google`, `GOOGLE_ASR_API_KEY` y opcionalmente `GOOGLE_ASR_LANGUAGE`.
 - Whisper: `ASR_PROVIDER=whisper`, `OPENAI_ASR_API_KEY` y opcionalmente `OPENAI_ASR_BASE_URL`.
 - Quechua: `ASR_PROVIDER=quechua`, `QUECHUA_ASR_API_URL` y `QUECHUA_ASR_API_TOKEN`. El endpoint acepta `POST multipart/form-data` con el campo `audio` y devuelve JSON `{ "text": "..." }`. En producción usa HTTPS, excepto HTTP en un hostname privado `.railway.internal`. El backend actúa como proxy y no contiene ni descarga el modelo.
+- Gemini para consultas cognitivas: configura opcionalmente `GEMINI_API_KEY` y `GEMINI_MODEL` (por defecto `gemini-3.5-flash-lite`) en el backend. La app utiliza el contrato autenticado `POST /api/v1/assistant/query`; sin clave conserva la respuesta demostrativa y los fallos del proveedor se informan como error.
 
-Guarda esas variables solo en `.env`; nunca las insertes en el APK. La API ofrece registro en `POST /api/v1/auth/register`. Si necesitas crear un propietario de prueba desde el contenedor, ejecuta `docker compose exec backend node dist/scripts/create-owner.js "MYPE de prueba" "propietario@example.test"` y protege la contraseña temporal generada.
+Guarda las claves solo en `.env` o en el gestor de secretos del despliegue; nunca las insertes en el APK. Solo las consultas generales pueden enviarse a Gemini; no incluyas datos personales ni información comercial sensible. Comandos, ventas, inventario y fiados permanecen en sus flujos locales. No copies una clave expuesta en conversaciones ni en el repositorio: revócala y genera una nueva. El `.env.example` conserva `ASR_PROVIDER=simulated`; no lo cambies a `quechua` hasta tener autorización para usar el modelo bajo su licencia. La API ofrece registro en `POST /api/v1/auth/register`. Si necesitas crear un propietario de prueba desde el contenedor, ejecuta `docker compose exec backend node dist/scripts/create-owner.js "MYPE de prueba" "propietario@example.test"` y protege la contraseña temporal generada.
 
 Compose usa `NODE_ENV=development` por defecto para la base PostgreSQL local. `API_BIND_ADDRESS=127.0.0.1` restringe el puerto al equipo local y permite el acceso desde el emulador Android mediante `10.0.2.2`. Para probar temporalmente con un teléfono en una red Wi-Fi confiable, cambia `API_BIND_ADDRESS` a `0.0.0.0`, limita el acceso con el firewall y usa la IP LAN del equipo; no expongas ese modo directamente a Internet. Para ejecutar Node directamente fuera de Docker, completa `DATABASE_URL` en el `backend/.env` local; el ejemplo deja ese valor vacío intencionalmente y el backend no inicia si falta.
 
-Para detener los servicios sin borrar los datos, usa `docker compose down`. `docker compose down -v` elimina también el volumen local de PostgreSQL.
+El microservicio ASR Quechua es opcional y no inicia con el Compose normal. Solo para evaluación autorizada no comercial, configura `ASR_PROVIDER=quechua` y `QUECHUA_ASR_API_TOKEN` en el `.env`, luego ejecuta `docker compose --profile quechua up -d --build` y espera a que `docker compose --profile quechua ps` muestre `quechua-asr` como `healthy`. Backend y ASR se comunican por la red interna usando `QUECHUA_ASR_API_URL=http://quechua-asr:8000/transcribe`; el puerto `8000` no se publica al host. El volumen `quechua_asr_models` conserva los pesos entre recreaciones del contenedor. La primera construcción/ejecución puede tardar varios minutos y descargar modelos; verifica la memoria y el espacio disponible. El perfil por sí solo no cambia el valor `ASR_PROVIDER` ni resuelve la licencia CC BY-NC 4.0 del modelo Whisper Puno; no uses inferencia en una operación comercial sin autorización/licencia apropiada.
+
+Para detener los servicios sin borrar los datos, usa `docker compose down`. `docker compose down -v` elimina también los volúmenes locales de PostgreSQL y del caché de modelos ASR.
 
 ## 3. App Android
 

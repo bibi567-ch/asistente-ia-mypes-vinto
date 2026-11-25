@@ -22,11 +22,19 @@ El PIN autentica el uso local del dispositivo sin depender de red. La contraseñ
 
 ## ¿La IA entiende quechua y aimara?
 
-La arquitectura contempla variantes locales, pero la implementación actualmente demostrable usa Vosk local y clasificación por reglas con alcance limitado. La precisión por idioma requiere una campaña WER con corpus, participantes y evidencia. No debe defenderse como resultado medido si no existe esa campaña.
+La app tiene Vosk en español y clasificación local por reglas. Existe un servicio experimental Quechua con Whisper y MiniLM, pero no está habilitado por defecto ni se ha probado funcionalmente; Aimara no debe presentarse como una capacidad validada. La precisión por idioma requiere una campaña WER con corpus, participantes y evidencia.
 
 ## ¿El ASR cloud ya es real?
 
-El contrato está preparado y el modo por defecto es `simulated`. Las pruebas validan el contrato y el manejo de errores, no una transcripción real. Para afirmar soporte cloud se necesitan proveedor configurado, credenciales fuera del repositorio y prueba reproducible.
+En Compose, el modo por defecto es `simulated`. Google Speech, Whisper o el servicio Quechua se pueden configurar, pero el resultado registrado no demuestra que un proveedor real haya transcrito audio. Para afirmar soporte cloud se necesitan proveedor configurado, credenciales fuera del repositorio y prueba reproducible.
+
+## ¿Dónde están las APIs y cómo se conecta Android?
+
+Las 20 rutas y su autenticación están enumeradas en el [contrato detallado](../.github/modernize/assessment/engines/facts/api-service-contracts.md). Android fija su base URL desde `BuildConfig.API_BASE_URL` en `ApiClient.kt`; el [mapa técnico](06_mapa_tecnico_apis_conexiones_ia.md) detalla Railway, emulador (`10.0.2.2`) y teléfono físico.
+
+## ¿Dónde están las redes neuronales?
+
+Vosk y su modelo acústico español están empaquetados en los assets Android. El clasificador de intenciones Android es código de reglas, no una red neuronal. Gemini es un LLM externo opcional; Whisper y MiniLM pertenecen al servicio experimental Quechua. No presentar el modelo remoto como desplegado o medido sin evidencia.
 
 ## ¿Qué patrón arquitectónico es el más importante?
 
