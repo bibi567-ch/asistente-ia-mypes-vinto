@@ -6,7 +6,7 @@ plugins {
 }
 
 val apiBaseUrl = providers.gradleProperty("MYPES_API_BASE_URL")
-    .orElse("http://10.0.2.2:3000/")
+    .orElse("https://blissful-enthusiasm-production-95638378.up.railway.app/")
     .get()
 require(apiBaseUrl.startsWith("http://") || apiBaseUrl.startsWith("https://")) {
     "MYPES_API_BASE_URL must use HTTP or HTTPS."

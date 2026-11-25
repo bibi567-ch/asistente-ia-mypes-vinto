@@ -34,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -59,6 +60,12 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
 
     LaunchedEffect(estado.mensajes.size) {
         if (estado.mensajes.isNotEmpty()) listState.animateScrollToItem(estado.mensajes.lastIndex)
+    }
+    LaunchedEffect(estado.rutaPendiente) {
+        estado.rutaPendiente?.let { ruta ->
+            vm.consumirRutaPendiente()
+            nav.navigate(ruta)
+        }
     }
 
     Box(Modifier.fillMaxSize().background(FondoOscuro)) {
@@ -114,7 +121,12 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
                         Column(Modifier.padding(14.dp)) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("ASISTENTE VOCAL MYPE", color = VerdeNeon, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
-                                Text("VOSK / EDGE", color = TextoGris, fontSize = 10.sp, fontFamily = FontFamily.Monospace)
+                                Text(
+                                    if (estado.modoQuechua) "QUECHUA / CLOUD" else "VOSK / EDGE",
+                                    color = TextoGris,
+                                    fontSize = 10.sp,
+                                    fontFamily = FontFamily.Monospace
+                                )
                             }
                             Spacer(Modifier.height(6.dp))
                             Text(
@@ -122,6 +134,24 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
                                 color = TextoBlanco,
                                 fontSize = 14.sp
                             )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text("Modo quechua", color = TextoBlanco, fontSize = 13.sp)
+                                    Text(
+                                        "Forzar cloud; baja confianza también activa fallback",
+                                        color = TextoGris,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                                Switch(
+                                    checked = estado.modoQuechua,
+                                    onCheckedChange = vm::setModoQuechua
+                                )
+                            }
                             Spacer(Modifier.height(10.dp))
                             Button(
                                 onClick = { if (estado.escuchando) vm.detenerEscucha() else vm.iniciarEscucha() },

@@ -1,6 +1,7 @@
 package com.mypes.vinto.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import android.speech.tts.TextToSpeech
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,6 +21,7 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.UUID
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +54,7 @@ sealed interface EstadoAccion {
 
 data class DashboardEstado(
     val escuchando: Boolean = false,
+    val modoQuechua: Boolean = false,
     val modeloDisponible: Boolean? = null,
     val textoParcial: String = "",
     val mensajes: List<MensajeAsistente> = listOf(
@@ -62,7 +65,8 @@ data class DashboardEstado(
         )
     ),
     val estadoAccion: EstadoAccion = EstadoAccion.Inactivo,
-    val mensajeError: String? = null
+    val mensajeError: String? = null,
+    val rutaPendiente: String? = null
 )
 
 class DashboardViewModel(application: Application) : AndroidViewModel(application) {
@@ -81,7 +85,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     init {
-        _estado.value = _estado.value.copy(modeloDisponible = asistente.inicializar())
+        _estado.value = _estado.value.copy(
+            modeloDisponible = asistente.inicializar(),
+            modoQuechua = asistente.modoQuechua()
+        )
         textToSpeech = TextToSpeech(application) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
             if (ttsReady) {
@@ -130,6 +137,11 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         _estado.value = _estado.value.copy(escuchando = false, textoParcial = "")
     }
 
+    fun setModoQuechua(enabled: Boolean) {
+        asistente.setModoQuechua(enabled)
+        _estado.value = _estado.value.copy(modoQuechua = enabled)
+    }
+
     fun confirmarAccion() {
         val pendiente = _estado.value.estadoAccion as? EstadoAccion.EsperandoConfirmacion ?: return
         val ejecutado = if (pendiente.intencion == IntentClassifier.Intencion.LEER_TEXTO) {
@@ -152,6 +164,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         if (_estado.value.estadoAccion !is EstadoAccion.EsperandoConfirmacion) return
         _estado.value = _estado.value.copy(estadoAccion = EstadoAccion.Inactivo)
         responder("Acción cancelada. No se realizó ningún cambio.")
+    }
+
+    fun consumirRutaPendiente() {
+        _estado.value = _estado.value.copy(rutaPendiente = null)
     }
 
     fun registrarCorreccion(textoOriginal: String, textoCorregido: String, compartir: Boolean) {
@@ -202,6 +218,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         IntentClassifier.Intencion.GUIA_TELEFONO -> "mostrar la guía"
         IntentClassifier.Intencion.CONSULTA_COGNITIVA -> "consultar la guía de negocio"
         IntentClassifier.Intencion.AYUDA -> "mostrar los comandos disponibles"
+        IntentClassifier.Intencion.REGISTRAR_VENTA -> "abrir el formulario de venta"
+        IntentClassifier.Intencion.CONSULTAR_STOCK -> "consultar existencias"
+        IntentClassifier.Intencion.CONSULTAR_VENTAS -> "consultar las ventas de hoy"
+        IntentClassifier.Intencion.AGREGAR_PRODUCTO -> "abrir el inventario"
     }
 
     private suspend fun procesarResultado(resultado: AsistenteVozFacade.Resultado) {
@@ -212,6 +232,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         )
         agregarMensaje(resultado.textoOriginal, esUsuario = true, corregible = true)
 
+        if (resultado.requiereTranscripcionNube && !resultado.transcripcionNube) {
+            responder("El modo quechua no produjo una transcripción cloud. Revisa la conexión y la configuración del servicio; no ejecuté ninguna acción.")
+            return
+        }
         if (resultado.confianzaVosk < 0.70f && !resultado.transcripcionNube) {
             agregarMensaje(
                 "La confianza de la transcripción local es baja. No ejecutaré ninguna acción; " +
@@ -227,34 +251,116 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             )
         }
 
-        if (
-            resultado.intencion == IntentClassifier.Intencion.CONSULTA_COGNITIVA
-            || resultado.transcripcionNube
+        if (resultado.transcripcionNube && resultado.clasificacionRemota &&
+            resultado.intencionRemota == null
+        ) {
+            responder("Transcribí el audio, pero no reconocí una intención con suficiente confianza. No ejecuté ninguna acción.")
+            return
+        }
+
+        val intencion = resultado.intencionRemota ?: resultado.intencion
+        if (intencion == IntentClassifier.Intencion.CONSULTA_COGNITIVA ||
+            (resultado.transcripcionNube && !resultado.clasificacionRemota)
         ) {
             consultarGuia(resultado.textoOriginal)
             return
         }
 
-        val missing = parametroFaltante(resultado.intencion, resultado.entidades)
+        when (intencion) {
+            IntentClassifier.Intencion.REGISTRAR_VENTA -> {
+                val parametros = mutableListOf<String>()
+                resultado.entidades.producto?.let { producto ->
+                    parametros += "producto=${Uri.encode(producto)}"
+                }
+                resultado.entidades.cantidad
+                    ?.takeIf { it.isFinite() && it > 0.0 }
+                    ?.let { cantidad -> parametros += "cantidad=$cantidad" }
+                val ruta = if (parametros.isEmpty()) {
+                    "venta_manual"
+                } else {
+                    "venta_manual?${parametros.joinToString("&")}"
+                }
+                _estado.value = _estado.value.copy(
+                    rutaPendiente = ruta
+                )
+                responder("Abrí el formulario de venta. Revisa el producto y la cantidad antes de guardar.")
+                return
+            }
+            IntentClassifier.Intencion.AGREGAR_PRODUCTO -> {
+                _estado.value = _estado.value.copy(rutaPendiente = "inventario")
+                responder("Abrí el inventario. Completa y confirma los datos del producto para guardarlo.")
+                return
+            }
+            IntentClassifier.Intencion.CONSULTAR_STOCK -> {
+                consultarStock(resultado.entidades.producto)
+                return
+            }
+            IntentClassifier.Intencion.CONSULTAR_VENTAS -> {
+                consultarVentasDeHoy()
+                return
+            }
+            else -> Unit
+        }
+
+        val missing = parametroFaltante(intencion, resultado.entidades)
         if (missing != null) {
             responder(missing)
             return
         }
 
-        if (actionExecutor.requiresConfirmation(resultado.intencion)) {
+        if (actionExecutor.requiresConfirmation(intencion)) {
             _estado.value = _estado.value.copy(
                 estadoAccion = EstadoAccion.EsperandoConfirmacion(
-                    resultado.intencion,
+                    intencion,
                     resultado.entidades,
                     resultado.textoOriginal
                 )
             )
-            hablar("¿Confirmas que debo ${nombreAccion(resultado.intencion)}?")
+            hablar("¿Confirmas que debo ${nombreAccion(intencion)}?")
             return
         }
 
-        responder(respuestaInformativa(resultado.intencion))
+        responder(respuestaInformativa(intencion))
     }
+
+    private suspend fun consultarStock(productoDictado: String?) {
+        val productos = db.productoDao().observarTodos().first()
+        val consulta = productoDictado
+            ?.let(::normalizarTexto)
+            ?.takeUnless { it in setOf("producto", "productos", "stock", "inventario", "existencias") }
+            .orEmpty()
+        val encontrados = if (consulta.isBlank()) {
+            productos.take(5)
+        } else {
+            productos.filter { normalizarTexto(it.nombre).contains(consulta) }
+        }
+        val respuesta = when {
+            encontrados.isEmpty() && consulta.isNotBlank() ->
+                "No encontré «$productoDictado» en el inventario local."
+            encontrados.isEmpty() -> "Todavía no hay productos en el inventario local."
+            else -> encontrados.joinToString(
+                prefix = "Existencias locales: ",
+                separator = "; "
+            ) { "${it.nombre}: ${it.stock}" }
+        }
+        responder(respuesta)
+    }
+
+    private suspend fun consultarVentasDeHoy() {
+        val inicioDelDia = java.util.Calendar.getInstance().apply {
+            set(java.util.Calendar.HOUR_OF_DAY, 0)
+            set(java.util.Calendar.MINUTE, 0)
+            set(java.util.Calendar.SECOND, 0)
+            set(java.util.Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        val total = db.ventaDao().totalDesde(inicioDelDia)
+        val cantidad = db.ventaDao().contarDesde(inicioDelDia)
+        responder("Hoy registraste $cantidad ventas por ${"%.2f".format(total)} Bs en este dispositivo.")
+    }
+
+    private fun normalizarTexto(texto: String): String =
+        Normalizer.normalize(texto.lowercase(Locale.ROOT), Normalizer.Form.NFD)
+            .replace(Regex("\\p{Mn}+"), "")
 
     private suspend fun consultarGuia(pregunta: String) {
         val token = AuthSession.token(getApplication())
@@ -316,6 +422,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         IntentClassifier.Intencion.ABRIR_APP -> "Se abrió la aplicación solicitada."
         IntentClassifier.Intencion.LINTERNA -> "Se actualizó el estado de la linterna."
         IntentClassifier.Intencion.AJUSTES_RED -> "Se abrieron los ajustes de Wi-Fi."
+        IntentClassifier.Intencion.REGISTRAR_VENTA -> "Se abrió el formulario de venta."
+        IntentClassifier.Intencion.CONSULTAR_STOCK -> "Se consultó el inventario local."
+        IntentClassifier.Intencion.CONSULTAR_VENTAS -> "Se consultaron las ventas locales."
+        IntentClassifier.Intencion.AGREGAR_PRODUCTO -> "Se abrió el inventario."
         else -> "Acción completada."
     }
 

@@ -12,7 +12,11 @@ class IntentClassifier {
         AJUSTES_RED,
         GUIA_TELEFONO,
         CONSULTA_COGNITIVA,
-        AYUDA
+        AYUDA,
+        REGISTRAR_VENTA,
+        CONSULTAR_STOCK,
+        CONSULTAR_VENTAS,
+        AGREGAR_PRODUCTO
     }
 
     fun clasificar(texto: String): Intencion {
@@ -21,6 +25,14 @@ class IntentClassifier {
             java.text.Normalizer.Form.NFD
         ).replace(Regex("\\p{Mn}+"), "")
         return when {
+            contiene(normalizado, "cuanto vendi", "cuanto vendí", "ventas de hoy", "total de ventas", "resumen de ventas") ->
+                Intencion.CONSULTAR_VENTAS
+            contiene(normalizado, "stock", "inventario", "existencias", "cuanto queda", "qué queda", "que queda") ->
+                Intencion.CONSULTAR_STOCK
+            contiene(normalizado, "agrega producto", "agregar producto", "añade producto", "anade producto", "nuevo producto") ->
+                Intencion.AGREGAR_PRODUCTO
+            contiene(normalizado, "registrar venta", "registra venta", "anota venta", "hacer una venta", "quiero vender", "vender producto") ->
+                Intencion.REGISTRAR_VENTA
             contiene(normalizado, "llama", "llamar", "telefonear", "wawq") -> Intencion.LLAMAR_CONTACTO
             contiene(normalizado, "envia mensaje", "enviar mensaje", "manda mensaje", "mensaje a") -> Intencion.ENVIAR_MENSAJE
             contiene(normalizado, "lee", "leer", "qillqata") -> Intencion.LEER_TEXTO
@@ -37,6 +49,23 @@ class IntentClassifier {
         }
     }
 
+    fun clasificarResultadoRemoto(intent: String?, confidence: Float?): Intencion? {
+        if (confidence == null || !confidence.isFinite() || confidence < MIN_REMOTE_CONFIDENCE) return null
+        return when (intent) {
+            "registrar_venta" -> Intencion.REGISTRAR_VENTA
+            "consultar_stock" -> Intencion.CONSULTAR_STOCK
+            "consultar_ventas" -> Intencion.CONSULTAR_VENTAS
+            "agregar_producto" -> Intencion.AGREGAR_PRODUCTO
+            "consulta_cognitiva" -> Intencion.CONSULTA_COGNITIVA
+            "ayuda" -> Intencion.AYUDA
+            else -> null
+        }
+    }
+
     private fun contiene(texto: String, vararg expresiones: String): Boolean =
         expresiones.any(texto::contains)
+
+    private companion object {
+        const val MIN_REMOTE_CONFIDENCE = 0.62f
+    }
 }

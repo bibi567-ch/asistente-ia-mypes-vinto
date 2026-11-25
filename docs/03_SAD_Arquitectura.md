@@ -1,13 +1,13 @@
 # DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v2.1 OFICIAL)
 **Universidad Adventista de Bolivia · Facultad de Ciencias Exactas e Ingeniería · Ingeniería en Sistemas**
 
-> **Estado operativo (25/11/2026):** el backend Node/Express y PostgreSQL están implementados en el repositorio y Compose los configura para desarrollo local. No hay un despliegue público de nube confirmado. Los diagramas cloud describen la arquitectura objetivo; no prueban que exista una instancia accesible en Internet. El APK debug puede usar HTTP local; las builds release deben conectarse por HTTPS.
+> **Estado operativo (25/11/2026):** el backend Node/Express está desplegado en Railway y su health check confirmó conexión al PostgreSQL privado con validación TLS estricta. Android tiene el dominio HTTPS como valor predeterminado, pendiente de validar en un dispositivo. El código del microservicio está conectado contractualmente con ASR Whisper y clasificación por similitud; todavía no se ha construido ni desplegado. Whisper Puno tiene licencia CC BY-NC 4.0; la inferencia queda restringida a evaluación no comercial hasta confirmar autorización de uso.
 
 | Control del Documento | Detalle |
 | :--- | :--- |
 | **Proyecto Integrador** | Gestión 2-2026 (Investigación I, Arquitectura de Software, Tecnologías en Internet) |
 | **Sistema** | Asistente Conversacional Offline con PLN Edge (Yapay) para la Gestión de Ventas e Inventario en MYPES de Vinto, Cochabamba |
-| **Versión Vigente** | **v2.1 (Asistente conversacional compatible)** — Noviembre 2026 |
+| **Versión Vigente** | **v2.5 (Pipeline de voz en cascada, implementación en validación)** — Noviembre 2026 |
 | **Equipo de Desarrollo** | **Eva Chino Quispe** — Líder de Proyecto, Requisitos y QA Documental<br>**Christian Gonzales** — Ingeniería de IA y Pipeline Conversacional<br>**Marializ Mamani** — Backend, Seguridad y Persistencia de Datos<br>**Kevin Rocha** — Diseño UX/UI y Prototipado<br>**Luis Lazo** — Arquitectura C4 y QA Técnico |
 | **Corte de Código** | Revisión de la implementación del asistente híbrido (Node.js 24, Express 5, PostgreSQL 16, Kotlin Room v7) |
 
@@ -23,6 +23,8 @@
 | **2.1** | 23/11/2026 | Equipo de Proyecto | El Dashboard pasa a ser el asistente conversacional Yapay. Se conserva la gestión comercial existente y se añade Room v7 con `VoiceLog`, clasificación de once intenciones, acciones del teléfono con confirmación, consulta cloud demostrativa y feedback de voz con autorización explícita. |
 | **2.2** | 23/11/2026 | Equipo de Proyecto | Se añade distribución cloud controlada de APK: endpoint público de metadatos, descarga configurada en backend, comparación por `versionCode`, verificación SHA-256 y apertura del instalador Android. No se realizan instalaciones silenciosas. |
 | **2.3** | 23/11/2026 | Equipo de Proyecto | Se integra el diseño visual Yapay Ambient Voice: fondo negro zinc, esmeralda, login cloud, registro bilingüe y dashboard con resumen operativo, chat, voz y navegación inferior. |
+| **2.4** | 25/11/2026 | Equipo de Proyecto | Se prepara microservicio ASR desacoplado y con modelo configurable. El backend admite HTTP solo hacia hostnames privados `.railway.internal`; conserva HTTPS para destinos públicos. El modelo y el despliegue quedan pendientes de autorización de licencia y costo. |
+| **2.5** | 25/11/2026 | Equipo de Proyecto | Se integra el contrato de transcripción + intención remota, plantillas de similitud configurables, umbrales de abstención, modo Quechua cloud explícito y enrutamiento móvil para iniciar venta, consultar stock/ventas o abrir inventario. Ninguna venta se guarda automáticamente y el audio solo se envía por modo seleccionado o fallback local de baja confianza. |
 
 ---
 
@@ -109,7 +111,7 @@ Priorización estratégica de atributos de calidad:
 ### ADR-003: Backend Nube — Node.js 24 + TypeScript + Express + PostgreSQL 16
 * **Estatus:** Aprobado (Vigente v2.1 - Sustituye propuesta inicial de Spring Boot).
 * **Contexto:** Se requiere un backend en la nube altamente eficiente, liviano y escalable para recibir la sincronización de lotes de miles de comerciantes.
-* **Decisión:** Adoptar **Node.js 24 con TypeScript, Express 5 y PostgreSQL 16**, protegido por un **API Gateway** con Circuit Breaker. En producción, PostgreSQL usa TLS con validación de certificado; proveedores con CA privada suministran el certificado raíz público mediante `DATABASE_SSL_CA`.
+* **Decisión:** Adoptar **Node.js 24 con TypeScript, Express 5 y PostgreSQL 16**, protegido por un **API Gateway** con Circuit Breaker. En producción, PostgreSQL usa TLS con validación de certificado; proveedores con CA privada suministran el certificado raíz público mediante `DATABASE_SSL_CA`. El proveedor ASR `quechua` reenvía multipart `audio` a FastAPI (`POST /transcribe`) y espera `{ "text", "intent", "confidence" }`; el backend traduce el contrato a `{ texto, clasificada, intencion, confianzaIntencion }`. El servicio carga Whisper Puno y un encoder de similitud al iniciar, con revisiones fijadas. El backend acepta HTTPS para destinos generales y HTTP únicamente para hostnames terminados exactamente en `.railway.internal`; el servicio no debe exponer un endpoint público sin TLS. En el móvil, intenciones válidas encaminan a funciones locales; las ventas requieren revisión y guardado explícito en el formulario.
 * **Justificación:** Arquitectura orientada a eventos no bloqueante (Event Loop), menor consumo de memoria en la nube frente a la JVM de Spring Boot, soporte nativo de JSON/TypeScript, y orquestación eficiente con Docker Compose.
 * **Consecuencia:** Unificación del stack en TypeScript para API y scripts de mantenimiento. No se desactiva la verificación TLS para aceptar certificados autofirmados.
 
@@ -155,12 +157,13 @@ System_Boundary(mobile_app, "Dispositivo Móvil Android (Gama Baja)") {
     ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v7 + SQLCipher (AES-256)", "Almacenamiento cifrado compartido por login, perfil, catálogo, ventas, fiados, VoiceLog y cola Outbox; una sola instancia de Room")
 }
 
-System_Boundary(cloud_infra, "Backend y persistencia (Compose local; despliegue cloud pendiente)") {
+System_Boundary(cloud_infra, "Backend y persistencia (backend Railway; PostgreSQL privado)") {
     Container(api_gateway, "API Gateway / Express Router", "Node.js 24 / Express 5", "Validación de JWT, Rate Limiting y enrutamiento seguro")
     Container(sync_service, "Servicio de Sincronización", "TypeScript Services", "Procesamiento idempotente de lotes Outbox y registro de eventos")
     ContainerDb(postgres_db, "Base de Datos Consolidada", "PostgreSQL 16", "Persistencia central de propietarios, negocios, productos y transacciones")
 }
 
+System_Ext(quechua_asr, "Microservicio ASR quechua opcional", "Código FastAPI en quechua-asr; modelo y despliegue aún no autorizados")
 System_Ext(phone_actions, "APIs del teléfono", "Llamadas, mensajes, alarmas, aplicaciones, linterna y ajustes de red")
 
 Rel(comerciante, ui_view, "Interactúa mediante voz o interfaz táctil")
@@ -171,6 +174,7 @@ Rel(data_layer, sqlite_db, "Lectura/Escritura de transacciones cifradas")
 Rel(data_layer, outbox_sync, "Encola eventos con UUID v4")
 Rel(outbox_sync, api_gateway, "POST /api/v1/transacciones/batch (Lotes JSON, JWT; HTTPS en producción)")
 Rel(api_gateway, sync_service, "Pasa payloads validados")
+Rel(api_gateway, quechua_asr, "POST /transcribe (multipart audio, Bearer; HTTPS o HTTP privado .railway.internal)")
 Rel(sync_service, postgres_db, "Consolida transacciones e inventario")
 Rel(ui_view, phone_actions, "Ejecuta acciones solo después de confirmación")
 Rel(ui_view, api_gateway, "Consulta /api/v1/assistant/query y envía feedback autorizado")

@@ -7,9 +7,9 @@ asrRouter.use(requireAuth);
 
 asrRouter.post('/transcribe', async (request, response) => {
   const provider = env.asrProvider;
-  if (provider !== 'google' && provider !== 'whisper' && provider !== 'simulated') {
+  if (provider !== 'google' && provider !== 'whisper' && provider !== 'quechua' && provider !== 'simulated') {
     response.status(503).json({
-      error: { code: 'asr_not_configured', message: 'Configure ASR_PROVIDER as google, whisper, or simulated.' }
+      error: { code: 'asr_not_configured', message: 'Configure ASR_PROVIDER as google, whisper, quechua, or simulated.' }
     });
     return;
   }
@@ -43,6 +43,18 @@ asrRouter.post('/transcribe', async (request, response) => {
         texto: '',
         simulada: true,
         mensaje: 'ASR en modo demostración: no se transcribió el audio.'
+      });
+      return;
+    }
+
+    if (provider === 'quechua') {
+      const resultado = await transcribeQuechua(audio);
+      response.status(200).json({
+        texto: resultado.text,
+        simulada: false,
+        clasificada: true,
+        intencion: resultado.intent,
+        confianzaIntencion: resultado.confidence
       });
       return;
     }
@@ -120,4 +132,53 @@ async function transcribeWhisper(audio: { bytes: Buffer; filename: string; mime:
   if (!response.ok) throw new Error('ASR provider request failed.');
   const payload = await response.json() as { text?: string };
   return typeof payload.text === 'string' ? payload.text : '';
+}
+
+const quechuaIntentLabels = new Set([
+  'registrar_venta',
+  'consultar_stock',
+  'consultar_ventas',
+  'agregar_producto',
+  'consulta_cognitiva',
+  'ayuda'
+]);
+
+async function transcribeQuechua(
+  audio: { bytes: Buffer; filename: string; mime: string }
+): Promise<{ text: string; intent: string | null; confidence: number | null }> {
+  const fileBytes = new Uint8Array(audio.bytes.byteLength);
+  fileBytes.set(audio.bytes);
+  const form = new FormData();
+  form.set('audio', new Blob([fileBytes], { type: audio.mime }), audio.filename);
+  const response = await fetch(env.quechuaAsrApiUrl, {
+    method: 'POST',
+    headers: env.quechuaAsrApiToken
+      ? { authorization: `Bearer ${env.quechuaAsrApiToken}` }
+      : undefined,
+    body: form,
+    signal: AbortSignal.timeout(120_000)
+  });
+  if (!response.ok) throw new Error('ASR Quechua provider request failed.');
+  const payload = await response.json() as {
+    text?: unknown;
+    intent?: unknown;
+    confidence?: unknown;
+  };
+  if (typeof payload.text !== 'string') {
+    throw new Error('ASR Quechua provider returned an invalid response.');
+  }
+  const intent = typeof payload.intent === 'string' && quechuaIntentLabels.has(payload.intent)
+    ? payload.intent
+    : null;
+  const confidence = typeof payload.confidence === 'number' &&
+    Number.isFinite(payload.confidence) &&
+    payload.confidence >= 0 &&
+    payload.confidence <= 1
+    ? payload.confidence
+    : null;
+  return {
+    text: payload.text.trim(),
+    intent: intent && confidence !== null ? intent : null,
+    confidence: intent && confidence !== null ? confidence : null
+  };
 }

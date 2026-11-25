@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { isAllowedQuechuaAsrUrl } from './quechua-asr-url.js';
 
 function required(name: string, fallback?: string): string {
   const value = process.env[name] ?? fallback;
@@ -17,12 +18,31 @@ export const env = {
   googleAsrLanguage: process.env.GOOGLE_ASR_LANGUAGE?.trim() || 'es-ES',
   openaiAsrApiKey: process.env.OPENAI_ASR_API_KEY?.trim() || '',
   openaiAsrBaseUrl: process.env.OPENAI_ASR_BASE_URL?.trim() || 'https://api.openai.com/v1',
+  quechuaAsrApiUrl: process.env.QUECHUA_ASR_API_URL?.trim() || '',
+  quechuaAsrApiToken: process.env.QUECHUA_ASR_API_TOKEN?.trim() || '',
   databaseSslCa: process.env.DATABASE_SSL_CA?.replace(/\\n/g, '\n').trim() || '',
   androidUpdateVersionCode: Number(process.env.ANDROID_UPDATE_VERSION_CODE ?? 0),
   androidUpdateVersionName: process.env.ANDROID_UPDATE_VERSION_NAME?.trim() || '',
   androidUpdateApkPath: process.env.ANDROID_UPDATE_APK_PATH?.trim() || '',
   androidUpdateBaseUrl: process.env.ANDROID_UPDATE_BASE_URL?.trim() || ''
 };
+
+if (env.asrProvider === 'quechua') {
+  if (!env.quechuaAsrApiUrl) {
+    throw new Error('QUECHUA_ASR_API_URL is required when ASR_PROVIDER=quechua');
+  }
+
+  let quechuaAsrApiUrl: URL;
+  try {
+    quechuaAsrApiUrl = new URL(env.quechuaAsrApiUrl);
+  } catch {
+    throw new Error('QUECHUA_ASR_API_URL must be an absolute URL');
+  }
+
+  if (env.nodeEnv === 'production' && !isAllowedQuechuaAsrUrl(quechuaAsrApiUrl)) {
+    throw new Error('QUECHUA_ASR_API_URL must use HTTPS or a .railway.internal hostname in production');
+  }
+}
 
 if (!Number.isInteger(env.port) || env.port < 1 || env.port > 65535) {
   throw new Error('PORT must be an integer between 1 and 65535');

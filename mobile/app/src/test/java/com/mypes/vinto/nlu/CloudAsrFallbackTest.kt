@@ -10,5 +10,7 @@ class CloudAsrFallbackTest {
         assertTrue(CloudAsrFallback.shouldFallback(isOnline = true, confidence = 0.69f))
         assertFalse(CloudAsrFallback.shouldFallback(isOnline = false, confidence = 0.69f))
         assertFalse(CloudAsrFallback.shouldFallback(isOnline = true, confidence = 0.70f))
+        assertTrue(CloudAsrFallback.shouldUseCloud(isOnline = true, confidence = 0.95f, forceCloud = true))
+        assertFalse(CloudAsrFallback.shouldUseCloud(isOnline = false, confidence = 0.95f, forceCloud = true))
     }
 }

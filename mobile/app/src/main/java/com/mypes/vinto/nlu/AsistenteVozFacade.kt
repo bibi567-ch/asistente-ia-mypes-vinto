@@ -23,6 +23,7 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val cloudPreferences =
         applicationContext.getSharedPreferences("voice_cloud", Context.MODE_PRIVATE)
+    private val quechuaModeKey = "quechua_mode"
 
     data class Resultado(
         val intencion: IntentClassifier.Intencion,
@@ -30,10 +31,19 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
         val textoOriginal: String,
         val confianzaVosk: Float,
         val transcripcionNube: Boolean = false,
-        val asrSimulado: Boolean = false
+        val asrSimulado: Boolean = false,
+        val intencionRemota: IntentClassifier.Intencion? = null,
+        val clasificacionRemota: Boolean = false,
+        val requiereTranscripcionNube: Boolean = false
     )
 
     fun inicializar(): Boolean = asr.inicializar()
+
+    fun modoQuechua(): Boolean = cloudPreferences.getBoolean(quechuaModeKey, false)
+
+    fun setModoQuechua(enabled: Boolean) {
+        cloudPreferences.edit().putBoolean(quechuaModeKey, enabled).apply()
+    }
 
     fun procesar(texto: String, confianza: Float = 0f): Resultado = Resultado(
         intencion = clasificador.clasificar(texto),
@@ -50,7 +60,8 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
         asr.escuchar(object : AsrEngine.Resultado {
             override fun onTextoParcial(texto: String) = onParcial(texto)
             override fun onTextoFinal(texto: String, confianza: Float, audioPcm: ByteArray) {
-                if (confianza >= 0.70f) {
+                val modoQuechuaActivo = modoQuechua()
+                if (confianza >= 0.70f && !modoQuechuaActivo) {
                     onResultado(procesar(texto, confianza))
                     return
                 }
@@ -60,7 +71,11 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                 val accessToken = AuthSession.token(applicationContext)
                     ?: cloudPreferences.getString("access_token", null)?.trim()
                 if (accessToken.isNullOrEmpty()) {
-                    onResultado(procesar(texto, confianza))
+                    onResultado(
+                        procesar(texto, confianza).copy(
+                            requiereTranscripcionNube = modoQuechuaActivo
+                        )
+                    )
                     return
                 }
 
@@ -71,7 +86,8 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                         CloudAsrService(baseUrl, accessToken).transcribeIfNeeded(
                             applicationContext,
                             audioPcm.toWaveRequestBody(),
-                            confianza
+                            confianza,
+                            forceCloud = modoQuechuaActivo
                         )
                     } catch (error: IOException) {
                         cloudFailure = error.message ?: "No se pudo contactar el servicio cloud."
@@ -85,6 +101,14 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                     }
                     val cloudText = cloudResponse?.takeUnless { it.simulada }?.texto
                         ?.takeIf(String::isNotBlank)
+                    val remoteIntent = cloudResponse
+                        ?.takeIf { it.clasificada }
+                        ?.let {
+                            IntentClassifier().clasificarResultadoRemoto(
+                                it.intencion,
+                                it.confianzaIntencion
+                            )
+                        }
                     if (cloudResponse?.simulada == true) {
                         cloudSimulated = true
                         cloudFailure = cloudResponse.mensaje
@@ -94,7 +118,10 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                         onResultado(
                             procesar(cloudText ?: texto, confianza).copy(
                                 transcripcionNube = cloudText != null,
-                                asrSimulado = cloudSimulated
+                                asrSimulado = cloudSimulated,
+                                intencionRemota = remoteIntent,
+                                clasificacionRemota = cloudResponse?.clasificada == true,
+                                requiereTranscripcionNube = modoQuechuaActivo
                             )
                         )
                         cloudFailure?.let(onError)
