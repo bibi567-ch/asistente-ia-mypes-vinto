@@ -19,3 +19,9 @@ test('production PostgreSQL TLS remains strict without a custom CA', () => {
 test('development does not enable PostgreSQL TLS by default', () => {
   assert.equal(postgresSslConfig('development', ''), undefined);
 });
+
+test('DATABASE_SSL_REJECT_UNAUTHORIZED=false disables validation explicitly', () => {
+  assert.deepEqual(postgresSslConfig('production', '', 'false'), {
+    rejectUnauthorized: false
+  });
+});
