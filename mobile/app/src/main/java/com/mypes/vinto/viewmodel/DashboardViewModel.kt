@@ -86,9 +86,18 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
 
     init {
         _estado.value = _estado.value.copy(
-            modeloDisponible = asistente.inicializar(),
             modoQuechua = asistente.modoQuechua()
         )
+        viewModelScope.launch(Dispatchers.IO) {
+            val modeloDisponible = asistente.inicializar()
+            withContext(Dispatchers.Main) {
+                _estado.value = _estado.value.copy(
+                    modeloDisponible = modeloDisponible,
+                    mensajeError = if (modeloDisponible) null else
+                        "No se pudo cargar el modelo de voz. Revisa los assets de Vosk y vuelve a abrir Yapay."
+                )
+            }
+        }
         textToSpeech = TextToSpeech(application) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
             if (ttsReady) {
@@ -218,6 +227,8 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         IntentClassifier.Intencion.GUIA_TELEFONO -> "mostrar la guía"
         IntentClassifier.Intencion.CONSULTA_COGNITIVA -> "consultar la guía de negocio"
         IntentClassifier.Intencion.AYUDA -> "mostrar los comandos disponibles"
+        IntentClassifier.Intencion.SALUDO -> "responder al saludo"
+        IntentClassifier.Intencion.DESCONOCIDA -> "ninguna acción"
         IntentClassifier.Intencion.REGISTRAR_VENTA -> "abrir el formulario de venta"
         IntentClassifier.Intencion.CONSULTAR_STOCK -> "consultar existencias"
         IntentClassifier.Intencion.CONSULTAR_VENTAS -> "consultar las ventas de hoy"
@@ -259,6 +270,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         }
 
         val intencion = resultado.intencionRemota ?: resultado.intencion
+        if (intencion == IntentClassifier.Intencion.DESCONOCIDA) {
+            responder("No entendí el comando. No ejecuté ninguna acción; prueba con otra frase.")
+            return
+        }
         if (intencion == IntentClassifier.Intencion.CONSULTA_COGNITIVA ||
             (resultado.transcripcionNube && !resultado.clasificacionRemota)
         ) {
@@ -411,6 +426,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         IntentClassifier.Intencion.AYUDA ->
             "Puedo llamar, preparar un mensaje, leer texto, crear una alarma, abrir aplicaciones, " +
                 "consultar la hora, usar la linterna o responder preguntas de negocio."
+        IntentClassifier.Intencion.SALUDO ->
+            "¡Imaynalla! Soy Yapay. Puedo ayudarte con ventas, inventario y consultas del negocio."
+        IntentClassifier.Intencion.DESCONOCIDA ->
+            "No entendí el comando. No ejecuté ninguna acción."
         else -> "No pude completar esa solicitud."
     }
 

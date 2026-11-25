@@ -38,7 +38,15 @@ class EntityExtractor {
         "veinticuatro" to "24", "veinticinco" to "25", "treinta" to "30",
         "cuarenta" to "40", "cincuenta" to "50", "sesenta" to "60",
         "setenta" to "70", "ochenta" to "80", "noventa" to "90",
-        "cien" to "100", "ciento" to "100", "mil" to "1000"
+        "cien" to "100", "ciento" to "100", "mil" to "1000",
+        "juk" to "1", "iskay" to "2", "kimsa" to "3", "tawa" to "4",
+        "phichqa" to "5", "suqta" to "6", "qanchis" to "7", "pusaq" to "8",
+        "jisqun" to "9", "chunka" to "10", "pachak" to "100"
+    )
+    private val frasesNumericasQuechua = listOf(
+        "chunka jukniyuq" to "11",
+        "chunka iskayniyuq" to "12",
+        "iskay chunka" to "20"
     )
 
     private val digitosHablados = mapOf(
@@ -90,7 +98,12 @@ class EntityExtractor {
     }
 
     private fun normalizarNumerosHablados(texto: String): String =
-        texto.split(Regex("\\s+")).joinToString(" ") { palabrasANumeros[it] ?: it }
+        frasesNumericasQuechua.fold(texto) { resultado, (frase, numero) ->
+            Regex("""(?<![\p{L}\d])${Regex.escape(frase)}(?![\p{L}\d])""")
+                .replace(resultado, numero)
+        }
+            .split(Regex("\\s+"))
+            .joinToString(" ") { palabrasANumeros[it] ?: it }
 
     private fun extraerNumeros(texto: String): List<Double> =
         Regex("""\d+(?:[.,]\d+)?""").findAll(texto).mapNotNull {
@@ -120,7 +133,7 @@ class EntityExtractor {
     }
 
     private fun extraerMonto(texto: String): Double? =
-        Regex("""(\d+(?:[.,]\d+)?)\s*(?:bolivianos?|bs\.?|pesos?)""")
+        Regex("""(\d+(?:[.,]\d+)?)\s*(?:bolivianos?|bs\.?|pesos?|qullqi)""")
             .find(texto)?.groupValues?.get(1)?.replace(',', '.')?.toDoubleOrNull()
 
     private fun extraerCliente(texto: String): String? =

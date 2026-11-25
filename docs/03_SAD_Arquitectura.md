@@ -1,13 +1,13 @@
 # DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v2.1 OFICIAL)
 **Universidad Adventista de Bolivia · Facultad de Ciencias Exactas e Ingeniería · Ingeniería en Sistemas**
 
-> **Estado operativo (25/11/2026):** el backend Node/Express está desplegado en Railway y su health check confirmó conexión al PostgreSQL privado con validación TLS estricta. Android tiene el dominio HTTPS como valor predeterminado, pendiente de validar en un dispositivo. El código del microservicio está conectado contractualmente con ASR Whisper y clasificación por similitud; todavía no se ha construido ni desplegado. Whisper Puno tiene licencia CC BY-NC 4.0; la inferencia queda restringida a evaluación no comercial hasta confirmar autorización de uso.
+> **Estado operativo (25/11/2026):** el backend Node/Express está desplegado en Railway y su health check confirmó conexión al PostgreSQL privado con validación TLS estricta. Android tiene el dominio HTTPS como valor predeterminado, pendiente de validar en un dispositivo. El código FastAPI de ASR Whisper y clasificación por similitud existe y está conectado contractualmente; no se ha construido, ejecutado con los modelos ni desplegado. Whisper Puno tiene licencia CC BY-NC 4.0; la inferencia queda restringida a evaluación no comercial hasta confirmar autorización de uso.
 
 | Control del Documento | Detalle |
 | :--- | :--- |
 | **Proyecto Integrador** | Gestión 2-2026 (Investigación I, Arquitectura de Software, Tecnologías en Internet) |
 | **Sistema** | Asistente Conversacional Offline con PLN Edge (Yapay) para la Gestión de Ventas e Inventario en MYPES de Vinto, Cochabamba |
-| **Versión Vigente** | **v2.5 (Pipeline de voz en cascada, implementación en validación)** — Noviembre 2026 |
+| **Versión Vigente** | **v2.6 (Vocabulario Vosk externo y NLU local experimental)** — Noviembre 2026 |
 | **Equipo de Desarrollo** | **Eva Chino Quispe** — Líder de Proyecto, Requisitos y QA Documental<br>**Christian Gonzales** — Ingeniería de IA y Pipeline Conversacional<br>**Marializ Mamani** — Backend, Seguridad y Persistencia de Datos<br>**Kevin Rocha** — Diseño UX/UI y Prototipado<br>**Luis Lazo** — Arquitectura C4 y QA Técnico |
 | **Corte de Código** | Revisión de la implementación del asistente híbrido (Node.js 24, Express 5, PostgreSQL 16, Kotlin Room v7) |
 
@@ -25,6 +25,7 @@
 | **2.3** | 23/11/2026 | Equipo de Proyecto | Se integra el diseño visual Yapay Ambient Voice: fondo negro zinc, esmeralda, login cloud, registro bilingüe y dashboard con resumen operativo, chat, voz y navegación inferior. |
 | **2.4** | 25/11/2026 | Equipo de Proyecto | Se prepara microservicio ASR desacoplado y con modelo configurable. El backend admite HTTP solo hacia hostnames privados `.railway.internal`; conserva HTTPS para destinos públicos. El modelo y el despliegue quedan pendientes de autorización de licencia y costo. |
 | **2.5** | 25/11/2026 | Equipo de Proyecto | Se integra el contrato de transcripción + intención remota, plantillas de similitud configurables, umbrales de abstención, modo Quechua cloud explícito y enrutamiento móvil para iniciar venta, consultar stock/ventas o abrir inventario. Ninguna venta se guarda automáticamente y el audio solo se envía por modo seleccionado o fallback local de baja confianza. |
+| **2.6** | 25/11/2026 | Equipo de Proyecto | Vosk carga su gramática desde `vosk-grammar.json`; se amplían términos semilla de negocio/quechua, algunos números quechua en el extractor y la abstención local para texto no reconocido. La inicialización/copia del modelo se mueve fuera del hilo UI y una copia interna incompleta se reconstruye. Es NLU por reglas sobre un modelo acústico español, no reconocimiento quechua validado. Las pruebas JVM añadidas quedan pendientes de ejecución por el bloqueo conocido de Gradle. |
 
 ---
 
@@ -104,7 +105,7 @@ Priorización estratégica de atributos de calidad:
 ### ADR-002: Engine PLN Edge — Vosk ASR + Clasificador Local con Confirmación Humana
 * **Estatus:** Aprobado (Vigente).
 * **Contexto:** El reconocimiento de voz en la nube falla por falta de señal en los mercados y genera costos recurrentes.
-* **Decisión:** Implementar el motor **Vosk Edge ASR** (~40 MB, modelo en español) para transcripción local, procesado con un extractor de intenciones/entidades en Kotlin, complementado con un **Modal de Confirmación Visual Obligatoria**.
+* **Decisión:** Implementar el motor **Vosk Edge ASR** (modelo en español) para transcripción local, con vocabulario de frases cargado desde `vosk-grammar.json`, clasificador/extractor de reglas Kotlin y **Modal de Confirmación Visual Obligatoria**. El vocabulario quechua y los números añadidos son experimentales; no convierten al modelo acústico español en ASR quechua. Texto no reconocido se abstiene sin ejecutar acción.
 * **Justificación:** Operatividad 100% offline, costo cero por transacción y tasa nula de ventas accidentales gracias al paso de verificación humana.
 * **Consecuencia:** Incremento moderado en el tamaño del APK (~70 MB totales).
 
@@ -151,7 +152,7 @@ Person(comerciante, "Comerciante de MYPE", "Usuario final")
 
 System_Boundary(mobile_app, "Dispositivo Móvil Android (Gama Baja)") {
     Container(ui_view, "UI & VUI Controller", "Kotlin / Jetpack Compose", "Vistas de Dashboard, Ventas, Fiados, Catálogo y Modal de Confirmación")
-    Container(pln_engine, "Motor PLN Edge", "Vosk ASR + Rule Matcher", "Transcripción de voz a texto y extracción de producto/cantidad/monto on-device")
+    Container(pln_engine, "Motor PLN Edge", "Vosk español + gramática JSON + reglas Kotlin", "Transcripción local y extracción limitada de producto/cantidad/monto; intención desconocida se abstiene")
     Container(data_layer, "Capa de Datos y Casos de Uso", "Clean Architecture / Repository", "Lógica de negocio local, validación de stock y reglas comerciales")
     Container(outbox_sync, "Outbox Sync Manager", "WorkManager", "Administra la cola de sincronización diferida y reintentos con backoff")
     ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v7 + SQLCipher (AES-256)", "Almacenamiento cifrado compartido por login, perfil, catálogo, ventas, fiados, VoiceLog y cola Outbox; una sola instancia de Room")
@@ -163,7 +164,7 @@ System_Boundary(cloud_infra, "Backend y persistencia (backend Railway; PostgreSQ
     ContainerDb(postgres_db, "Base de Datos Consolidada", "PostgreSQL 16", "Persistencia central de propietarios, negocios, productos y transacciones")
 }
 
-System_Ext(quechua_asr, "Microservicio ASR quechua opcional", "Código FastAPI en quechua-asr; modelo y despliegue aún no autorizados")
+System_Ext(quechua_asr, "Microservicio ASR quechua opcional", "Código FastAPI en quechua-asr; modelos no ejecutados y despliegue pendiente")
 System_Ext(phone_actions, "APIs del teléfono", "Llamadas, mensajes, alarmas, aplicaciones, linterna y ajustes de red")
 
 Rel(comerciante, ui_view, "Interactúa mediante voz o interfaz táctil")

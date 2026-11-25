@@ -22,17 +22,7 @@ class AsrEngine(private val context: Context) : Closeable {
 
     companion object {
         private const val SAMPLE_RATE = 16_000
-        private val gramatica = JSONArray(
-            listOf(
-                "llama a [unk]", "llama a juan", "llamar a [unk]", "telefonea a [unk]",
-                "envía mensaje a [unk]", "manda mensaje a [unk]", "lee este texto",
-                "pon alarma a las [unk]", "pon una alarma", "abre [unk]", "abrir [unk]",
-                "qué hora es", "prende la linterna", "enciende la linterna", "apaga la linterna",
-                "abre ajustes de red", "activa wifi", "guía del teléfono", "ayuda",
-                "wawqta waqyay", "linternata kichay", "alarma churay", "telefonota kichay",
-                "[unk]"
-            )
-        ).toString()
+        private const val GRAMMAR_ASSET = "vosk-grammar.json"
 
         fun extraerConfianza(json: String): Float = runCatching {
             val root = JSONObject(json)
@@ -44,11 +34,16 @@ class AsrEngine(private val context: Context) : Closeable {
     }
 
     private var model: Model? = null
+    private var grammarJson: String? = null
     @Volatile private var escuchando = false
     @Volatile private var audioRecord: AudioRecord? = null
     @Volatile private var listenerThread: Thread? = null
 
     fun inicializar(): Boolean = runCatching {
+        val grammar = context.assets.open(GRAMMAR_ASSET).bufferedReader().use { it.readText() }
+        val phrases = JSONArray(grammar)
+        require(phrases.length() > 0) { "La gramática Vosk está vacía" }
+        grammarJson = phrases.toString()
         model = Model(copiarModeloDesdeAssets())
     }.isSuccess
 
@@ -56,6 +51,11 @@ class AsrEngine(private val context: Context) : Closeable {
         val modelo = model
         if (modelo == null) {
             resultado.onError("Modelo no inicializado")
+            return
+        }
+        val grammar = grammarJson
+        if (grammar.isNullOrBlank()) {
+            resultado.onError("La gramática Vosk no está inicializada")
             return
         }
         detener()
@@ -87,7 +87,7 @@ class AsrEngine(private val context: Context) : Closeable {
                 resultado.onError("No se pudo inicializar el micrófono")
                 return
             }
-            val recognizer = Recognizer(modelo, SAMPLE_RATE.toFloat(), gramatica)
+            val recognizer = Recognizer(modelo, SAMPLE_RATE.toFloat(), grammar)
             nuevoReconocedor = recognizer
             recorder.startRecording()
             audioRecord = recorder
@@ -204,7 +204,19 @@ class AsrEngine(private val context: Context) : Closeable {
     private fun copiarModeloDesdeAssets(): String {
         val nombreModelo = "vosk-model-small-es-0.42"
         val destino = File(context.filesDir, nombreModelo)
-        if (!destino.exists()) copiarCarpetaAsset(nombreModelo, destino)
+        val requiredFiles = listOf("am/final.mdl", "conf/model.conf")
+        fun modeloCompleto(): Boolean = requiredFiles.all { relativePath ->
+            File(destino, relativePath).let { it.isFile && it.length() > 0L }
+        }
+        if (!modeloCompleto()) {
+            if (destino.exists() && !destino.deleteRecursively()) {
+                throw IOException("No se pudo reemplazar la copia incompleta del modelo Vosk")
+            }
+            copiarCarpetaAsset(nombreModelo, destino)
+        }
+        if (!modeloCompleto()) {
+            throw IOException("Los archivos requeridos del modelo Vosk no están disponibles")
+        }
         return destino.absolutePath
     }
 

@@ -240,6 +240,19 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
 * **Validación Android y despliegue:** No se ejecutaron las pruebas JVM modificadas por el bloqueo previo de Gradle al acceder al lockfile del wrapper. No se desplegó Railway ni se probó en teléfono; la selección de Whisper para código no autoriza uso comercial bajo CC BY-NC 4.0. Quedan pendientes validación de licencia/uso, modelos y ejemplos qxp, costos reales, CI y health check.
 * **Revalidación técnica (2026-11-25):** Desde `backend/`, `npm.cmd run build` y `npm.cmd run typecheck:test` finalizaron con código 0. `git diff --check` también finalizó con código 0. El diagnóstico de VS Code no encontró errores en `AsistenteVozFacade.kt`, `CloudAsrService.kt`, `IntentClassifier.kt`, `DashboardScreen.kt` ni `DashboardViewModel.kt`; esto no sustituye la ejecución de Gradle. Node.js observado: `v24.11.1`; `docker info` indicó que el daemon no responde. No se ejecutaron pruebas JVM, inferencia Python ni despliegue en esta revalidación.
 
+##### Fase 29: Línea base local de Android y backend
+* **Fecha:** 2026-11-25.
+* **Backend:** Desde `backend/`, `npm.cmd test` terminó con código 1: 26 pruebas, 7 aprobadas y 19 fallidas. Las fallas reportaron `TypeError: fetch failed` al conectar con los servidores HTTP locales de prueba mediante el proxy (`127.0.0.1`, error upstream/10060); la suite queda **FALLIDA/BLOQUEADA para integración HTTP**, no aprobada. `npm.cmd run build` y `npm.cmd run typecheck:test` finalizaron con código 0.
+* **Android:** `mobile\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` terminó con código 1 antes de ejecutar Gradle; el entorno denegó acceso al lockfile `%USERPROFILE%\.gradle\wrapperdists\gradle-8.7-bin\...\gradle-8.7-bin.zip.lck`. No se ejecutaron pruebas JVM ni se generó APK.
+* **Alcance:** No se desplegó, no se probaron flujos en dispositivo y no se cambió la aplicación durante esta línea base. Los fallos no demuestran que los flujos funcionen ni identifican por sí solos defectos de lógica; requieren reejecución en entorno local con caché Gradle y loopback accesibles.
+
+##### Fase 30: Gramática Vosk y vocabulario NLU local experimental
+* **Fecha:** 2026-11-25.
+* **Cambio:** `AsrEngine` ahora carga `vosk-grammar.json` desde assets en vez de mantener una segunda gramática en Kotlin. Se añadieron frases semilla de negocio, vocabulario quechua limitado, saludo y extracción de algunos números quechua/montos con `qullqi`. La inicialización/copia del modelo se ejecuta en I/O y una copia privada incompleta se reemplaza desde los assets; se reporta el estado de carga en el estado del dashboard. La intención desconocida se abstiene y comunica que no ejecutó ninguna acción. El modelo acústico Vosk continúa siendo español; no se afirma reconocimiento quechua ni precisión comercial.
+* **Pruebas añadidas:** `IntentClassifierTest` cubre saludo, dos palabras clave quechua y abstención; `EntityExtractorTest` cubre cantidad/producto/monto y formas numéricas quechua 11 y 20. **No ejecutadas**: Gradle sigue bloqueado por el acceso denegado al lockfile registrado en Fase 29; no se reintentó.
+* **Comprobaciones ejecutadas:** Node.js analizó `vosk-grammar.json` correctamente (109 frases); `git diff --check` terminó con código 0. Pylance `pylanceFileSyntaxErrors` no reportó errores sintácticos en `quechua-asr/main.py`; esa comprobación no valida imports, carga de pesos, ejecución ni calidad del modelo.
+* **Límites:** No hubo build Android, prueba acústica, inferencia Whisper, evaluación con hablantes qxp, ejecución de pruebas JVM ni despliegue. Los tests añadidos quedan pendientes de ejecución.
+
 ---
 
 #### 3. MATRIZ DE EVIDENCIAS Y ALCANCE DE VERIFICACIÓN

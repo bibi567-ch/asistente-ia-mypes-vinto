@@ -11,6 +11,8 @@
 - Android Studio, Android SDK 35 y JDK 17.
 - Emulador o dispositivo Android 8.0 (API 26) o posterior, con micrófono.
 - Modelo Vosk español en `mobile/app/src/main/assets/vosk-model-small-es-0.42`. El script `mobile/download-vosk-model.ps1` descarga el modelo desde una distribución autorizada y verifica su integridad antes de incorporarlo al build. El modelo está excluido por `.gitignore`.
+- La gramática local se define en `mobile/app/src/main/assets/vosk-grammar.json` y se carga al inicializar Vosk. Incluye comandos telefónicos, frases de negocio y términos quechua experimentales; el modelo acústico sigue siendo español, así que esto no representa ASR quechua.
+- La carga/copia del modelo se realiza en un hilo de I/O para no bloquear la interfaz. Si una copia previa quedó incompleta dentro del almacenamiento privado de la app, la inicialización vuelve a copiarla desde assets.
 
 ## 2. Backend con Docker Compose
 
@@ -95,4 +97,4 @@ En el servicio backend define `ASR_PROVIDER=quechua`, `QUECHUA_ASR_API_URL=http:
 
 El endpoint limita el audio a 5 MB y 120 segundos; decodifica WAV/FLAC/OGG, normaliza a mono 16 kHz y no conserva audio de forma persistente. No se fuerza `language="qu"`: la revisión configurada tiene `language="spanish"` y no incluye token `<|qu|>` en `lang_to_id`; se usa su generación predeterminada. El encoder MiniLM clasifica por similitud frente a plantillas y se abstiene bajo 0.62 o margen 0.08; score no equivale a probabilidad ni accuracy. El móvil usa el intent remoto solo si está permitido y encima del umbral. Venta abre el formulario y no guarda hasta acción explícita del usuario; consultas de stock/ventas leen Room local. La app envía audio cloud cuando hay conectividad y baja confianza Vosk; habilítalo solo con consentimiento y autorización de datos. WER, latencia, precisión de intención y calidad qxp siguen sin medir.
 
-La actualización remota de modelos Vosk no está implementada.
+La gramática local Vosk ahora se carga desde `mobile/app/src/main/assets/vosk-grammar.json`; el clasificador Kotlin reconoce un conjunto limitado de palabras clave quechua y el extractor convierte algunos números quechua. No es un modelo de voz quechua ni se ha probado acústicamente; frases qxp deben validarse con hablantes antes de usarlo en ventas. La actualización remota de modelos Vosk no está implementada.

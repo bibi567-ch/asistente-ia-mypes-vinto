@@ -17,9 +17,12 @@ class IntentClassifierTest {
         assertEquals(IntentClassifier.Intencion.REGISTRAR_VENTA, classifier.clasificar("Quiero vender un producto"))
         assertEquals(IntentClassifier.Intencion.CONSULTAR_STOCK, classifier.clasificar("¿Cuánto queda de harina?"))
         assertEquals(IntentClassifier.Intencion.CONSULTAR_VENTAS, classifier.clasificar("¿Cuánto vendí hoy?"))
+        assertEquals(IntentClassifier.Intencion.REGISTRAR_VENTA, classifier.clasificar("qhatuy papa"))
+        assertEquals(IntentClassifier.Intencion.CONSULTAR_STOCK, classifier.clasificar("yupay papa"))
+        assertEquals(IntentClassifier.Intencion.SALUDO, classifier.clasificar("imaynalla"))
         assertEquals(IntentClassifier.Intencion.AGREGAR_PRODUCTO, classifier.clasificar("Agrega producto"))
-        assertEquals(IntentClassifier.Intencion.AYUDA, classifier.clasificar("comando no reconocido"))
-        assertEquals(15, IntentClassifier.Intencion.entries.size)
+        assertEquals(IntentClassifier.Intencion.DESCONOCIDA, classifier.clasificar("comando no reconocido"))
+        assertEquals(17, IntentClassifier.Intencion.entries.size)
     }
 
     @Test

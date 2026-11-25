@@ -16,7 +16,9 @@ class IntentClassifier {
         REGISTRAR_VENTA,
         CONSULTAR_STOCK,
         CONSULTAR_VENTAS,
-        AGREGAR_PRODUCTO
+        AGREGAR_PRODUCTO,
+        SALUDO,
+        DESCONOCIDA
     }
 
     fun clasificar(texto: String): Intencion {
@@ -27,12 +29,13 @@ class IntentClassifier {
         return when {
             contiene(normalizado, "cuanto vendi", "cuanto vendí", "ventas de hoy", "total de ventas", "resumen de ventas") ->
                 Intencion.CONSULTAR_VENTAS
-            contiene(normalizado, "stock", "inventario", "existencias", "cuanto queda", "qué queda", "que queda") ->
+            contiene(normalizado, "stock", "inventario", "existencias", "cuanto queda", "qué queda", "que queda", "yupay") ->
                 Intencion.CONSULTAR_STOCK
             contiene(normalizado, "agrega producto", "agregar producto", "añade producto", "anade producto", "nuevo producto") ->
                 Intencion.AGREGAR_PRODUCTO
-            contiene(normalizado, "registrar venta", "registra venta", "anota venta", "hacer una venta", "quiero vender", "vender producto") ->
+            contiene(normalizado, "registrar venta", "registra venta", "anota venta", "hacer una venta", "quiero vender", "vender producto", "qhatuy") ->
                 Intencion.REGISTRAR_VENTA
+            contiene(normalizado, "imaynalla", "allillan") -> Intencion.SALUDO
             contiene(normalizado, "llama", "llamar", "telefonear", "wawq") -> Intencion.LLAMAR_CONTACTO
             contiene(normalizado, "envia mensaje", "enviar mensaje", "manda mensaje", "mensaje a") -> Intencion.ENVIAR_MENSAJE
             contiene(normalizado, "lee", "leer", "qillqata") -> Intencion.LEER_TEXTO
@@ -45,7 +48,7 @@ class IntentClassifier {
             contiene(normalizado, "como", "que es", "iva", "ganancia", "contabilidad", "administracion") ->
                 Intencion.CONSULTA_COGNITIVA
             contiene(normalizado, "ayuda", "que puedo", "comandos") -> Intencion.AYUDA
-            else -> Intencion.AYUDA
+            else -> Intencion.DESCONOCIDA
         }
     }
 

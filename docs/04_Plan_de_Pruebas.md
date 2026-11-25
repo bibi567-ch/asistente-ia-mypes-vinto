@@ -76,11 +76,13 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 #### 2.6 Módulo de Inteligencia Artificial Conversacional Edge (IA)
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
 | :--- | :--- | :--- | :--- | :--- |
-| **IA-01** | Transcripción ASR local con motor Vosk | Transcribe la voz del usuario a texto localmente sin conexión a Internet con una latencia total ≤ 2 s. | Android / Vosk | **PENDIENTE** (Prueba en dispositivo) |
+| **IA-01** | Transcripción ASR local con motor Vosk | Transcribe la voz del usuario a texto localmente sin conexión a Internet con una latencia total ≤ 2 s; la inicialización no bloquea la UI y recupera una copia privada incompleta del modelo. | Android / Vosk | **PENDIENTE** (Prueba en dispositivo y JVM) |
 | **IA-02** | Clasificación de Intención y Extracción de Entidades | Interpreta comandos verbales (ej. "Vendí 2 cuartillas de arroz a 20 pesos") extrayendo intención, producto y monto. | Android / NLU | **APROBADO** (Prueba Unit/JVM) |
 | **IA-03** | Confirmación humana obligatoria antes de guardar | Ningún comando dictado por voz se guarda automáticamente; se exige confirmación explícita mediante diálogo modal. | Android / UI | **APROBADO** (Prueba local) |
 | **IA-04** | Cancelación e interrupción verbal | Si el usuario dice "cancelar" o "me equivoqué", el orquestador aborta la captura y vuelve al estado inicial. | Android / VUI | **PENDIENTE** (Prueba acústica) |
 | **IA-05** | Sugerencia inteligente de productos (Asistente Yapay) | Yapay consulta las existencias en Room y sugiere productos con bajo stock o resumen diario mediante reglas locales. | Android / Logic | **APROBADO** (Prueba Unit/JVM) |
+| **IA-06** | Vocabulario local experimental quechua | Con `qhatuy iskay papa a phichqa qullqi`, clasifica una solicitud de venta y extrae cantidad 2, producto papa y monto 5; no guarda la venta sin confirmación. Otros números no implementados o frases no reconocidas no deben producir acciones. | Android / JVM / VUI | **PENDIENTE** (Pruebas JVM añadidas; ejecución Gradle bloqueada por acceso a caché) |
+| **IA-07** | Abstención ante texto local desconocido | Una frase sin intención reconocida recibe respuesta de no comprensión y no navega ni ejecuta una acción. | Android / JVM | **PENDIENTE** (Prueba JVM añadida; ejecución Gradle bloqueada por acceso a caché) |
 
 #### 2.7 Módulo de Sincronización Outbox e Integración Cloud (SYNC / API)
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
@@ -120,6 +122,8 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 
 - Desde `mobile/`, ejecutar `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug`.
 - La ejecución necesita acceso al caché de Gradle del usuario (`%USERPROFILE%\.gradle`). Si la política del sandbox deniega ese acceso, registrar la prueba como bloqueada; la CI actual del backend no valida ni compila Android.
+
+**Último intento local (2026-11-25):** `npm.cmd test` terminó con código 1 (7 aprobadas, 19 fallidas); las fallas fueron `fetch failed` al conectar con servidores de prueba en `127.0.0.1` a través del proxy. `npm.cmd run build` y `npm.cmd run typecheck:test` terminaron con código 0. `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug` se bloqueó antes de iniciar Gradle por acceso denegado al lockfile en `%USERPROFILE%\.gradle\wrapperdists\gradle-8.7-bin\`. Ver detalle en [05_Resultados_de_Pruebas.md](05_Resultados_de_Pruebas.md); no se considera validación funcional.
 
 ---
 
