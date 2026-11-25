@@ -3,7 +3,7 @@ import { env } from '../config/env.js';
 import { postgresSslConfig } from './postgres-ssl.js';
 
 const { Pool } = pg;
-const ssl = postgresSslConfig(env.nodeEnv, env.databaseSslCa);
+const ssl = postgresSslConfig(env.nodeEnv, env.databaseSslCa, env.databaseSslRejectUnauthorized);
 
 export const pool = new Pool({
   connectionString: env.databaseUrl,
