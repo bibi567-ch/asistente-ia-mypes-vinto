@@ -173,6 +173,19 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
 * **Compilación:** `:app:testDebugUnitTest :app:assembleDebug` finalizó con `BUILD SUCCESSFUL`.
 * **APK:** `mobile/app/build/outputs/apk/debug/app-debug.apk`, `applicationId com.mypes.vinto`, versión `2.3.0`, `versionCode 5`.
 
+##### Fase 21: Endurecimiento de configuración local y tráfico Android
+* **Fecha:** 25/11/2026
+* **Cambios:** Compose usa `NODE_ENV=development` por defecto para PostgreSQL local y conserva el bind del API a loopback salvo configuración explícita. El manifiesto de tráfico HTTP quedó limitado a debug. `DATABASE_URL` ya no tiene una credencial de respaldo en el código y se exige mediante entorno.
+* **Validación:** No se ejecutaron build, pruebas ni `docker compose config` para estos cambios en esta sesión. El comando local fue bloqueado por la política del sandbox y la ejecución de validación delegada falló antes de iniciar los comandos por un error del runtime. No hay un nuevo resultado de CI asociado.
+* **Estado:** Revalidación de Compose, backend y manifiestos Android **PENDIENTE**. La nube pública y la integración end-to-end continúan pendientes.
+
+##### Fase 22: Preparación de TLS para PostgreSQL administrado
+* **Fecha:** 2026-11-25.
+* **Cambio de configuración:** En producción, el pool PostgreSQL conserva la validación de certificados y acepta una CA privada pública configurada por `DATABASE_SSL_CA`. Se documentó la exportación de CA para Railway; no se almacenan certificados privados ni secretos en el repositorio.
+* **Pruebas añadidas:** `backend/test/postgres-ssl.test.ts` cubre TLS desactivado por defecto en desarrollo, uso de CA en producción y validación estricta cuando no se configura CA personalizada.
+* **Validación:** Se intentaron `npm test` y `npm run build` desde `backend/`; PowerShell bloqueó ambos antes de iniciar npm (`PSSecurityException`, `AuthorizationManager`, `UnauthorizedAccess`). Tras una nueva confirmación del usuario, se reintentó `npm test` y volvió a bloquearse con el mismo error. No se ejecutó ninguna prueba ni build. `git status --short` sí respondió y mostró cambios locales, incluidos artefactos `.gradle` no relacionados, que se dejaron intactos. No se intentó eludir la política.
+* **Estado:** Build, pruebas automatizadas y conexión Railway **PENDIENTES**. El usuario mostró el proyecto Railway con PostgreSQL en línea; la API todavía no está desplegada ni validada.
+
 ---
 
 #### 3. MATRIZ DE EVIDENCIAS Y ALCANCE DE VERIFICACIÓN

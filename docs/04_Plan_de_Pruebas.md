@@ -34,6 +34,9 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | **LOGIN-03** | Búsqueda multicanal de perfil local | Permite identificar al comerciante por Carnet de Identidad, celular o correo (case-insensitive). | Android / DB | **APROBADO** (Prueba Unit/JVM) |
 | **LOGIN-04** | Ingreso de PIN mediante comando verbal | El motor Vosk traduce los dígitos hablados ("uno dos tres cuatro") a PIN "1234" sin ambigüedad. | Android / VUI | **PENDIENTE** (Acondicionamiento acústico) |
 | **SEC-01** | Cifrado de base de datos en reposo (SQLCipher) | La base de datos SQLite/Room v7 se cifra con AES-256. Un volcado raw resulta ilegible sin la clave master. | Android / DB | **APROBADO** (Prueba Unit/JVM) |
+| **SEC-02** | HTTP limitado a debug | El manifiesto release no permite tráfico HTTP sin cifrar; el manifiesto debug permite HTTP solo para pruebas locales. | Android / Configuración | **PENDIENTE** (Verificar manifiestos mergeados de debug y release) |
+| **SEC-03** | Configuración de DB sin credenciales por defecto | El backend no inicia si falta `DATABASE_URL`; los ejemplos versionados no contienen una contraseña reutilizable. | Backend / Configuración | **PENDIENTE** (Build y prueba de arranque con variable ausente) |
+| **SEC-04** | TLS de PostgreSQL con CA privada | En producción, el backend valida el certificado del servidor PostgreSQL; la prueba unitaria confirma que `DATABASE_SSL_CA` se usa sin desactivar la validación. La conexión Railway debe aceptar la CA correcta y rechazar una CA incorrecta. | Backend / PostgreSQL | **PENDIENTE** (Prueba unitaria y conexión cloud) |
 
 #### 2.2 Módulo de Registro y Gestión de Cuenta (REG / PERF)
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |
@@ -49,7 +52,7 @@ El presente plan establece los escenarios estandarizados y los criterios formale
 | :--- | :--- | :--- | :--- | :--- |
 | **ONB-01** | Carga e inicialización por plantilla de rubro | Al seleccionar un rubro (ej. Ferretería, Minimarket), se puebla el catálogo local con al menos 10 productos base. | Android / Logic | **APROBADO** (Prueba Unit/JVM) |
 | **ONB-02** | Prevención de duplicación al re-aplicar plantilla | Seleccionar nuevamente una plantilla no duplica los productos previamente registrados en Room. | Android / DB | **PENDIENTE** (Prueba funcional) |
-| **ONB-03** | Sincronización de perfil comercial hacia el Backend | Al cambiar el nombre de la tienda o rubro con conexión, la API actualiza los datos del negocio (PUT /api/v1/business). | Backend / API | **APROBADO** (CI Run #43157514411) |
+| **ONB-03** | Sincronización de perfil comercial hacia el Backend | Al cambiar el nombre de la tienda o rubro con conexión, la API actualiza los datos del negocio (PUT /api/v1/auth/business). | Backend / API | **APROBADO** (CI Run #43157514411) |
 
 #### 2.4 Módulo de Ventas e Inventario (VTA / INV)
 | ID | Escenario | Criterio de Aceptación | Entorno / Nivel | Estado / Evidencia |

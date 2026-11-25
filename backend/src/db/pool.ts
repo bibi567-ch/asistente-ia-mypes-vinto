@@ -1,14 +1,16 @@
 import pg from 'pg';
 import { env } from '../config/env.js';
+import { postgresSslConfig } from './postgres-ssl.js';
 
 const { Pool } = pg;
+const ssl = postgresSslConfig(env.nodeEnv, env.databaseSslCa);
 
 export const pool = new Pool({
   connectionString: env.databaseUrl,
   max: 5,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,
-  ...(env.nodeEnv === 'production' ? { ssl: { rejectUnauthorized: true } } : {})
+  ...(ssl ? { ssl } : {})
 });
 
 pool.on('error', () => {

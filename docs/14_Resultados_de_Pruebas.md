@@ -2,7 +2,7 @@
 
 **Proyecto:** Asistente Conversacional Offline para MYPES de Vinto
 **Estado:** Registro inicial; métricas de campo pendientes
-**Actualizado:** 23/11/2026
+**Actualizado:** 25/11/2026
 
 > **Estado del documento:** registro inicial. Los objetivos no son resultados. Completar las métricas únicamente después de ejecutar las pruebas y conservar evidencia verificable; no reemplazar estados pendientes con ejemplos.
 
@@ -10,10 +10,10 @@
 
 | Prueba | Resultado observado | Estado / evidencia |
 |---|---|---|
-| Compilación Android / APK debug | No se generó APK en este entorno. Faltan `mobile/gradlew.bat` y `mobile/gradle/wrapper/`; tampoco hay Gradle instalado. | **Pendiente / bloqueada** hasta restaurar Gradle Wrapper y ejecutar `testDebugUnitTest` y `assembleDebug`. |
-| Backend: pruebas automatizadas | 11 pruebas aprobadas, incluyendo contrato ASR con proveedor simulado, autenticación, validación de logs y errores de JSON. | **Aprobado en pruebas automatizadas**: ejecutar `cd backend; npm test` para reproducir. El test ASR usa un mock, no una API cloud real. |
-| Backend: compilación y tipos | `npm run build` y `npm run typecheck:test` finalizaron correctamente. | **Aprobado** en el entorno de desarrollo. |
-| Docker Compose | `docker compose config --quiet` validó la configuración con variables temporales de prueba. | **Configuración aprobada**; no implica que los servicios hayan iniciado. |
+| Compilación Android / APK debug | El Gradle Wrapper está presente en `mobile/gradlew.bat` y `mobile/gradle/wrapper/`. La ejecución del 23/11 registrada en `05_Resultados_de_Pruebas.md` pasó; los cambios del 25/11 aún no se han recompilado. | **Build previo aprobado; revalidación pendiente** para los cambios recientes. |
+| Backend: pruebas automatizadas | 22 pruebas aprobadas en la validación del 23/11 registrada en `05_Resultados_de_Pruebas.md`. | **Aprobado en esa ejecución automatizada**; el ASR de pruebas es simulado, no una API cloud real. |
+| Backend: compilación y tipos | `npm run build` y `npm run typecheck:test` finalizaron correctamente en la ejecución del 23/11 registrada en `05_Resultados_de_Pruebas.md`. | **Aprobado en esa ejecución**; cambios recientes pendientes de revalidación. |
+| Docker Compose | La configuración anterior pasó `docker compose config --quiet` con variables temporales de prueba; la configuración actualizada del 25/11 no se pudo validar en esta sesión. | **Validación previa aprobada; cambio actual pendiente**; no implica que los servicios hayan iniciado. |
 | Imagen/servicios Docker | No se construyeron ni iniciaron: Docker Desktop no tenía activo el daemon Linux. | **Pendiente / bloqueada**. |
 | Modo offline en teléfono | No hay resultados de dispositivo adjuntos. | **Pendiente**: probar los diez comandos con Wi-Fi y datos desactivados. |
 | Modo online con ASR real | No se probó proveedor cloud con credenciales reales ni desde el teléfono. | **Pendiente**: configurar proveedor, backend, JWT y conexión de la app. |

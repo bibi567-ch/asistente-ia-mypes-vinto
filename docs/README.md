@@ -30,12 +30,13 @@ La carpeta `defensa_tecnica/` está fuera de `docs/` porque es una guía persona
 
 ## Ejecución del backend
 
-Requisitos: Node.js 24, npm y PostgreSQL local o Docker Desktop operativo.
+Requisitos: Node.js 24, npm y PostgreSQL local o Docker Desktop operativo. Para ejecutar la aplicación completa en local, se recomienda seguir primero la [guía operativa de despliegue](15_Guia_de_Despliegue.md), que configura Compose, PostgreSQL y el backend conjuntamente.
 
 ```powershell
 cd backend
 npm ci
 Copy-Item .env.example .env
+# Completa DATABASE_URL y JWT_SECRET en backend/.env con valores locales.
 npm run db:migrate
 npm run build
 npm test
@@ -43,7 +44,7 @@ npm run test:integration
 npm run dev
 ```
 
-`npm run test:integration` necesita una PostgreSQL accesible con credenciales correctas. Si no puede conectarse, el resultado debe quedar bloqueado, no convertido en aprobación.
+`backend/.env.example` deja `DATABASE_URL` vacío deliberadamente: el backend no contiene una contraseña predeterminada y no inicia hasta que configures ese valor en el `.env` ignorado por Git. `npm run test:integration` necesita una PostgreSQL accesible con credenciales correctas. Si no puede conectarse, el resultado debe quedar bloqueado, no convertido en aprobación.
 
 ## Ejecución Android
 

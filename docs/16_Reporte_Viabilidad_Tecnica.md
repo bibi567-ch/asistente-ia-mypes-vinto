@@ -1,14 +1,14 @@
 # 16. Reporte de viabilidad técnica
 
 **Proyecto:** Asistente Conversacional Offline para MYPES de Vinto
-**Fecha de revisión:** 23/11/2026
+**Fecha de revisión:** 25/11/2026
 **Estado:** Evaluación preliminar; no constituye validación de campo ni aprobación de despliegue
 
 ## 1. Resumen ejecutivo
 
 El repositorio contiene una base técnica para un asistente Android con reconocimiento local Vosk, clasificación por reglas, confirmación, acciones Android, TTS, Outbox y backend Node.js/TypeScript con PostgreSQL. La viabilidad es **condicional**: las pruebas automatizadas del backend y la compilación TypeScript pasaron en el entorno de desarrollo, pero no se verificaron el build Android, la ejecución real de Docker, la transcripción con proveedor cloud ni las métricas de campo.
 
-La integración de sesión móvil sigue pendiente: el login local por PIN no aprovisiona el JWT requerido por los endpoints cloud. No se debe presentar la solución como lista para producción o como evaluada con comerciantes hasta completar las validaciones documentadas en [13_Plan_de_Pruebas.md](13_Plan_de_Pruebas.md) y [14_Resultados_de_Pruebas.md](14_Resultados_de_Pruebas.md).
+La app implementa registro/login cloud independiente del PIN local y guarda el JWT para sincronización; la integración end-to-end con una API accesible no está verificada en esta evaluación. No se debe presentar la solución como lista para producción o como evaluada con comerciantes hasta completar las validaciones documentadas en [13_Plan_de_Pruebas.md](13_Plan_de_Pruebas.md) y [14_Resultados_de_Pruebas.md](14_Resultados_de_Pruebas.md).
 
 ## 2. Alcance funcional evaluado
 
@@ -43,7 +43,7 @@ Las claves del proveedor se configuran únicamente en el backend. El contrato de
 | Requisito | Valor / estado |
 |---|---|
 | Sistema operativo | Android 8.0 (API 26) o posterior, conforme al `minSdk` del proyecto. |
-| Herramientas de compilación | Android SDK 35 y JDK 17; build aún no verificado por falta de Gradle Wrapper en el checkout. |
+| Herramientas de compilación | Android SDK 35, JDK 17 y Gradle Wrapper presentes en `mobile/`; el build previo del 23/11 está registrado en `05_Resultados_de_Pruebas.md`. Los cambios del 25/11 aún requieren recompilación. |
 | Modelo offline | Vosk español pequeño, ubicado en `mobile/app/src/main/assets/vosk-model-small-es-0.42` cuando se prepara un build autorizado. |
 | Tamaño del modelo | Aproximadamente 57.5 MiB en el workspace observado; el APK y el uso de almacenamiento final deben medirse. |
 | Memoria | 3 GB RAM es una recomendación inicial para seleccionar dispositivos de prueba, no un mínimo medido ni una garantía de ejecución. |
@@ -58,7 +58,7 @@ El modelo Vosk está excluido por la regla `.gitignore`; un build limpio debe ob
 | Backend automatizado | 22 pruebas aprobadas; el proveedor ASR se simula en pruebas. | Verificado en pruebas automatizadas. |
 | TypeScript | `npm run build` y `npm run typecheck:test` completados correctamente. | Verificado en entorno de desarrollo. |
 | Docker Compose | La configuración se validó; no se construyó ni levantó el servicio porque el daemon no estaba activo. | Configuración validada; runtime pendiente. |
-| Android | `:app:testDebugUnitTest :app:assembleDebug` finalizó con `BUILD SUCCESSFUL`; la ejecución en dispositivo sigue pendiente. | Compilación y pruebas JVM verificadas; prueba física pendiente. |
+| Android | `:app:testDebugUnitTest :app:assembleDebug` finalizó con `BUILD SUCCESSFUL` el 23/11; los manifiestos debug/release modificados el 25/11 siguen pendientes de revalidación. | Compilación y pruebas JVM previas verificadas; cambio reciente y prueba física pendientes. |
 | ASR cloud real | No se ejecutó con credenciales de proveedor desde un dispositivo. | Pendiente. |
 | WER, SUS, latencia, memoria y batería | No existen mediciones de campo verificadas en este repositorio. | Pendiente. |
 

@@ -17,7 +17,6 @@
 
     <application
         android:label="Yapay - MYPES Vinto"
-        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.MypesLocal">
         <activity
             android:name=".MainActivity"

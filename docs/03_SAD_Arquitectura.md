@@ -1,6 +1,8 @@
 # DOCUMENTO DE ARQUITECTURA DE SOFTWARE (SAD v2.1 OFICIAL)
 **Universidad Adventista de Bolivia · Facultad de Ciencias Exactas e Ingeniería · Ingeniería en Sistemas**
 
+> **Estado operativo (25/11/2026):** el backend Node/Express y PostgreSQL están implementados en el repositorio y Compose los configura para desarrollo local. No hay un despliegue público de nube confirmado. Los diagramas cloud describen la arquitectura objetivo; no prueban que exista una instancia accesible en Internet. El APK debug puede usar HTTP local; las builds release deben conectarse por HTTPS.
+
 | Control del Documento | Detalle |
 | :--- | :--- |
 | **Proyecto Integrador** | Gestión 2-2026 (Investigación I, Arquitectura de Software, Tecnologías en Internet) |
@@ -107,9 +109,9 @@ Priorización estratégica de atributos de calidad:
 ### ADR-003: Backend Nube — Node.js 24 + TypeScript + Express + PostgreSQL 16
 * **Estatus:** Aprobado (Vigente v2.1 - Sustituye propuesta inicial de Spring Boot).
 * **Contexto:** Se requiere un backend en la nube altamente eficiente, liviano y escalable para recibir la sincronización de lotes de miles de comerciantes.
-* **Decisión:** Adoptar **Node.js 24 con TypeScript, Express 5 y PostgreSQL 16**, protegido por un **API Gateway** con Circuit Breaker.
+* **Decisión:** Adoptar **Node.js 24 con TypeScript, Express 5 y PostgreSQL 16**, protegido por un **API Gateway** con Circuit Breaker. En producción, PostgreSQL usa TLS con validación de certificado; proveedores con CA privada suministran el certificado raíz público mediante `DATABASE_SSL_CA`.
 * **Justificación:** Arquitectura orientada a eventos no bloqueante (Event Loop), menor consumo de memoria en la nube frente a la JVM de Spring Boot, soporte nativo de JSON/TypeScript, y orquestación eficiente con Docker Compose.
-* **Consecuencia:** Unificación del stack en TypeScript para API y scripts de mantenimiento.
+* **Consecuencia:** Unificación del stack en TypeScript para API y scripts de mantenimiento. No se desactiva la verificación TLS para aceptar certificados autofirmados.
 
 ### ADR-004: Patrón Outbox Idempotente y Política de Concurrencia
 * **Estatus:** Aprobado (Vigente v2.1).
@@ -153,7 +155,7 @@ System_Boundary(mobile_app, "Dispositivo Móvil Android (Gama Baja)") {
     ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v7 + SQLCipher (AES-256)", "Almacenamiento cifrado compartido por login, perfil, catálogo, ventas, fiados, VoiceLog y cola Outbox; una sola instancia de Room")
 }
 
-System_Boundary(cloud_infra, "Infraestructura Nube (Docker Compose)") {
+System_Boundary(cloud_infra, "Backend y persistencia (Compose local; despliegue cloud pendiente)") {
     Container(api_gateway, "API Gateway / Express Router", "Node.js 24 / Express 5", "Validación de JWT, Rate Limiting y enrutamiento seguro")
     Container(sync_service, "Servicio de Sincronización", "TypeScript Services", "Procesamiento idempotente de lotes Outbox y registro de eventos")
     ContainerDb(postgres_db, "Base de Datos Consolidada", "PostgreSQL 16", "Persistencia central de propietarios, negocios, productos y transacciones")
@@ -167,12 +169,12 @@ Rel(pln_engine, ui_view, "Retorna texto transcrito e intenciones")
 Rel(ui_view, data_layer, "Invoca Casos de Uso")
 Rel(data_layer, sqlite_db, "Lectura/Escritura de transacciones cifradas")
 Rel(data_layer, outbox_sync, "Encola eventos con UUID v4")
-Rel(outbox_sync, api_gateway, "POST /api/v1/sync (Lotes JSON, JWT / TLS 1.3)")
+Rel(outbox_sync, api_gateway, "POST /api/v1/transacciones/batch (Lotes JSON, JWT; HTTPS en producción)")
 Rel(api_gateway, sync_service, "Pasa payloads validados")
 Rel(sync_service, postgres_db, "Consolida transacciones e inventario")
 Rel(ui_view, phone_actions, "Ejecuta acciones solo después de confirmación")
-Rel(ui_view, api_gateway, "Consulta /assistant/query y envía feedback autorizado")
-Rel(pln_engine, api_gateway, "Usa /asr/transcribe solo como fallback cloud configurado")
+Rel(ui_view, api_gateway, "Consulta /api/v1/assistant/query y envía feedback autorizado")
+Rel(pln_engine, api_gateway, "Usa /api/v1/asr/transcribe solo como fallback configurado")
 ```
 
 ---

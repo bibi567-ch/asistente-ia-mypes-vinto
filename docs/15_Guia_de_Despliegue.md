@@ -1,8 +1,8 @@
 # 15. Guía de despliegue y ejecución
 
 **Proyecto:** Asistente Conversacional Offline para MYPES de Vinto
-**Estado:** Instrucciones locales; despliegue productivo no implementado
-**Actualizado:** 23/11/2026
+**Estado:** Instrucciones locales y preparación para despliegue de prueba; despliegue productivo no implementado
+**Actualizado:** 25/11/2026
 
 ## 1. Requisitos previos
 
@@ -34,7 +34,9 @@ La API escucha en el puerto `3000`, no `4000`, y Compose la enlaza solo a loopba
 - Google: `ASR_PROVIDER=google`, `GOOGLE_ASR_API_KEY` y opcionalmente `GOOGLE_ASR_LANGUAGE`.
 - Whisper: `ASR_PROVIDER=whisper`, `OPENAI_ASR_API_KEY` y opcionalmente `OPENAI_ASR_BASE_URL`.
 
-Guarda esas variables solo en `.env`; nunca las insertes en el APK. El login no tiene registro público. Para crear un propietario desde el contenedor, ejecuta `docker compose exec backend node dist/scripts/create-owner.js "MYPE de prueba" "propietario@example.test"` y guarda la contraseña temporal impresa.
+Guarda esas variables solo en `.env`; nunca las insertes en el APK. La API ofrece registro en `POST /api/v1/auth/register`. Si necesitas crear un propietario de prueba desde el contenedor, ejecuta `docker compose exec backend node dist/scripts/create-owner.js "MYPE de prueba" "propietario@example.test"` y protege la contraseña temporal generada.
+
+Compose usa `NODE_ENV=development` por defecto para la base PostgreSQL local. `API_BIND_ADDRESS=127.0.0.1` restringe el puerto al equipo local y permite el acceso desde el emulador Android mediante `10.0.2.2`. Para probar temporalmente con un teléfono en una red Wi-Fi confiable, cambia `API_BIND_ADDRESS` a `0.0.0.0`, limita el acceso con el firewall y usa la IP LAN del equipo; no expongas ese modo directamente a Internet. Para ejecutar Node directamente fuera de Docker, completa `DATABASE_URL` en el `backend/.env` local; el ejemplo deja ese valor vacío intencionalmente y el backend no inicia si falta.
 
 Para detener los servicios sin borrar los datos, usa `docker compose down`. `docker compose down -v` elimina también el volumen local de PostgreSQL.
 
@@ -42,11 +44,16 @@ Para detener los servicios sin borrar los datos, usa `docker compose down`. `doc
 
 1. Abre `mobile/` en Android Studio.
 2. Asegura que el modelo Vosk esté en la ruta indicada arriba.
-3. Restaura un Gradle Wrapper versionado antes de ejecutar CI o builds reproducibles; actualmente faltan `gradlew.bat` y `gradle/wrapper/`.
-4. Ejecuta `testDebugUnitTest` y `assembleDebug` desde Android Studio o con el wrapper.
+3. Usa el Gradle Wrapper versionado incluido en `mobile/`.
+4. Desde `mobile/`, configura la URL de API y ejecuta las pruebas/build:
+
+   ```powershell
+   .\gradlew.bat -PMYPES_API_BASE_URL=http://10.0.2.2:3000/ :app:testDebugUnitTest :app:assembleDebug
+   ```
+
 5. Instala el APK debug en un dispositivo/emulador y concede permiso de micrófono. Concede cámara cuando se solicite para la linterna.
 
-El emulador Android puede alcanzar el host usando `10.0.2.2`; el puerto de API del Compose actual es `3000`. Android moderno bloquea HTTP sin cifrar por defecto: para pruebas online usa un endpoint HTTPS o una configuración cleartext limitada a debug. La app requiere que el inicio de sesión proporcione `api_base_url` y un JWT vigente en preferencias privadas `voice_cloud`; el login local por PIN aún no genera ese JWT.
+El manifiesto principal no permite HTTP en builds release; el permiso de tráfico sin cifrar está limitado al manifiesto debug para pruebas locales. Para una versión release, compila con una URL HTTPS, por ejemplo `-PMYPES_API_BASE_URL=https://tu-api.example/`. Las funciones cloud requieren autenticación cloud y un JWT vigente; el PIN local no crea esa sesión.
 
 ## 4. Pruebas de funcionamiento
 
@@ -56,45 +63,27 @@ El emulador Android puede alcanzar el host usando `10.0.2.2`; el puerto de API d
 - Probar el Outbox con desconexión/reconexión. La sincronización requiere URL y JWT.
 - En llamadas/mensajes por nombre, proporcionar un número explícito: aún no se consulta la agenda.
 
-## 5. Estrategias futuras de actualización
+## 5. Actualización del APK y estado de la nube
 
-Las siguientes estrategias son propuestas; no hay `UpdateManager`, endpoint de versiones, Play In-App Updates ni actualizador remoto de modelos implementados en este repositorio.
+El backend ya contiene `GET /api/v1/app-updates/latest` y `GET /api/v1/app-updates/apk`; Android consulta versión, descarga el APK configurado, verifica su SHA-256 y abre el instalador del sistema. La instalación requiere confirmación del usuario. Esto no es Google Play In-App Updates ni una actualización silenciosa.
 
-### Estrategia 1: Google Play In-App Updates
+En Compose, el APK se monta desde `mobile/app/build/outputs/apk/debug`. Para habilitar la descarga local, configura en el `.env` raíz `ANDROID_UPDATE_VERSION_CODE`, `ANDROID_UPDATE_VERSION_NAME`, `ANDROID_UPDATE_APK_PATH` y `ANDROID_UPDATE_BASE_URL` con valores coherentes con el APK que realmente existe.
 
-Si la app se publica en Google Play, Play puede distribuir actualizaciones y la API Play In-App Updates puede ofrecer flujos flexible o inmediato. Antes de implementarla:
+El backend y la base de datos aún no están desplegados en un proveedor público. La cuenta Railway disponible está en prueba; el crédito y la vigencia son limitados y no equivalen a hosting gratuito permanente. No ingreses datos reales de comerciantes ni habilites un plan pagado para una demostración.
 
-1. Publicar la app mediante Play y configurar los tracks de prueba.
-2. Agregar `com.google.android.play:app-update-ktx` en el módulo `app`.
-3. Consultar `AppUpdateManager` al iniciar y manejar disponibilidad, descarga, reanudación, cancelación y errores.
-4. Probar los flujos desde Play Internal Testing; no funcionan como actualización in-app para APK instalados manualmente.
+### Despliegue de prueba en Railway
 
-No agregues la dependencia hasta decidir que Play será un canal de distribución.
+1. Crea un proyecto y agrega PostgreSQL 16. Mantén la base privada; no habilites acceso público.
+2. Despliega este repositorio desde GitHub como servicio backend y configura **Root Directory** en `/backend`. El `Dockerfile` ejecuta las migraciones antes de iniciar la API.
+3. En las variables del backend, referencia `DATABASE_URL` desde el servicio PostgreSQL y configura `JWT_SECRET` con al menos 32 bytes aleatorios. Para la prueba inicial usa `ASR_PROVIDER=simulated`; no agregues claves de proveedores externos.
+4. Railway PostgreSQL puede usar una CA privada. En el equipo con Railway CLI autenticado, exporta únicamente el certificado raíz público:
 
-### Estrategia 2: APK fuera de Google Play
+   ```powershell
+   railway ssh --project <proyecto> --service <servicio-postgres> --environment <entorno> -- export-ssl-ca
+   ```
 
-Para pruebas de campo por APK, podría añadirse un endpoint autenticado o firmado `GET /api/v1/app/version` que publique versión, URL HTTPS, tamaño y SHA-256 del APK. Una futura implementación Android debe:
+   Pega el PEM resultante en la variable `DATABASE_SSL_CA` del backend, conservando las líneas `BEGIN CERTIFICATE` y `END CERTIFICATE`. No copies `root.key` ni `server.key`. La API mantiene la validación del certificado; no agregues `sslmode=require` a `DATABASE_URL` ni desactives la verificación.
+5. Configura el health check del servicio backend como `GET /api/v1/health`, genera un dominio HTTPS solo para la API y prueba esa URL antes de conectar Android. No publiques PostgreSQL.
+6. Para una build debug que apunte al servicio, usa `-PMYPES_API_BASE_URL=https://<dominio-api>/`. Verifica primero registro, login y persistencia con datos ficticios. El build Android por sí solo no prueba la integración cloud.
 
-1. Comparar la versión disponible con `BuildConfig.VERSION_NAME`.
-2. Mostrar un diálogo y permitir rechazar/posponer.
-3. Descargar a almacenamiento privado, validar SHA-256 y certificado de firma del APK, tamaño y versión antes de abrir el instalador.
-4. Usar `FileProvider` para compartir un URI `content://`; el usuario debe confirmar la instalación y habilitar la fuente correspondiente.
-5. Solicitar `REQUEST_INSTALL_PACKAGES` solo si el canal de distribución lo exige y tras revisar las políticas aplicables.
-
-No publiques una URL arbitraria ni instales un APK sin validar su firma. El endpoint, `UpdateManager`, permisos y proveedor de descargas aún deben diseñarse e implementarse.
-
-### Estrategia 3: Actualización de modelos de IA
-
-- **LiteRT/TensorFlow Lite:** no hay modelo TFLite/LiteRT en el clasificador actual. Si se incorpora uno, Firebase ML Model Management puede evaluarse para distribuirlo; requiere proyecto Firebase, configuración Android y políticas de descarga/rollback.
-- **Vosk:** una futura distribución desde servidor debe publicar una versión firmada con tamaño y checksum. El cliente descarga por HTTPS, valida, extrae a un directorio temporal, comprueba los archivos y cambia el modelo de forma atómica conservando una copia de rollback. Vosk abre el modelo desde `filesDir`; no necesita `FileProvider`.
-
-Antes de una actualización remota, medir el tamaño de descarga, almacenamiento temporal, compatibilidad del modelo y calidad de reconocimiento. El modelo actual está en assets y debe incluirse de forma autorizada en el paquete de distribución.
-
-### Secuencia propuesta
-
-| Componente | Estrategia | Estado |
-|---|---|---|
-| APK de producción | Google Play In-App Updates | Propuesta si se publica en Play |
-| APK de pruebas de campo | Endpoint firmado + instalador del sistema | No implementado |
-| Modelo Vosk | Descarga versionada, checksum y rollback | No implementado |
-| Modelo LiteRT | Firebase ML solo si se adopta LiteRT | No implementado; clasificador actual usa reglas |
+La variable de URL de producción no debe quedar guardada como valor de release dentro del código: pásala al compilar. El despliegue, las migraciones, la persistencia PostgreSQL y la conexión desde Android siguen pendientes de prueba real. La actualización remota de modelos Vosk no está implementada.
