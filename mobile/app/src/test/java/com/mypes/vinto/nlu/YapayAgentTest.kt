@@ -26,4 +26,41 @@ class YapayAgentTest {
         assertTrue(saved.contains("guardado"))
         assertTrue(inserts == 1)
     }
+
+    @Test
+    fun `product command with explicit product word still requests confirmation`() {
+        val agent = YapayAgent(
+            YapayAgent.Tools(
+                insertarProducto = { true },
+                totalVentasDesde = { 0.0 }
+            )
+        )
+
+        assertTrue(agent.puedePrepararProducto("agrega producto harina por 12.50 Bs"))
+        val response = runBlocking {
+            agent.procesarComando("agrega producto harina por 12.50 Bs")
+        }
+
+        assertTrue(response.contains("¿Confirmas"))
+    }
+
+    @Test
+    fun `remote sales intent can answer a non Spanish transcription`() {
+        val agent = YapayAgent(
+            YapayAgent.Tools(
+                insertarProducto = { true },
+                totalVentasDesde = { 25.0 }
+            )
+        )
+
+        val response = runBlocking {
+            agent.procesarComando(
+                "qhawariy",
+                IntentClassifier.Intencion.CONSULTAR_VENTAS
+            )
+        }
+
+        assertTrue(response.contains("ventas registradas hoy suman"))
+        assertTrue(response.contains("25"))
+    }
 }

@@ -112,16 +112,9 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun iniciarEscucha() {
-        if (_estado.value.escuchando) return
-        _estado.value = _estado.value.copy(
-            escuchando = true,
-            textoParcial = "",
-            mensajeError = null
-        )
+        if (!prepararEscucha()) return
         asistente.escuchar(
-            onParcial = { texto ->
-                _estado.value = _estado.value.copy(textoParcial = texto)
-            },
+            onParcial = ::actualizarTextoParcial,
             onResultado = { resultado ->
                 viewModelScope.launch { procesarResultado(resultado) }
             },
@@ -133,12 +126,51 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     )
                     agregarMensaje(mensaje, esUsuario = false)
                 }
+            }
+        )
+    }
 
-                fun onBotonMicrofonoPresionado() {
-                    if (_estado.value.escuchando) detenerEscucha() else iniciarEscucha()
+    fun iniciarEscuchaParaChat(onResultado: (AsistenteVozFacade.Resultado) -> Unit): Boolean {
+        if (!prepararEscucha()) return false
+        asistente.escuchar(
+            onParcial = ::actualizarTextoParcial,
+            onResultado = { resultado ->
+                viewModelScope.launch {
+                    _estado.value = _estado.value.copy(escuchando = false, textoParcial = "")
+                    onResultado(resultado)
+                }
+            },
+            onError = { mensaje ->
+                viewModelScope.launch {
+                    _estado.value = _estado.value.copy(
+                        escuchando = false,
+                        textoParcial = "",
+                        mensajeError = mensaje
+                    )
                 }
             }
         )
+        return true
+    }
+
+    private fun prepararEscucha(): Boolean {
+        if (_estado.value.escuchando) return false
+        if (_estado.value.modeloDisponible != true) {
+            _estado.value = _estado.value.copy(
+                mensajeError = "El modelo de voz todavía no está disponible."
+            )
+            return false
+        }
+        _estado.value = _estado.value.copy(
+            escuchando = true,
+            textoParcial = "",
+            mensajeError = null
+        )
+        return true
+    }
+
+    private fun actualizarTextoParcial(texto: String) {
+        _estado.value = _estado.value.copy(textoParcial = texto)
     }
 
     fun detenerEscucha() {
@@ -241,6 +273,10 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             textoParcial = "",
             mensajeError = null
         )
+        if (resultado.textoOriginal.isBlank() || normalizarTexto(resultado.textoOriginal) == "de") {
+            responder("No te escuché bien. Mantén presionado el micrófono, habla y suelta para enviar.")
+            return
+        }
         agregarMensaje(resultado.textoOriginal, esUsuario = true, corregible = true)
 
         if (resultado.requiereTranscripcionNube && !resultado.transcripcionNube) {
@@ -255,13 +291,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             )
             return
         }
-        if (resultado.asrSimulado) {
-            agregarMensaje(
-                "El ASR cloud está simulado; no transcribió el audio. Se conserva el texto de Vosk.",
-                esUsuario = false
-            )
-        }
-
         if (resultado.transcripcionNube && resultado.clasificacionRemota &&
             resultado.intencionRemota == null
         ) {

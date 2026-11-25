@@ -2,12 +2,15 @@ package com.mypes.vinto
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
@@ -27,6 +30,7 @@ import com.mypes.vinto.presentation.reportes.ReportesScreen
 import com.mypes.vinto.presentation.sync.SincronizacionScreen
 import com.mypes.vinto.presentation.ventas.VentaManualScreen
 import com.mypes.vinto.update.AppUpdateManager
+import com.mypes.vinto.viewmodel.DashboardViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -46,7 +50,18 @@ class MainActivity : ComponentActivity() {
                     composable("dashboard") { DashboardScreen(nav) }
                     composable("perfil") { PerfilScreen(nav) }
                     composable("fiados") { FiadosScreen(nav) }
-                    composable("inventario") { InventarioScreen(nav) }
+                    composable(
+                        route = "inventario?filtro={filtro}",
+                        arguments = listOf(
+                            navArgument("filtro") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ) { entry ->
+                        InventarioScreen(nav, filtroInicial = entry.arguments?.getString("filtro"))
+                    }
                     composable(
                         route = "venta_manual?producto={producto}&cantidad={cantidad}",
                         arguments = listOf(
@@ -70,7 +85,32 @@ class MainActivity : ComponentActivity() {
                                 ?.takeIf { it.isFinite() } ?: 1.0
                         )
                     }
-                    composable("chat") { ChatScreen(nav) }
+                    composable("chat") {
+                        val dashboardEntry = remember(nav) {
+                            nav.getBackStackEntry("dashboard")
+                        }
+                        val voiceViewModel: DashboardViewModel = viewModel(
+                            viewModelStoreOwner = dashboardEntry
+                        )
+                        ChatScreen(
+                            nav = nav,
+                            onNavegarVenta = { producto, cantidad ->
+                                val productoCodificado = Uri.encode(producto.orEmpty())
+                                val cantidadCodificada = cantidad?.toString().orEmpty()
+                                nav.navigate(
+                                    "venta_manual?producto=$productoCodificado&cantidad=$cantidadCodificada"
+                                )
+                            },
+                            onNavegarInventario = { filtro ->
+                                val ruta = filtro?.takeIf(String::isNotBlank)
+                                    ?.let { "inventario?filtro=${Uri.encode(it)}" }
+                                    ?: "inventario"
+                                nav.navigate(ruta)
+                            },
+                            onNavegarFiados = { nav.navigate("fiados") },
+                            voiceViewModel = voiceViewModel
+                        )
+                    }
                     composable("sync") { SincronizacionScreen(nav) }
                     composable("api_login") { ApiLoginScreen(nav) }
                     composable("reportes") { ReportesScreen(nav) }

@@ -2,6 +2,7 @@ package com.mypes.vinto.presentation.dashboard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -41,8 +41,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.focusable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -153,15 +166,38 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
                                 )
                             }
                             Spacer(Modifier.height(10.dp))
-                            Button(
-                                onClick = { if (estado.escuchando) vm.detenerEscucha() else vm.iniciarEscucha() },
+                            PushToTalkButton(
                                 modifier = Modifier.fillMaxWidth().height(50.dp),
+                                isListening = estado.escuchando,
+                                enabled = estado.modeloDisponible == true,
                                 shape = RoundedCornerShape(12.dp),
-                                enabled = estado.modeloDisponible != false
+                                label = when {
+                                    estado.modeloDisponible == null -> "Cargando voz..."
+                                    estado.modeloDisponible == false -> "Voz no disponible"
+                                    estado.escuchando -> "Suelta para enviar"
+                                    else -> "Mantén para hablar"
+                                },
+                                onStart = vm::iniciarEscucha,
+                                onStop = vm::detenerEscucha
+                            )
+                            TextButton(
+                                onClick = { nav.navigate("chat") },
+                                modifier = Modifier.align(Alignment.End)
                             ) {
-                                Icon(Icons.Default.Mic, null)
-                                Spacer(Modifier.width(8.dp))
-                                Text(if (estado.escuchando) "Detener escucha" else "Hablar con Yapay")
+                                Text("Abrir chat de texto", color = VerdeNeon)
+                            }
+                            if (estado.escuchando && estado.textoParcial.isNotBlank()) {
+                                Spacer(Modifier.height(6.dp))
+                                Text(
+                                    estado.textoParcial,
+                                    color = TextoGris,
+                                    fontSize = 12.sp,
+                                    maxLines = 2
+                                )
+                            }
+                            estado.mensajeError?.let { error ->
+                                Spacer(Modifier.height(6.dp))
+                                Text(error, color = RojoCancelar, fontSize = 12.sp)
                             }
                         }
                     }
@@ -212,7 +248,10 @@ fun DashboardScreen(nav: NavController, vm: DashboardViewModel = viewModel()) {
 
         BottomNav(
             modifier = Modifier.align(Alignment.BottomCenter),
-            onVoice = { if (estado.escuchando) vm.detenerEscucha() else vm.iniciarEscucha() },
+            isListening = estado.escuchando,
+            voiceEnabled = estado.modeloDisponible == true,
+            onStartVoice = vm::iniciarEscucha,
+            onStopVoice = vm::detenerEscucha,
             onInventory = { nav.navigate("inventario") },
             onSales = { nav.navigate("venta_manual") },
             onFiados = { nav.navigate("fiados") },
@@ -298,7 +337,10 @@ private fun MetricCard(modifier: Modifier, label: String, value: String, detail:
 @Composable
 private fun BottomNav(
     modifier: Modifier,
-    onVoice: () -> Unit,
+    isListening: Boolean,
+    voiceEnabled: Boolean,
+    onStartVoice: () -> Unit,
+    onStopVoice: () -> Unit,
     onInventory: () -> Unit,
     onSales: () -> Unit,
     onFiados: () -> Unit,
@@ -312,13 +354,92 @@ private fun BottomNav(
         Row(Modifier.padding(horizontal = 8.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceAround) {
             NavItem("Inventario", Icons.Default.Inventory2, onInventory)
             NavItem("Venta", Icons.Default.PointOfSale, onSales)
-            Surface(modifier = Modifier.size(56.dp), shape = CircleShape, color = VerdeNeon, onClick = onVoice) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Mic, null, tint = FondoOscuro)
-                }
-            }
+            PushToTalkButton(
+                modifier = Modifier.size(56.dp),
+                isListening = isListening,
+                enabled = voiceEnabled,
+                shape = CircleShape,
+                onStart = onStartVoice,
+                onStop = onStopVoice
+            )
             NavItem("Fiados", Icons.Default.Person, onFiados)
             NavItem("Ajustes", Icons.Default.Settings, onSettings)
+        }
+    }
+}
+
+@Composable
+private fun PushToTalkButton(
+    modifier: Modifier,
+    isListening: Boolean,
+    enabled: Boolean,
+    shape: Shape,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    label: String? = null
+) {
+    var pressed by remember { mutableStateOf(false) }
+    val currentOnStart by rememberUpdatedState(onStart)
+    val currentOnStop by rememberUpdatedState(onStop)
+    val backgroundColor = when {
+        isListening || pressed -> RojoCancelar
+        enabled -> VerdeNeon
+        else -> SuperficieOscura
+    }
+    val contentColor = if (isListening || pressed || !enabled) TextoBlanco else FondoOscuro
+
+    Box(
+        modifier = modifier
+            .background(backgroundColor, shape)
+            .pointerInput(enabled) {
+                if (enabled) {
+                    detectTapGestures(
+                        onPress = {
+                            var started = false
+                            pressed = true
+                            try {
+                                currentOnStart()
+                                started = true
+                                tryAwaitRelease()
+                            } finally {
+                                pressed = false
+                                if (started) currentOnStop()
+                            }
+                        }
+                    )
+                }
+            }
+            .focusable(enabled)
+            .semantics(mergeDescendants = true) {
+                role = Role.Button
+                contentDescription = if (isListening) {
+                    "Grabando. Suelta para enviar."
+                } else {
+                    label ?: "Mantén presionado para hablar."
+                }
+                if (!enabled) disabled()
+                onClick(label = if (isListening) "Detener grabación" else "Iniciar grabación") {
+                    if (!enabled) {
+                        false
+                    } else {
+                        if (isListening) currentOnStop() else currentOnStart()
+                        true
+                    }
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Default.Mic, contentDescription = null, tint = contentColor, modifier = Modifier.size(20.dp))
+            if (label != null) {
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    label,
+                    color = contentColor,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }

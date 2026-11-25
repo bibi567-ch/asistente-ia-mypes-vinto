@@ -31,7 +31,6 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
         val textoOriginal: String,
         val confianzaVosk: Float,
         val transcripcionNube: Boolean = false,
-        val asrSimulado: Boolean = false,
         val intencionRemota: IntentClassifier.Intencion? = null,
         val clasificacionRemota: Boolean = false,
         val requiereTranscripcionNube: Boolean = false
@@ -81,7 +80,6 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
 
                 scope.launch {
                     var cloudFailure: String? = null
-                    var cloudSimulated = false
                     val cloudResponse = try {
                         CloudAsrService(baseUrl, accessToken).transcribeIfNeeded(
                             applicationContext,
@@ -99,8 +97,7 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                         cloudFailure = error.message ?: "La configuración cloud no es válida."
                         null
                     }
-                    val cloudText = cloudResponse?.takeUnless { it.simulada }?.texto
-                        ?.takeIf(String::isNotBlank)
+                    val cloudText = cloudResponse?.textoUtilizable()
                     val remoteIntent = cloudResponse
                         ?.takeIf { it.clasificada }
                         ?.let {
@@ -109,16 +106,10 @@ class AsistenteVozFacade(context: Context) : AutoCloseable {
                                 it.confianzaIntencion
                             )
                         }
-                    if (cloudResponse?.simulada == true) {
-                        cloudSimulated = true
-                        cloudFailure = cloudResponse.mensaje
-                            ?: "El reconocimiento cloud está en modo demostración y no transcribió el audio."
-                    }
                     withContext(Dispatchers.Main) {
                         onResultado(
                             procesar(cloudText ?: texto, confianza).copy(
                                 transcripcionNube = cloudText != null,
-                                asrSimulado = cloudSimulated,
                                 intencionRemota = remoteIntent,
                                 clasificacionRemota = cloudResponse?.clasificada == true,
                                 requiereTranscripcionNube = modoQuechuaActivo

@@ -23,6 +23,9 @@ data class CloudAsrResponse(
     val confianzaIntencion: Float? = null
 )
 
+internal fun CloudAsrResponse.textoUtilizable(): String? =
+    texto.takeUnless { simulada }?.trim()?.takeIf(String::isNotEmpty)
+
 interface CloudAsrApi {
     @Multipart
     @POST("api/v1/asr/transcribe")

@@ -40,6 +40,11 @@ class YapayAgent private constructor(private val tools: Tools, @Suppress("UNUSED
     )
     val estadoChat: StateFlow<List<MensajeChat>> = _estadoChat.asStateFlow()
     private var productoPendiente: ProductoPendiente? = null
+    val esperandoConfirmacionProducto: Boolean
+        get() = productoPendiente != null
+
+    fun puedePrepararProducto(texto: String): Boolean =
+        ADD_PRODUCT_REGEX.containsMatchIn(texto)
 
     data class ProductoPendiente(val nombre: String, val precio: Double, val stock: Double)
 
@@ -55,7 +60,10 @@ class YapayAgent private constructor(private val tools: Tools, @Suppress("UNUSED
         explica el cambio y solicita confirmación explícita. No inventes ventas, costos ni márgenes.
     """.trimIndent()
 
-    suspend fun procesarComando(texto: String): String {
+    suspend fun procesarComando(
+        texto: String,
+        intencionForzada: IntentClassifier.Intencion? = null
+    ): String {
         val comando = texto.trim()
         if (comando.isEmpty()) return responder("No recibí un mensaje. ¿Puedes repetir?")
         agregarMensaje(MensajeChat(comando, esUsuario = true))
@@ -94,7 +102,8 @@ class YapayAgent private constructor(private val tools: Tools, @Suppress("UNUSED
         }
 
         return when {
-            contiene(comando, "venta", "vendí", "vendi", "factur") -> {
+            intencionForzada == IntentClassifier.Intencion.CONSULTAR_VENTAS ||
+                contiene(comando, "venta", "vendí", "vendi", "factur") -> {
                 val total = runCatching { tools.consultarVentasDelDia() }
                     .getOrElse { return responder("No pude consultar las ventas: ${it.message ?: "error de almacenamiento"}.") }
                 responder("Las ventas registradas hoy suman ${"%.2f".format(total)} Bs. ${tools.obtenerConsejoFinanciero()}")
@@ -186,7 +195,7 @@ class YapayAgent private constructor(private val tools: Tools, @Suppress("UNUSED
 
     private companion object {
         val ADD_PRODUCT_REGEX = Regex(
-            """(?i)(?:agrega|agregar|añade|anade)\s+(.+?)\s+por\s+(\d+(?:[.,]\d{1,2})?)(?:\s*(?:bs|bolivianos?))?(?:\s+con\s+stock\s+(\d+(?:[.,]\d+)?))?\s*$"""
+            """(?i)(?:agrega|agregar|añade|anade)\s+(?:el\s+)?(?:producto\s+)?(.+?)\s+por\s+(\d+(?:[.,]\d{1,2})?)(?:\s*(?:bs|bolivianos?))?(?:\s+con\s+stock\s+(\d+(?:[.,]\d+)?))?\s*$"""
         )
     }
 }

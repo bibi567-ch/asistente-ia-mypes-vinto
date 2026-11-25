@@ -43,11 +43,15 @@ import com.mypes.vinto.presentation.theme.YapayScreenHeader
 import com.mypes.vinto.viewmodel.InventarioViewModel
 
 @Composable
-fun InventarioScreen(nav: NavController, vm: InventarioViewModel = viewModel()) {
+fun InventarioScreen(
+    nav: NavController,
+    filtroInicial: String? = null,
+    vm: InventarioViewModel = viewModel()
+) {
     val productos by vm.productos.collectAsState()
     var dialogoCrear by remember { mutableStateOf(false) }
     var productoAEditar by remember { mutableStateOf<Producto?>(null) }
-    var busqueda by remember { mutableStateOf("") }
+    var busqueda by remember(filtroInicial) { mutableStateOf(filtroInicial.orEmpty()) }
 
     val productosFiltrados = productos.filter {
         it.nombre.contains(busqueda.trim(), ignoreCase = true)

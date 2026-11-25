@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import org.json.JSONArray
 import org.json.JSONObject
 import org.vosk.Model
 import org.vosk.Recognizer
@@ -22,7 +21,7 @@ class AsrEngine(private val context: Context) : Closeable {
 
     companion object {
         private const val SAMPLE_RATE = 16_000
-        private const val GRAMMAR_ASSET = "vosk-grammar.json"
+        private const val MAX_RECORDING_BYTES = SAMPLE_RATE * 2 * 120
 
         fun extraerConfianza(json: String): Float = runCatching {
             val root = JSONObject(json)
@@ -34,28 +33,18 @@ class AsrEngine(private val context: Context) : Closeable {
     }
 
     private var model: Model? = null
-    private var grammarJson: String? = null
     @Volatile private var escuchando = false
     @Volatile private var audioRecord: AudioRecord? = null
     @Volatile private var listenerThread: Thread? = null
 
     fun inicializar(): Boolean = runCatching {
-        val grammar = context.assets.open(GRAMMAR_ASSET).bufferedReader().use { it.readText() }
-        val phrases = JSONArray(grammar)
-        require(phrases.length() > 0) { "La gramática Vosk está vacía" }
-        grammarJson = phrases.toString()
-        model = Model(copiarModeloDesdeAssets())
+        if (model == null) model = Model(copiarModeloDesdeAssets())
     }.isSuccess
 
     fun escuchar(resultado: Resultado) {
         val modelo = model
         if (modelo == null) {
             resultado.onError("Modelo no inicializado")
-            return
-        }
-        val grammar = grammarJson
-        if (grammar.isNullOrBlank()) {
-            resultado.onError("La gramática Vosk no está inicializada")
             return
         }
         detener()
@@ -87,7 +76,8 @@ class AsrEngine(private val context: Context) : Closeable {
                 resultado.onError("No se pudo inicializar el micrófono")
                 return
             }
-            val recognizer = Recognizer(modelo, SAMPLE_RATE.toFloat(), grammar)
+            val recognizer = Recognizer(modelo, SAMPLE_RATE.toFloat())
+            recognizer.setWords(true)
             nuevoReconocedor = recognizer
             recorder.startRecording()
             audioRecord = recorder
@@ -136,37 +126,56 @@ class AsrEngine(private val context: Context) : Closeable {
     ) {
         val buffer = ByteArray(bufferSize)
         val audioUtterance = ByteArrayOutputStream()
-        var ultimoTextoFinal: String? = null
+        val segmentosFinales = mutableListOf<String>()
+        val confianzas = mutableListOf<Float>()
+        var limiteDeAudioAlcanzado = false
+        var falloDeLectura = false
         try {
             while (escuchando && !Thread.currentThread().isInterrupted) {
                 val read = recorder.read(buffer, 0, buffer.size, AudioRecord.READ_BLOCKING)
                 if (read < 0) {
-                    if (escuchando) resultado.onError("Falló la lectura del micrófono")
+                    if (escuchando) {
+                        falloDeLectura = true
+                        resultado.onError("Falló la lectura del micrófono")
+                    }
                     break
                 }
                 if (read == 0) continue
+                if (audioUtterance.size() + read > MAX_RECORDING_BYTES) {
+                    limiteDeAudioAlcanzado = true
+                    escuchando = false
+                    resultado.onError("La grabación superó los 120 segundos. Inténtalo con un audio más corto.")
+                    break
+                }
                 audioUtterance.write(buffer, 0, read)
-                if (recognizer.acceptWaveForm(buffer, read)) {
-                    val json = recognizer.result
-                    val texto = extraerTexto(json)
-                    if (!texto.isNullOrBlank() && texto != ultimoTextoFinal) {
-                        ultimoTextoFinal = texto
-                        resultado.onTextoFinal(texto, extraerConfianza(json), audioUtterance.toByteArray())
-                        escuchando = false
-                        break
-                    }
-                    audioUtterance.reset()
+                val jsonFinal = if (recognizer.acceptWaveForm(buffer, read)) recognizer.result else null
+                if (jsonFinal != null) {
+                    extraerTexto(jsonFinal)?.let(segmentosFinales::add)
+                    extraerConfianza(jsonFinal)
+                        .takeIf { it > 0f }
+                        ?.let(confianzas::add)
+                }
+                val parcial = extraerTexto(recognizer.partialResult)
+                val textoParcial = (segmentosFinales + listOfNotNull(parcial)).joinToString(" ")
+                if (textoParcial.isNotBlank()) resultado.onTextoParcial(textoParcial)
+            }
+            if (!limiteDeAudioAlcanzado && !falloDeLectura) {
+                val finalJson = recognizer.finalResult
+                extraerTexto(finalJson)?.let(segmentosFinales::add)
+                extraerConfianza(finalJson)
+                    .takeIf { it > 0f }
+                    ?.let(confianzas::add)
+                val textoFinal = segmentosFinales.joinToString(" ").trim()
+                if (textoFinal.isBlank()) {
+                    resultado.onError("No se detectó voz. Mantén presionado para hablar y suelta para enviar.")
                 } else {
-                    extraerTexto(recognizer.partialResult)?.let(resultado::onTextoParcial)
+                    val confianza = confianzas.average().takeIf { !it.isNaN() }
+                        ?.toFloat() ?: extraerConfianza(finalJson)
+                    resultado.onTextoFinal(textoFinal, confianza, audioUtterance.toByteArray())
                 }
             }
-            val finalJson = recognizer.finalResult
-            val textoFinal = extraerTexto(finalJson)
-            if (!textoFinal.isNullOrBlank() && textoFinal != ultimoTextoFinal) {
-                resultado.onTextoFinal(textoFinal, extraerConfianza(finalJson), audioUtterance.toByteArray())
-            }
         } catch (error: RuntimeException) {
-            if (escuchando) resultado.onError(error.message ?: "Error de reconocimiento")
+            resultado.onError(error.message ?: "Error de reconocimiento")
         } finally {
             escuchando = false
             detenerGrabadora(recorder)

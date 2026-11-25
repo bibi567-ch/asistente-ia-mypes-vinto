@@ -11,7 +11,6 @@
 - Android Studio, Android SDK 35 y JDK 17.
 - Emulador o dispositivo Android 8.0 (API 26) o posterior, con micrófono.
 - Modelo Vosk español en `mobile/app/src/main/assets/vosk-model-small-es-0.42`. El script `mobile/download-vosk-model.ps1` descarga el modelo desde una distribución autorizada y verifica su integridad antes de incorporarlo al build. El modelo está excluido por `.gitignore`.
-- La gramática local se define en `mobile/app/src/main/assets/vosk-grammar.json` y se carga al inicializar Vosk. Incluye comandos telefónicos, frases de negocio y términos quechua experimentales; el modelo acústico sigue siendo español, así que esto no representa ASR quechua.
 - La carga/copia del modelo se realiza en un hilo de I/O para no bloquear la interfaz. Si una copia previa quedó incompleta dentro del almacenamiento privado de la app, la inicialización vuelve a copiarla desde assets.
 
 ## 2. Backend con Docker Compose
@@ -60,7 +59,8 @@ El manifiesto principal no permite HTTP en builds release; el permiso de tráfic
 
 ## 4. Pruebas de funcionamiento
 
-- Probar en modo offline cada intención y confirmar que Vosk funciona sin backend.
+- Probar en modo offline cada intención: mantener presionado el micrófono mientras se habla y soltar para enviar; confirmar que una pausa al hablar no termina anticipadamente la captura y que se procesa una sola transcripción final.
+- Configurar `ASR_PROVIDER=simulated` solo como modo demostrativo del backend. La app no muestra ese mensaje como transcripción: vuelve al texto Vosk en el modo normal (sujeto a su umbral de confianza); en modo Quechua explícito, sin transcripción cloud no ejecuta acción.
 - Probar que las acciones muestran confirmación antes de ejecutarse y que cancelar no dispara la acción.
 - Probar ASR cloud con una cuenta JWT y un proveedor configurado; el endpoint responde `{ "texto": "..." }`.
 - Probar el Outbox con desconexión/reconexión. La sincronización requiere URL y JWT.
@@ -97,4 +97,4 @@ En el servicio backend define `ASR_PROVIDER=quechua`, `QUECHUA_ASR_API_URL=http:
 
 El endpoint limita el audio a 5 MB y 120 segundos; decodifica WAV/FLAC/OGG, normaliza a mono 16 kHz y no conserva audio de forma persistente. No se fuerza `language="qu"`: la revisión configurada tiene `language="spanish"` y no incluye token `<|qu|>` en `lang_to_id`; se usa su generación predeterminada. El encoder MiniLM clasifica por similitud frente a plantillas y se abstiene bajo 0.62 o margen 0.08; score no equivale a probabilidad ni accuracy. El móvil usa el intent remoto solo si está permitido y encima del umbral. Venta abre el formulario y no guarda hasta acción explícita del usuario; consultas de stock/ventas leen Room local. La app envía audio cloud cuando hay conectividad y baja confianza Vosk; habilítalo solo con consentimiento y autorización de datos. WER, latencia, precisión de intención y calidad qxp siguen sin medir.
 
-La gramática local Vosk ahora se carga desde `mobile/app/src/main/assets/vosk-grammar.json`; el clasificador Kotlin reconoce un conjunto limitado de palabras clave quechua y el extractor convierte algunos números quechua. No es un modelo de voz quechua ni se ha probado acústicamente; frases qxp deben validarse con hablantes antes de usarlo en ventas. La actualización remota de modelos Vosk no está implementada.
+Vosk usa la decodificación abierta del modelo español `vosk-model-small-es-0.42`; no se restringe a una lista fija de frases. El clasificador Kotlin reconoce un conjunto limitado de palabras clave quechua y el extractor convierte algunos números quechua, pero el modelo de voz sigue siendo español: no es ASR quechua ni se ha validado acústicamente. La actualización remota de modelos Vosk no está implementada.

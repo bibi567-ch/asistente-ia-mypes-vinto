@@ -253,6 +253,34 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
 * **Comprobaciones ejecutadas:** Node.js analizó `vosk-grammar.json` correctamente (109 frases); `git diff --check` terminó con código 0. Pylance `pylanceFileSyntaxErrors` no reportó errores sintácticos en `quechua-asr/main.py`; esa comprobación no valida imports, carga de pesos, ejecución ni calidad del modelo.
 * **Límites:** No hubo build Android, prueba acústica, inferencia Whisper, evaluación con hablantes qxp, ejecución de pruebas JVM ni despliegue. Los tests añadidos quedan pendientes de ejecución.
 
+##### Fase 31: Captura push-to-talk y fallback ASR
+* **Fecha:** 2026-11-25.
+* **Cambio:** Los controles de voz del dashboard inician grabación al presionar y la detienen al soltar; Vosk conserva y concatena segmentos hasta el cierre, devuelve una transcripción única, activa confidencias por palabra y limita el audio a 120 segundos. Se filtran respuestas simuladas/vacías como transcripción visible, se mantiene el fallback local según umbral y se descarta el fragmento aislado `de`.
+* **Prueba añadida:** `CloudAsrFallbackTest` comprueba que las respuestas simuladas/vacías no se consideran transcripciones utilizables y que el texto real se recorta antes de procesarlo. No se ejecutó por el bloqueo de Gradle.
+* **Comprobaciones ejecutadas:** Los diagnósticos de VS Code no encontraron errores en los archivos Kotlin de producción y prueba modificados; `git diff --check` terminó con código 0. Estos diagnósticos no equivalen a compilación ni a prueba de comportamiento.
+* **Pendiente:** No se ejecutó Gradle, prueba JVM, interacción táctil sintetizada, micrófono físico ni solicitud ASR de extremo a extremo. La ejecución sigue bloqueada por acceso denegado previo a la caché Gradle. No se modificaron variables de Railway ni se desplegó el proveedor.
+
+##### Fase 32: Chat textual y navegación Yapay
+* **Fecha:** 2026-11-25.
+* **Cambio:** `ChatScreen` ahora presenta y envía mensajes a `YapayAgent`. `ChatViewModel` enruta venta con producto/cantidad sugeridos, consulta de stock hacia inventario filtrado y consultas de fiados hacia cuentas por cobrar; el precio continúa siendo del catálogo local y una venta no se guarda desde el chat. La entrada de texto está accesible desde el Dashboard. Las altas de producto completas mantienen confirmación y un alta pendiente no se intercepta como navegación.
+* **Pruebas añadidas:** `ChatCommandRouterTest` cubre navegación de venta, stock, producto incompleto/completo y fiados; `YapayAgentTest` cubre la solicitud de alta con el prefijo `producto` y su confirmación. Se intentó ejecutar `.\mobile\gradlew.bat -p .\mobile :app:testDebugUnitTest --tests com.mypes.vinto.presentation.chat.ChatCommandRouterTest --tests com.mypes.vinto.nlu.YapayAgentTest`; Gradle no llegó a iniciar porque el sandbox denegó el acceso a `%USERPROFILE%\.gradle\wrapperdists\gradle-8.7-bin\bhs2wmbdwecv87pi65oeuq5iu\gradle-8.7-bin.zip.lck` (`FileNotFoundException`, `Acceso denegado`). Las pruebas quedan **BLOQUEADAS**, no aprobadas.
+* **Comprobaciones ejecutadas:** `git diff --check` terminó con código 0. No se generó APK ni se validó la navegación en un dispositivo.
+* **Pendiente:** Reejecutar pruebas JVM y build en un entorno con caché Gradle accesible; comprobar el flujo de chat/venta/inventario/fiados en Android. No se cambió Railway ni se desplegó.
+
+##### Fase 33: Push-to-talk desde el chat Yapay
+* **Fecha:** 2026-11-25.
+* **Cambio:** El chat usa el `DashboardViewModel` retenido en la pila de navegación para compartir la instancia ASR y evitar cargar dos modelos Vosk. Al soltar, la transcripción entra al historial/chat; se mantienen los controles de confianza, el filtro del fragmento `de` y la abstención cuando el modo Quechua no devuelve texto e intención remotos aceptables. El clasificador remoto de consulta de ventas puede dirigir la respuesta local del agente.
+* **Pruebas añadidas:** `ChatCommandRouterTest` verifica filtro de transcripción, abstención y aceptación de intención remota; `YapayAgentTest` verifica consulta de ventas con intención remota. **No ejecutadas**: el intento dirigido de Gradle de Fase 32 fue bloqueado por el sandbox al acceder a su lockfile; no se reintentó.
+* **Comprobaciones ejecutadas:** Diagnósticos del editor sin errores en los archivos Kotlin modificados y `git diff --check` con código 0. No equivalen a compilación ni validación funcional en dispositivo.
+* **Pendiente:** Ejecutar JVM/build y verificar push-to-talk en teléfono con permisos de micrófono. Railway no se modificó ni se desplegó.
+
+##### Fase 34: Decodificación abierta del modelo Vosk en español
+* **Fecha:** 2026-11-25.
+* **Diagnóstico:** El asset `vosk-model-small-es-0.42` incluye el modelo acústico español (`am/final.mdl`, `conf/model.conf`). `AsrEngine` le pasaba a `Recognizer` una gramática cerrada con frases españolas y semillas quechua; esto limitaba el vocabulario de salida en vez de dejar que el modelo reconociera habla española libre.
+* **Cambio:** Se quitó la gramática cerrada y el asset `vosk-grammar.json`. El reconocedor usa el modelo español completo; se conserva el clasificador Kotlin para identificar intenciones comerciales y el push-to-talk sigue agregando segmentos hasta que se suelta.
+* **Comprobaciones ejecutadas:** Diagnósticos del editor sin errores en `AsrEngine.kt` y `git diff --check` con código 0. No se recompiló Android porque la ejecución de Gradle ya estaba bloqueada por la denegación del sandbox al lockfile de la caché.
+* **Pendiente:** Probar frases españolas espontáneas con micrófono en un dispositivo y ejecutar build/pruebas JVM cuando el sandbox permita acceso a `%USERPROFILE%\.gradle`. No se desplegó ni cambió Railway.
+
 ---
 
 #### 3. MATRIZ DE EVIDENCIAS Y ALCANCE DE VERIFICACIÓN

@@ -7,7 +7,7 @@
 | :--- | :--- |
 | **Proyecto Integrador** | Gestión 2-2026 (Investigación I, Arquitectura de Software, Tecnologías en Internet) |
 | **Sistema** | Asistente Conversacional Offline con PLN Edge (Yapay) para la Gestión de Ventas e Inventario en MYPES de Vinto, Cochabamba |
-| **Versión Vigente** | **v2.6 (Vocabulario Vosk externo y NLU local experimental)** — Noviembre 2026 |
+| **Versión Vigente** | **v2.10 (Vosk con decodificación abierta en español)** — Noviembre 2026 |
 | **Equipo de Desarrollo** | **Eva Chino Quispe** — Líder de Proyecto, Requisitos y QA Documental<br>**Christian Gonzales** — Ingeniería de IA y Pipeline Conversacional<br>**Marializ Mamani** — Backend, Seguridad y Persistencia de Datos<br>**Kevin Rocha** — Diseño UX/UI y Prototipado<br>**Luis Lazo** — Arquitectura C4 y QA Técnico |
 | **Corte de Código** | Revisión de la implementación del asistente híbrido (Node.js 24, Express 5, PostgreSQL 16, Kotlin Room v7) |
 
@@ -26,6 +26,10 @@
 | **2.4** | 25/11/2026 | Equipo de Proyecto | Se prepara microservicio ASR desacoplado y con modelo configurable. El backend admite HTTP solo hacia hostnames privados `.railway.internal`; conserva HTTPS para destinos públicos. El modelo y el despliegue quedan pendientes de autorización de licencia y costo. |
 | **2.5** | 25/11/2026 | Equipo de Proyecto | Se integra el contrato de transcripción + intención remota, plantillas de similitud configurables, umbrales de abstención, modo Quechua cloud explícito y enrutamiento móvil para iniciar venta, consultar stock/ventas o abrir inventario. Ninguna venta se guarda automáticamente y el audio solo se envía por modo seleccionado o fallback local de baja confianza. |
 | **2.6** | 25/11/2026 | Equipo de Proyecto | Vosk carga su gramática desde `vosk-grammar.json`; se amplían términos semilla de negocio/quechua, algunos números quechua en el extractor y la abstención local para texto no reconocido. La inicialización/copia del modelo se mueve fuera del hilo UI y una copia interna incompleta se reconstruye. Es NLU por reglas sobre un modelo acústico español, no reconocimiento quechua validado. Las pruebas JVM añadidas quedan pendientes de ejecución por el bloqueo conocido de Gradle. |
+| **2.7** | 25/11/2026 | Equipo de Proyecto | El micrófono usa push-to-talk: inicia al presionar y entrega una sola transcripción al soltar, agregando segmentos Vosk y habilitando palabras/confianzas. Respuestas ASR simuladas o vacías no se muestran como transcripción; el fallback local mantiene abstención para baja confianza y el modo Quechua no ejecuta texto local si no hay transcripción cloud. |
+| **2.8** | 25/11/2026 | Equipo de Proyecto | Se habilita un chat textual local con Yapay y se conecta desde el Dashboard. Sus comandos pueden abrir el formulario de venta con producto/cantidad sugeridos, el inventario con filtro o las cuentas por cobrar. La venta sigue requiriendo revisión y guardado explícito; el precio unitario lo resuelve el formulario desde el catálogo local. |
+| **2.9** | 25/11/2026 | Equipo de Proyecto | El chat incorpora push-to-talk reutilizando el `DashboardViewModel` y la única instancia del motor ASR. Al soltar procesa una transcripción validada; texto vacío, fragmentos sin contenido útil, baja confianza e intención Quechua no confirmada se abstienen sin ejecutar acciones. |
+| **2.10** | 25/11/2026 | Equipo de Proyecto | Se confirma el modelo Vosk `vosk-model-small-es-0.42` (español) y se quita la gramática cerrada de frases del reconocedor. Vosk usa ahora el vocabulario completo del modelo para admitir habla española libre; las reglas de negocio siguen en el clasificador Kotlin. La precisión acústica requiere pruebas en dispositivo. |
 
 ---
 
@@ -105,7 +109,7 @@ Priorización estratégica de atributos de calidad:
 ### ADR-002: Engine PLN Edge — Vosk ASR + Clasificador Local con Confirmación Humana
 * **Estatus:** Aprobado (Vigente).
 * **Contexto:** El reconocimiento de voz en la nube falla por falta de señal en los mercados y genera costos recurrentes.
-* **Decisión:** Implementar el motor **Vosk Edge ASR** (modelo en español) para transcripción local, con vocabulario de frases cargado desde `vosk-grammar.json`, clasificador/extractor de reglas Kotlin y **Modal de Confirmación Visual Obligatoria**. El vocabulario quechua y los números añadidos son experimentales; no convierten al modelo acústico español en ASR quechua. Texto no reconocido se abstiene sin ejecutar acción.
+* **Decisión:** Implementar el motor **Vosk Edge ASR** `vosk-model-small-es-0.42` para transcripción local en español, usando el decodificador completo del modelo y no una gramática cerrada de frases. La captura push-to-talk agrega segmentos hasta soltar y habilita palabras/confianzas; después usa clasificador/extractor de reglas Kotlin y **Modal de Confirmación Visual Obligatoria**. Las semillas quechua del NLU son experimentales; no convierten al modelo acústico español en ASR quechua. Texto no reconocido se abstiene sin ejecutar acción.
 * **Justificación:** Operatividad 100% offline, costo cero por transacción y tasa nula de ventas accidentales gracias al paso de verificación humana.
 * **Consecuencia:** Incremento moderado en el tamaño del APK (~70 MB totales).
 
@@ -151,8 +155,8 @@ title Diagrama de Contenedores (C2) - Arquitectura del Sistema Yapay
 Person(comerciante, "Comerciante de MYPE", "Usuario final")
 
 System_Boundary(mobile_app, "Dispositivo Móvil Android (Gama Baja)") {
-    Container(ui_view, "UI & VUI Controller", "Kotlin / Jetpack Compose", "Vistas de Dashboard, Ventas, Fiados, Catálogo y Modal de Confirmación")
-    Container(pln_engine, "Motor PLN Edge", "Vosk español + gramática JSON + reglas Kotlin", "Transcripción local y extracción limitada de producto/cantidad/monto; intención desconocida se abstiene")
+    Container(ui_view, "UI & VUI Controller", "Kotlin / Jetpack Compose", "Dashboard, chat textual Yapay, Ventas, Fiados, Catálogo y revisión de acciones")
+    Container(pln_engine, "Motor PLN Edge", "Vosk español + reglas Kotlin", "Decodificación abierta en español y extracción limitada de producto/cantidad/monto; intención desconocida se abstiene")
     Container(data_layer, "Capa de Datos y Casos de Uso", "Clean Architecture / Repository", "Lógica de negocio local, validación de stock y reglas comerciales")
     Container(outbox_sync, "Outbox Sync Manager", "WorkManager", "Administra la cola de sincronización diferida y reintentos con backoff")
     ContainerDb(sqlite_db, "Base de Datos Encubierta", "Room v7 + SQLCipher (AES-256)", "Almacenamiento cifrado compartido por login, perfil, catálogo, ventas, fiados, VoiceLog y cola Outbox; una sola instancia de Room")
@@ -181,6 +185,8 @@ Rel(ui_view, phone_actions, "Ejecuta acciones solo después de confirmación")
 Rel(ui_view, api_gateway, "Consulta /api/v1/assistant/query y envía feedback autorizado")
 Rel(pln_engine, api_gateway, "Usa /api/v1/asr/transcribe solo como fallback configurado")
 ```
+
+El destino `chat` presenta el historial de `YapayAgent` y acepta comandos de texto procesados localmente por `ChatViewModel`. También reutiliza el `DashboardViewModel` de la entrada `dashboard` para compartir la única instancia Vosk/ASR; no carga una segunda copia del modelo. El clasificador y extractor existentes derivan navegación hacia venta, inventario o cuentas por cobrar; el formulario de venta recibe producto y cantidad como sugerencias, obtiene el precio del catálogo Room y no persiste hasta la confirmación del comerciante. Las transcripciones Quechua requieren respuesta cloud e intención remota aceptada; si falta cualquiera, el chat se abstiene. Los comandos de consulta de ventas y el alta de productos con datos completos continúan por el agente local; el alta solicita confirmación antes de escribir.
 
 ---
 
@@ -222,4 +228,4 @@ Rel(pln_engine, api_gateway, "Usa /api/v1/asr/transcribe solo como fallback conf
 
 ---
 
-*Documento de Arquitectura de Software (SAD v2.0) · Proyecto Integrador Yapay · Noviembre 2026*
+*Documento de Arquitectura de Software (SAD v2.10) · Proyecto Integrador Yapay · Noviembre 2026*
