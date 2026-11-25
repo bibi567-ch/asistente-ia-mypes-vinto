@@ -18,6 +18,7 @@ export const env = {
   openaiAsrApiKey: process.env.OPENAI_ASR_API_KEY?.trim() || '',
   openaiAsrBaseUrl: process.env.OPENAI_ASR_BASE_URL?.trim() || 'https://api.openai.com/v1',
   databaseSslCa: process.env.DATABASE_SSL_CA?.replace(/\\n/g, '\n').trim() || '',
+  databaseSslRejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED?.trim().toLowerCase() !== 'false',
   androidUpdateVersionCode: Number(process.env.ANDROID_UPDATE_VERSION_CODE ?? 0),
   androidUpdateVersionName: process.env.ANDROID_UPDATE_VERSION_NAME?.trim() || '',
   androidUpdateApkPath: process.env.ANDROID_UPDATE_APK_PATH?.trim() || '',
