@@ -36,6 +36,10 @@ Las 20 rutas y su autenticación están enumeradas en el [contrato detallado](..
 
 Vosk y su modelo acústico español están empaquetados en los assets Android. El clasificador de intenciones Android es código de reglas, no una red neuronal. Gemini es un LLM externo opcional; Whisper y MiniLM pertenecen al servicio experimental Quechua. No presentar el modelo remoto como desplegado o medido sin evidencia.
 
+## ¿Qué pasa si el chat no reconoce un mensaje?
+
+Si el clasificador no reconoce una intención y el router local no encuentra una acción comercial, el chat puede consultar el endpoint autenticado de guía con el mismo contrato de pregunta. No ejecuta ventas ni inventario por esa vía. La app muestra una advertencia; sin sesión conserva el fallback local. Vosk bajo el umbral se rechaza si no hay texto cloud utilizable; Quechua además requiere intención remota aceptada.
+
 ## ¿Qué patrón arquitectónico es el más importante?
 
 El Outbox es el principal para el problema de conectividad: la operación se confirma localmente y la entrega remota se reintenta. MVVM/StateFlow organiza la UI, Room/Repository encapsula persistencia y la confirmación visual protege acciones sensibles.

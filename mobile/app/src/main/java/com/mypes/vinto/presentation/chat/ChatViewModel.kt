@@ -83,11 +83,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
 
-                if (
-                    destino == null
-                    && intencion == IntentClassifier.Intencion.CONSULTA_COGNITIVA
-                    && !agente.esperandoConfirmacionProducto
-                ) {
+                if (debeConsultarGuiaRemota(intencion, destino, agente.esperandoConfirmacionProducto)) {
                     consultarGuia(texto)
                 } else if (destino == null) {
                     agente.procesarComando(texto, intencionForzada)

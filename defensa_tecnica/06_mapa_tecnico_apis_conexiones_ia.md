@@ -91,7 +91,7 @@ Todas estas rutas se montan desde [backend/src/app.ts](../backend/src/app.ts). �
 | `POST /api/v1/asr/transcribe` | JWT | Sí, `CloudAsrApi` dentro de `CloudAsrService` |
 | `GET /api/v1/app-updates/latest` | No | Sí, `AppUpdateApi` |
 | `GET /api/v1/app-updates/apk` | No | URL de descarga entregada por el backend |
-| `POST /api/v1/assistant/query` | JWT | Sí, `AssistantApi`; solo consultas cognitivas |
+| `POST /api/v1/assistant/query` | JWT | Sí, `AssistantApi`; consultas cognitivas y mensajes no clasificados sin acción local |
 | `POST /api/v1/learning/feedback` | JWT | Sí, `LearningApi` |
 | `POST /api/v1/logs/comandos` | JWT | No se encontró llamada Retrofit |
 | `POST /api/v1/facturas` | JWT | No se encontró llamada Retrofit |
@@ -118,8 +118,9 @@ Una ruta existente en el servidor no implica que la app actual la invoque. En pa
 ### En el backend/nube
 
 - **Gemini:** modelo configurable por `GEMINI_MODEL` (Compose propone `gemini-3.5-flash-lite`); el backend usa `GEMINI_API_KEY`. Si falta la clave, `/assistant/query` responde con guía demostrativa local. El proveedor real no se contacta en ese caso. La petición real tiene timeout de 15 s y el error del proveedor da HTTP 502.
-- **Qué se envía:** pregunta general y código de idioma, no ventas/inventario. Android solo consulta el backend para `CONSULTA_COGNITIVA` cuando dispone de sesión; sin sesión conserva el comportamiento local.
+- **Qué se envía:** pregunta general y código de idioma, no ventas/inventario. Android consulta el backend para `CONSULTA_COGNITIVA` y para mensajes `DESCONOCIDA` sin destino comercial local ni confirmación pendiente. Sin sesión conserva el comportamiento local.
 - **ASR cloud:** en Compose `ASR_PROVIDER` queda en `simulated` por defecto. Ese modo devuelve explícitamente que no transcribió audio. Google Speech, OpenAI Whisper o Quechua requieren configuración y credenciales privadas.
+- **Abstención de voz:** Vosk bajo el umbral se rechaza si no existe texto cloud utilizable. Un texto cloud obtenido por fallback sigue el enrutamiento del chat; el modo Quechua también requiere intención remota aceptada.
 - **Quechua experimental:** [quechua-asr/main.py](../quechua-asr/main.py) obtiene desde Hugging Face el modelo Whisper `QuechuaBase/whisper-base-qxp-finetuned` (revisión fijada en el código) y `paraphrase-multilingual-MiniLM-L12-v2` para similitud de intención. Se descargan en el volumen `quechua_asr_models`; perfil Compose: `quechua`. No está habilitado por defecto ni hay resultado que pruebe el despliegue/calidad. Revisar la licencia del modelo antes de cualquier uso comercial.
 
 ## 6. PostgreSQL, Docker y nube

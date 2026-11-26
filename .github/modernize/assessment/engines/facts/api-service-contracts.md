@@ -42,7 +42,7 @@ Los paths de la tabla son absolutos desde la raíz de la API. Salvo las rutas ma
 | Product sync | GET | `/api/v1/products/sync?desde&cursorActualizadoEn&cursorId` | Query de cursor | `{items, total, timestamp}`; 200, 400, 401, 500 |
 | Transaction sync | POST | `/api/v1/transacciones/batch` | `SyncBatchRequest` | `SyncBatchResponse`; 200, 400, 401, 500 |
 
-Las rutas de registro/inicio de sesión, health y descarga de actualizaciones son públicas. El resto requiere JWT. El catálogo del backend incluye CRUD de productos, facturas, QR y SSE, pero la app Retrofit actual no tiene un cliente para todos esos contratos; ver [Conexión Android ↔ Backend](../../../../../defensa_tecnica/06_mapa_tecnico_apis_conexiones_ia.md).
+Las rutas de registro/inicio de sesión, health y descarga de actualizaciones son públicas. El resto requiere JWT. El chat envía consultas cognitivas clasificadas o mensajes no clasificados sin destino comercial local al mismo contrato Assistant; ventas, inventario y confirmaciones pendientes no usan ese fallback. Voz Vosk bajo el umbral se abstiene si no hay texto cloud utilizable; Quechua también requiere intención remota aceptada. El catálogo del backend incluye CRUD de productos, facturas, QR y SSE, pero la app Retrofit actual no tiene un cliente para todos esos contratos; ver [Conexión Android ↔ Backend](../../../../../defensa_tecnica/06_mapa_tecnico_apis_conexiones_ia.md).
 
 ## Management & Observability Endpoints
 
@@ -66,7 +66,7 @@ Kotlin DTOs son `data class` con propiedades `val`; las interfaces TypeScript se
 
 ## Communication Patterns
 
-- **Android → Backend:** REST síncrono a `BuildConfig.API_BASE_URL`; Retrofit/OkHttp usa Bearer JWT en operaciones autenticadas. Timeout general móvil: conexión 15 s, lectura/escritura 30 s. ASR cloud usa hasta 125 s.
+- **Android → Backend:** REST síncrono a `BuildConfig.API_BASE_URL`; Retrofit/OkHttp usa Bearer JWT en operaciones autenticadas. Timeout general móvil: conexión 15 s, lectura/escritura 30 s. ASR cloud usa hasta 125 s. En chat, consultas cognitivas y mensajes no clasificados sin destino comercial local reutilizan `/api/v1/assistant/query`; acciones comerciales reconocidas y confirmaciones pendientes no usan ese fallback. Voz Vosk bajo el umbral se abstiene si no hay transcripción cloud utilizable; Quechua exige intención remota aceptada.
 - **Android offline → nube:** `Room` conserva transacciones/pendientes; `WorkManager` requiere conectividad y reintenta con backoff exponencial desde 30 s. El lote identifica cada operación para deduplicación; no hay broker de mensajes.
 - **Backend → PostgreSQL:** pool `pg.Pool` de hasta 5 conexiones, conexión inicial con timeout 5 s; en producción TLS tiene `rejectUnauthorized: true` y puede recibir CA privada mediante `DATABASE_SSL_CA`.
 - **Backend → Gemini:** llamada HTTPS síncrona desde el servicio assistant, solo si `GEMINI_API_KEY` está configurada; timeout 15 s. La key queda en el backend. No se envían ventas ni inventario al modelo desde este contrato. Sin key se conserva la guía demostrativa; error del proveedor da 502.

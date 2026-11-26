@@ -241,7 +241,7 @@ fun ChatScreen(
             }
         }
         Text(
-            "Consultas generales pueden enviarse a Gemini. No incluyas datos sensibles. Las ventas requieren tu confirmación.",
+            "Consultas generales o mensajes no reconocidos pueden enviarse a Gemini. No incluyas datos sensibles. Las ventas requieren tu confirmación.",
             color = TextoGris,
             fontSize = 11.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)

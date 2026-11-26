@@ -50,7 +50,7 @@ class YapayAgent private constructor(private val tools: Tools, @Suppress("UNUSED
 
     /**
      * Prompt de referencia; las acciones y consultas comerciales de esta clase se resuelven localmente.
-     * ChatViewModel envía solo consultas cognitivas al backend autenticado.
+     * ChatViewModel envía consultas cognitivas o mensajes no clasificados sin destino comercial al backend autenticado.
      */
     val systemPrompt: String = """
         Eres Yapay, un consultor financiero experto en contabilidad, auditoría y administración

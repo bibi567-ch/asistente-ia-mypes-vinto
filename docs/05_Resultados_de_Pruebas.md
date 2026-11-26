@@ -312,6 +312,14 @@ La presente bitácora documenta las comprobaciones técnicas, compilaciones, pru
 * **Docker y salud:** `docker compose up -d --build backend` fue bloqueado por la política del sandbox al leer `C:\Users\ADMIN\.docker\config.json` y conectar al pipe `npipe:////./pipe/docker_engine`. No se iniciaron contenedores y `/api/v1/health` no se verificó.
 * **Estado:** Integración unitaria del adaptador Gemini **APROBADA con proveedor simulado**; la API sobre HTTP, el build Android, la llamada real a Google, Docker, health check y flujo end-to-end **PENDIENTES/BLOQUEADOS**. No existe un resultado CI asociado a este cambio.
 
+##### Fase 39: Fallback del chat para mensajes no clasificados
+* **Fecha:** 2026-11-25.
+* **Cambio:** El chat reutiliza `POST /api/v1/assistant/query` con JWT para entradas `CONSULTA_COGNITIVA` y mensajes `DESCONOCIDA` que no tienen destino comercial local ni confirmación de producto pendiente. Las acciones comerciales reconocidas continúan locales. La UI advierte que mensajes no reconocidos pueden enviarse al proveedor configurado.
+* **Salvaguardas:** La voz Vosk bajo el umbral se abstiene si no hay texto cloud utilizable. Un texto cloud obtenido por fallback sigue el enrutamiento normal; el modo Quechua requiere transcripción e intención aceptada. Sin JWT, se conserva la guía local.
+* **Pruebas añadidas:** Cinco casos JVM cubren fallback de texto desconocido, consulta cognitiva, exclusión de navegación comercial, confirmación pendiente y rechazo de voz de baja confianza.
+* **Ejecución intentada:** Desde la raíz, `Set-Location mobile; .\gradlew.bat :app:testDebugUnitTest --tests com.mypes.vinto.presentation.chat.ChatCommandRouterTest` terminó con código 1 antes de iniciar Gradle. El wrapper recibió `FileNotFoundException` / `Acceso denegado` al abrir `%USERPROFILE%\.gradle\wrapperdists\gradle-8.7-bin\bhs2wmbdwecv87pi65oeuq5iu\gradle-8.7-bin.zip.lck`.
+* **Estado:** Las pruebas JVM quedaron **BLOQUEADAS** por acceso denegado del sandbox; no se afirma que pasaron. No se ejecutó build Android, llamada real a Gemini ni prueba funcional.
+
 ---
 
 #### 3. MATRIZ DE EVIDENCIAS Y ALCANCE DE VERIFICACIÓN

@@ -85,11 +85,63 @@ class ChatCommandRouterTest {
     }
 
     @Test
+    fun `unclassified message without a local destination can use the remote guide`() {
+        assertTrue(
+            debeConsultarGuiaRemota(
+                intencion = IntentClassifier.Intencion.DESCONOCIDA,
+                destino = null,
+                esperandoConfirmacionProducto = false
+            )
+        )
+    }
+
+    @Test
+    fun `classified cognitive question can use the remote guide`() {
+        assertTrue(
+            debeConsultarGuiaRemota(
+                intencion = IntentClassifier.Intencion.CONSULTA_COGNITIVA,
+                destino = null,
+                esperandoConfirmacionProducto = false
+            )
+        )
+    }
+
+    @Test
+    fun `commercial navigation is not sent to the remote guide`() {
+        assertFalse(
+            debeConsultarGuiaRemota(
+                intencion = IntentClassifier.Intencion.REGISTRAR_VENTA,
+                destino = ChatDestination.Venta("papas", 2.0),
+                esperandoConfirmacionProducto = false
+            )
+        )
+    }
+
+    @Test
+    fun `pending product confirmation stays local`() {
+        assertFalse(
+            debeConsultarGuiaRemota(
+                intencion = IntentClassifier.Intencion.DESCONOCIDA,
+                destino = null,
+                esperandoConfirmacionProducto = true
+            )
+        )
+    }
+
+    @Test
     fun `isolated filler is rejected and not shown as a transcript`() {
         val result = resultadoVoz(texto = "de")
 
         assertNotNull(errorTranscripcionParaChat(result))
         assertFalse(mostrarTranscripcionEnChat(result))
+    }
+
+    @Test
+    fun `low confidence voice transcript is rejected before guide routing`() {
+        val result = resultadoVoz(texto = "quizá vender papas", confianza = 0.4f)
+
+        assertNotNull(errorTranscripcionParaChat(result))
+        assertTrue(mostrarTranscripcionEnChat(result))
     }
 
     @Test

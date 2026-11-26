@@ -29,6 +29,16 @@ internal fun resolverDestinoChat(
     }
 }
 
+internal fun debeConsultarGuiaRemota(
+    intencion: IntentClassifier.Intencion,
+    destino: ChatDestination?,
+    esperandoConfirmacionProducto: Boolean
+): Boolean =
+    !esperandoConfirmacionProducto &&
+        destino == null &&
+        (intencion == IntentClassifier.Intencion.CONSULTA_COGNITIVA ||
+            intencion == IntentClassifier.Intencion.DESCONOCIDA)
+
 internal fun errorTranscripcionParaChat(resultado: AsistenteVozFacade.Resultado): String? {
     val texto = resultado.textoOriginal.trim()
     val textoNormalizado = Normalizer.normalize(texto.lowercase(), Normalizer.Form.NFD)
